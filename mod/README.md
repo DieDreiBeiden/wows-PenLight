@@ -8,10 +8,10 @@ Spiel beenden. Ordner mit der **höchsten Nummer** unter `World_of_Warships\bin\
 | `PnFModsLoader.py` | leere Datei, aktiviert Python-Mods (bei dir schon vorhanden) |
 | `PnFMods\Overmatcher\Main.py` | die Mod (generiert, siehe unten) |
 | `PnFMods\Overmatcher\ships.json` | Panzerungs-/Kaliberdaten für genau eine Spielversion |
-| `PnFMods\Overmatcher\Overmatcher.unbound` | Anzeige am Fadenkreuz (ab 0.2, benötigt ModForge) |
-| `PnFMods\Overmatcher\OvermatcherContainer.xml` | ModForge-Manifest für die Anzeige |
+| `gui\unbound2\PnFMods\Overmatcher.unbound` | Anzeige am Fadenkreuz (ab 0.2, benötigt ModForge) |
+| `ForgeBlueprints\OvermatcherContainer.xml` | ModForge-Manifest für die Anzeige |
 
-Ablageort von `.unbound`/`.xml` noch unbestätigt: gleicher Ordner wie bei PenetrationCalculator.
+Ablageorte wie bei PenetrationCalculator (vom Nutzer bestätigt).
 
 Ab 0.2 zeigt die Mod bei aufgeschaltetem Ziel „Granate“/„Schild“ mit Farbpunkt unter dem
 Fadenkreuz (Prototyp, Text statt Icons). Zusätzlich steht das Ergebnis in
