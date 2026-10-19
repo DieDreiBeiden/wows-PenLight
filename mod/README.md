@@ -8,8 +8,13 @@ Spiel beenden. Ordner mit der **höchsten Nummer** unter `World_of_Warships\bin\
 | `PnFModsLoader.py` | leere Datei, aktiviert Python-Mods (bei dir schon vorhanden) |
 | `PnFMods\Overmatcher\Main.py` | die Mod (generiert, siehe unten) |
 | `PnFMods\Overmatcher\ships.json` | Panzerungs-/Kaliberdaten für genau eine Spielversion |
+| `PnFMods\Overmatcher\Overmatcher.unbound` | Anzeige am Fadenkreuz (ab 0.2, benötigt ModForge) |
+| `PnFMods\Overmatcher\OvermatcherContainer.xml` | ModForge-Manifest für die Anzeige |
 
-Stand 0.1 zeigt noch nichts im Spiel an. Nach Gefechtsbeginn steht das Ergebnis in
+Ablageort von `.unbound`/`.xml` noch unbestätigt: gleicher Ordner wie bei PenetrationCalculator.
+
+Ab 0.2 zeigt die Mod bei aufgeschaltetem Ziel „Granate“/„Schild“ mit Farbpunkt unter dem
+Fadenkreuz (Prototyp, Text statt Icons). Zusätzlich steht das Ergebnis in
 `PnFMods\Overmatcher\overmatcher_last.txt`. Diagnose (wird fortlaufend angehängt):
 `PnFMods\Overmatcher\overmatcher_log.txt` und `profile\python.log` (Zeilen mit `[Overmatcher]`).
 Fehlt `overmatcher_log.txt` nach dem Spielstart ganz, wurde die Mod nicht geladen.

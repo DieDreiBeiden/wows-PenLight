@@ -48,6 +48,7 @@ class ModTest(unittest.TestCase):
             players[i] = {'teamId': 1, 'name': 'bot%d' % i}
             ship_names[i] = ship
         handlers = {}
+        self.ui_data = []
 
         def client_open(path, mode):
             # wie im Client: Modus Pflicht, 'a' nur fuer vorhandene Dateien
@@ -60,6 +61,10 @@ class ModTest(unittest.TestCase):
                           getPlayerShipInfo=lambda pid: Obj(name=ship_names[pid]),
                           getSelfPlayerInfo=lambda: {'id': 1}),
             'open': client_open,
+            'ui': Obj(createUiElement=lambda: 7,
+                      addDataComponentWithId=lambda uid, cid, data: self.ui_data.append((cid, data)),
+                      updateUiElementData=lambda uid, data: self.ui_data.append(('update', data)),
+                      deleteUiElement=lambda uid: None),
             'utils': Obj(getModDir=lambda: wrong_dir, getGameVersion=lambda: VERSION,
                          jsonDncode=json.loads, logInfo=lambda *a, **k: None),
             'events': Obj(onBattleShown=lambda f: handlers.setdefault('shown', f),
@@ -81,6 +86,14 @@ class ModTest(unittest.TestCase):
     def test_large_cruiser_overmatches_minotaur(self):
         lines = self.run_mod('PASC510_Alaska', ['PBSC110_Minotaur'])
         self.assertEqual(lines, ['PBSC110_Minotaur attack=green defense=green'])
+
+    def test_ui_payload_for_unbound(self):
+        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PASD013_Gearing'])
+        self.assertEqual(self.ui_data[0], ('modOvermatcher', {'byId': {}, 'byName': {}}))
+        self.assertEqual(self.ui_data[-1], ('update', {
+            'byId': {'10': ['red', 'yellow']},
+            'byName': {'bot10': ['red', 'yellow']},
+        }))
 
     def test_version_mismatch_disables(self):
         lines = self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'], data_version='15,8,0,1')

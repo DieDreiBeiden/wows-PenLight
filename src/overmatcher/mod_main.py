@@ -1,14 +1,22 @@
 # -*- coding: utf-8 -*-
 # Spiel-Anbindung. Wird von tools/build_mod.py hinter logic.py in Main.py kopiert;
-# battle, utils, events stellt der Client als Globals bereit (ModsAPI v1.0).
+# battle, utils, events stellt der Client als Globals bereit (ModsAPI v1.0);
+# der Import ist eine Absicherung wie in PenetrationCalculator.
+try:
+    import events, ui, utils, battle
+except Exception:
+    pass
+
 MOD_NAME = 'Overmatcher'
+# Datenkomponente fuer Overmatcher.unbound (CC.mods_DataComponent mit dieser ID)
+UI_COMPONENT_ID = 'modOvermatcher'
 DATA_FILE = 'ships.json'
 RESULT_FILE = 'overmatcher_last.txt'
 LOG_FILE = 'overmatcher_log.txt'
 
 LOG_KEEP = 300
 
-_state = {'data': None, 'disabled': False, 'results': None, 'log': []}
+_state = {'data': None, 'disabled': False, 'results': None, 'log': [], 'ui_id': None}
 
 # Client-Eigenheiten (python.log 15.9.0.13357625):
 # - open() verlangt immer (pfad, modus); Modus 'a' nur fuer bereits vorhandene Dateien.
@@ -130,6 +138,7 @@ def compute():
         verdict = evaluate(me, enemy)
         if verdict is not None:
             verdict['ship'] = name
+            verdict['player'] = _get(players[pid], 'name')
             results[pid] = verdict
     return results
 
@@ -147,6 +156,37 @@ def _report(results):
         _log('could not write %s: %r' % (RESULT_FILE, e))
 
 
+def ui_payload(results):
+    """Daten fuer Overmatcher.unbound: Schluessel = Avatar-ID (als Text) bzw. Spielername."""
+    by_id, by_name = {}, {}
+    for pid, r in results.items():
+        pair = [r['attack'], r['defense']]
+        by_id[str(pid)] = pair
+        if r.get('player'):
+            by_name[r['player']] = pair
+    return {'byId': by_id, 'byName': by_name}
+
+
+def _publish(results):
+    try:
+        if _state['ui_id'] is None:
+            _state['ui_id'] = ui.createUiElement()
+            ui.addDataComponentWithId(_state['ui_id'], UI_COMPONENT_ID, ui_payload({}))
+        ui.updateUiElementData(_state['ui_id'], ui_payload(results))
+    except Exception as e:
+        _log('ui publish failed: %r' % (e,))
+
+
+def _remove_ui():
+    if _state['ui_id'] is None:
+        return
+    try:
+        ui.deleteUiElement(_state['ui_id'])
+    except Exception as e:
+        _log('ui delete failed: %r' % (e,))
+    _state['ui_id'] = None
+
+
 def _refresh(*args, **kwargs):
     _log('refresh (battle shown / players updated)')
     try:
@@ -157,10 +197,12 @@ def _refresh(*args, **kwargs):
     if results != _state['results']:
         _state['results'] = results
         _report(results)
+        _publish(results)
 
 
 def _on_battle_quit(*args, **kwargs):
     _state['results'] = None
+    _remove_ui()
 
 
 _log('Main.py loaded, game version %s, getModDir %s -> %s'

@@ -1,0 +1,144 @@
+# Overmatcher – Anzeige am Fadenkreuz fuer das aufgeschaltete Ziel.
+# Daten: CC.mods_DataComponent 'modOvermatcher' aus Main.py
+#   {byId: {'<avatarId>': [attack, defense]}, byName: {'<spielername>': [...]}}
+# Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
+# XTargetTracker (Battle Expert, AutoSpy). Prototyp: Text statt Icons.
+
+(def constant OVERMATCHER_COMPONENT_KEY 'modOvermatcher')
+
+# RGB ohne Alpha (wie $Sector-Farben in PenetrationCalculator)
+(def constant OVERMATCHER_COLORS {
+	green:  0x46D246,
+	yellow: 0xFFD200,
+	red:    0xFF3C3C
+})
+
+(def element OvermatcherRoot() layout=true
+	(scope
+		(var stageComponent:gfx = "$datahub.getSingleComponent(CC.stage)")
+		(var stageWidth:number = "stageComponent.width" (event "stageComponent.evStageSizeChanged"))
+		(var stageHeight:number = "stageComponent.height" (event "stageComponent.evStageSizeChanged"))
+
+		(var cameraEntity:gfx = "$datahub.getSingleEntity(CC.camera)")
+		(var cameraMode:number = "cameraEntity.camera.mode" (event "cameraEntity.camera.evModeChanged"))
+		(var isCameraTrackingShell:bool = "cameraMode == CameraMode.SHELLTRACKER")
+		(var isTactical:bool = "cameraEntity.camera.isTactical" (event "cameraEntity.camera.evTacticalStateChanged"))
+
+		(var avatar:gfx = "$datahub.getSingleEntity(CC.playerAvatar)")
+		(var healthComponent:gfx = "avatar ? avatar.health : null")
+		(var isAlive:bool = "healthComponent ? healthComponent.isAlive : false" (event "healthComponent.evIsAliveChanged"))
+
+		(var isCrosshairVisible:bool = "isAlive && !isCameraTrackingShell && !isTactical")
+	)
+
+	(style
+		(position = "absolute")
+		(bind width "stageWidth")
+		(bind height "stageHeight")
+		(hitTest = false)
+	)
+
+	(controller $Instance renderer='OvermatcherCrosshairItem'
+		(bind enabled "isAlive")
+		(exprs
+			(style (position = "absolute") (left = 50%) (top = 50%))
+			(bind visible "isCrosshairVisible")
+		)
+	)
+)
+
+(def element OvermatcherCrosshairItem() layout=true
+	(scope
+		# Zielerkennung: jeder Avatar meldet per evTargetChanged, ob er aufgeschaltet ist
+		(event evTargetChanged)
+		(var enemies:gfx = "$datahub.getCollection(CC.avatar)")
+		(var currentTarget:gfx = "$event.entity" watch=false init=false (event "evTargetChanged"))
+		(var targetAvatar:gfx = "currentTarget && currentTarget.hasComponent(CC.avatar) ? currentTarget.avatar : null" (event "evTargetChanged"))
+		(var targetKey:str = "targetAvatar ? toString(targetAvatar.id) : ''" (event "evTargetChanged"))
+		(var targetName:str = "targetAvatar ? targetAvatar.name : ''" (event "evTargetChanged"))
+
+		# Daten aus Main.py
+		(var omWatcher:gfx = "$datahub.getPrimWatcher(CC.mods_DataComponent, OVERMATCHER_COMPONENT_KEY)")
+		(var omEntity:gfx = "omWatcher.entity" (event "omWatcher.event"))
+		(var omComponent:gfx = "omEntity ? omEntity.mods_DataComponent : null")
+		(var omData:dict = "omComponent ? omComponent.data : {}" (event "omComponent.evDataChanged"))
+		(var byId:dict = "'byId' in omData && null != omData.byId ? omData.byId : {}")
+		(var byName:dict = "'byName' in omData && null != omData.byName ? omData.byName : {}")
+
+		(var verdict:array = "(targetKey != '' && targetKey in byId) ? byId[targetKey]
+								: ((targetName != '' && targetName in byName) ? byName[targetName] : [])")
+		(var hasVerdict:bool = "verdict.length == 2")
+		(var attackColor:number = "hasVerdict ? OVERMATCHER_COLORS[verdict[0]] : 0x808080")
+		(var defenseColor:number = "hasVerdict ? OVERMATCHER_COLORS[verdict[1]] : 0x808080")
+	)
+
+	(controller $Repeat renderer='OvermatcherTargetTracker'
+		(bind count "enemies.items.length" (event "enemies.evAdded") (event "enemies.evRemoved"))
+		(exprs
+			(scope
+				(bind _currentTargetId "currentTarget ? currentTarget.id : 0")
+			)
+		)
+	)
+
+	(hblock
+		(bind visible "hasVerdict")
+		(style
+			(position = "absolute")
+			(left = -70)
+			(top = 40)
+		)
+		(element OvermatcherBadge _label="'Granate'" _color="attackColor")
+		(element OvermatcherBadge _label="'Schild'" _color="defenseColor")
+	)
+)
+
+(def element OvermatcherBadge(_label:str, _color:number) layout=true
+	(style
+		(flow = "Flow.HORIZONTAL")
+		(marginRight = 10)
+	)
+	(block
+		(style (width = 14) (height = 14) (marginTop = 4))
+		(controller $Sector
+			(arc = 360)
+			(bind radius "6")
+			(bind color "_color")
+			(offset = 0)
+		)
+	)
+	(tf
+		(class $OvermatcherText)
+		(bind text "_label")
+		(style (marginLeft = 4))
+	)
+)
+
+# Kopie von XTargetTracker unter eigenem Namen (ModForge meldet doppelte Namen als Konflikt)
+(def element OvermatcherTargetTracker() layout=false
+	(scope
+		(var _currentTargetId:number = 0)
+		(var avatars:gfx = "$datahub.getCollection(CC.avatar)")
+		(var trackedEntity:gfx = "avatars.items[$index]" watch=false)
+		(var targetComponent:gfx = "trackedEntity.hasComponent(CC.target) ? trackedEntity.target : null"
+			(event "trackedEntity.evAdded")
+			(event "trackedEntity.evRemoved")
+		)
+		(var targetFlags:number = "targetComponent ? targetComponent.flags : 0"
+			(event "targetComponent.evFlagsChanged")
+		)
+		(var isTargetLocked:bool = "(targetFlags & LOCKABLE_WEAPONS) > 0")
+	)
+	(dispatch evTargetChanged args="{entity: isTargetLocked ? trackedEntity : null}" dir="EventDirection.UP"
+		(bind enabled "isTargetLocked || _currentTargetId == trackedEntity.id")
+		(event "targetComponent.evFlagsChanged")
+	)
+	(dispatch evTargetChanged args="{entity: trackedEntity}" dir="EventDirection.UP" on='addedToStage'
+		(bind enabled "isTargetLocked")
+	)
+)
+
+(def css $OvermatcherText()
+	(extends $TextDefaultBoldNM)
+	(extends $FontEnableReadability)
+)
