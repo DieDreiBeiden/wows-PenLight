@@ -61,14 +61,22 @@ Nur gegnerisches Team.
 - Beim Nutzer laufen bereits ModForge, TTaroTeamPanel, Crosshair-Marks u. a. →
   Konfliktgefahr bei Teamliste und Fadenkreuz.
 
+## Erkenntnisse Probe v2.1
+
+- `getPlayersInfo()[pid]['shipInfo']` ist ein leeres Gerüst; gefüllt nur über `getPlayerShipInfo(pid)`.
+- `getPlayerShipInfo(pid)`: `name` (Index, z. B. `PJSB018_Yamato_1944`), `level`, `subtype`
+  (`'Cruiser'`/`'Battleship'`) bestätigt → Lookup-Schlüssel für die Datentabelle.
+- `params.A_Hull.armourDeck` per Item-Zugriff `None`.
+
 ## Offene Punkte
 
 | # | Punkt | Klärung durch |
 |---|---|---|
-| 1 | Sind `armourDeck`/`armourExtremities`/`barrelDiameter` im Client lesbar, Einheit? | Probe v2 |
-| 2 | Welche Module sind ausgerüstet (`shipComponents`)? | Probe v2 |
-| 3 | Aufgeschaltetes Ziel erkennen | Prototyp |
-| 4 | Teamliste: über ModForge-Override oder eigenes Panel, Konflikt mit TTaroTeamPanel | Prototyp |
+| 1 | Sind `armourDeck`/`armourExtremities` im Client lesbar? v2.1: `None` – Filterung oder Zugriffsfehler? | Probe v2.2 |
+| 2 | Entsprechen `armourExtremities`/`armourDeck` der overmatch-relevanten Beplankung? | Abgleich bekannter Schiffe (Wiki) |
+| 3 | `shipComponents` aus `getPlayersInfo()` ist leer → Annahme „voll ausgebaut“ bleibt | – |
+| 4 | Aufgeschaltetes Ziel erkennen | Prototyp |
+| 5 | Teamliste: über ModForge-Override oder eigenes Panel, Konflikt mit TTaroTeamPanel | Prototyp |
 
 ## Umsetzungsreihenfolge
 

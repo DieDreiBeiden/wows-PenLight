@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Probe-Mod v2.1: liest pro Spieler Klasse, Panzerungs- und Artilleriewerte aus
+# Probe-Mod v2.2: liest pro Spieler Klasse, Panzerungs- und Artilleriewerte aus
 # shipInfo.params (GameParams im Client) und die ausgeruesteten Module.
 # Schreibt probe_dump2.txt in den Mod-Ordner. Zeigt nichts an, aendert nichts.
 API_VERSION = 'API_v1.0'
@@ -17,10 +17,34 @@ def _keys(obj):
     except Exception:
         pass
     try:
-        return [k for k in vars(obj) if not k.startswith('_')]
+        keys = [k for k in vars(obj) if not k.startswith('_')]
+        if keys:
+            return keys
     except Exception:
         pass
     return [k for k in dir(obj) if not k.startswith('_')]
+
+
+def _all_access(obj, key):
+    """Alle Zugriffswege einzeln, um eine API-Filterung von einem Zugriffsfehler zu trennen."""
+    out = {}
+    try:
+        out['item'] = repr(obj[key])
+    except Exception as e:
+        out['item'] = '<%s>' % type(e).__name__
+    try:
+        out['attr'] = repr(getattr(obj, key))
+    except Exception as e:
+        out['attr'] = '<%s>' % type(e).__name__
+    try:
+        out['get'] = repr(obj.get(key))
+    except Exception as e:
+        out['get'] = '<%s>' % type(e).__name__
+    try:
+        out['dict'] = repr(obj.__dict__.get(key))
+    except Exception as e:
+        out['dict'] = '<%s>' % type(e).__name__
+    return out
 
 
 def _get(obj, key):
@@ -106,10 +130,16 @@ def _dump():
                 'info.type': type(info).__name__,
                 'params.type': type(params).__name__,
                 'A_Hull.type': type(hull).__name__,
-                'A_Hull.armourDeck': _get(hull, 'armourDeck'),
-                'A_Hull.armourExtremities': _get(hull, 'armourExtremities'),
+                'info.name': _all_access(info, 'name'),
+                'params.A_Hull': _all_access(params, 'A_Hull'),
+                'A_Hull.armourDeck': _all_access(hull, 'armourDeck'),
+                'A_Hull.armourExtremities': _all_access(hull, 'armourExtremities'),
                 'params.keys': sorted(str(k) for k in _keys(params)),
+                'params.dir': [k for k in dir(params) if not k.startswith('__')],
+                'A_Hull.dir': [k for k in dir(hull) if not k.startswith('__')],
             })
+            section('%s | repr(params)' % pid, repr(params)[:4000])
+            section('%s | repr(A_Hull)' % pid, repr(hull)[:4000])
             tag = '%s %s team=%s' % (pid, _get(info, 'name'), _get(p, 'teamId'))
             section(tag + ' | basics', {
                 'shipParamsId': _get(p, 'shipParamsId'),
