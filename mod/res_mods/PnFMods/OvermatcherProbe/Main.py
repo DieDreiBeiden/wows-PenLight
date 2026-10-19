@@ -1,24 +1,87 @@
 # -*- coding: utf-8 -*-
-# Probe-Mod: schreibt die im Gefecht verfuegbaren Spieler-/Schiffsdaten in
-# probe_dump.txt im Mod-Ordner (und ins python.log). Zeigt nichts an, aendert nichts.
+# Probe-Mod v2: liest pro Spieler Klasse, Panzerungs- und Artilleriewerte aus
+# shipInfo.params (GameParams im Client) und die ausgeruesteten Module.
+# Schreibt probe_dump2.txt in den Mod-Ordner. Zeigt nichts an, aendert nichts.
 API_VERSION = 'API_v1.0'
 MOD_NAME = 'OvermatcherProbe'
+
+MAX_DEPTH = 4
+MAX_ITEMS = 40
 
 _dumped = [False]
 
 
-def _public_attrs(obj):
+def _keys(obj):
+    try:
+        return list(obj.keys())
+    except Exception:
+        pass
+    try:
+        return [k for k in vars(obj) if not k.startswith('_')]
+    except Exception:
+        pass
+    return [k for k in dir(obj) if not k.startswith('_')]
+
+
+def _get(obj, key):
+    try:
+        return obj[key]
+    except Exception:
+        pass
+    try:
+        return getattr(obj, key)
+    except Exception as e:
+        return '<error %r>' % (e,)
+
+
+def _is_scalar(value):
+    return value is None or isinstance(value, (bool, int, long, float, basestring))
+
+
+def _ser(value, depth=0):
+    if _is_scalar(value):
+        return repr(value)
+    if depth >= MAX_DEPTH:
+        return '<%s ...>' % type(value).__name__
+    if isinstance(value, (list, tuple)):
+        items = [_ser(v, depth + 1) for v in value[:MAX_ITEMS]]
+        if len(value) > MAX_ITEMS:
+            items.append('... (%d total)' % len(value))
+        return '[' + ', '.join(items) + ']'
+    keys = _keys(value)
+    parts = []
+    for k in sorted(keys, key=str)[:MAX_ITEMS]:
+        v = _get(value, k)
+        if callable(v):
+            continue
+        parts.append('%r: %s' % (k, _ser(v, depth + 1)))
+    if len(keys) > MAX_ITEMS:
+        parts.append('... (%d keys total)' % len(keys))
+    return '{' + ', '.join(parts) + '}'
+
+
+def _module_keys(params, suffix):
+    return [k for k in _keys(params) if str(k).endswith(suffix)]
+
+
+def _hull_summary(hull):
     out = {}
-    for name in dir(obj):
-        if name.startswith('_'):
+    for k in _keys(hull):
+        ks = str(k)
+        if ks.startswith('armour') or ks.startswith('armor') or ks in ('health', 'Bow', 'Cit', 'Cas', 'SG', 'Hull'):
+            out[ks] = _get(hull, k)
+    return out
+
+
+def _artillery_summary(art):
+    out = {}
+    for k in _keys(art):
+        v = _get(art, k)
+        if _is_scalar(v):
             continue
-        try:
-            value = getattr(obj, name)
-        except Exception as e:
-            value = '<error %r>' % (e,)
-        if callable(value):
-            continue
-        out[name] = repr(value)
+        sub = _keys(v)
+        if 'barrelDiameter' in sub or 'ammoList' in sub:
+            out[str(k)] = dict((f, _get(v, f)) for f in ('barrelDiameter', 'ammoList', 'numBarrels', 'typeinfo') if f in sub)
     return out
 
 
@@ -27,30 +90,37 @@ def _dump():
 
     def section(title, value):
         lines.append('===== %s =====' % title)
-        lines.append(repr(value))
+        lines.append(_ser(value) if not isinstance(value, basestring) else value)
 
     try:
-        section('gameVersion', utils.getGameVersion())
+        section('gameVersion', repr(utils.getGameVersion()))
         players = battle.getPlayersInfo()
-        section('getPlayersInfo', players)
-        for player_id in players:
-            try:
-                ship_info = battle.getPlayerShipInfo(player_id)
-                section('getPlayerShipInfo(%s)' % player_id, ship_info)
-                section('getPlayerShipInfo(%s) attrs' % player_id, _public_attrs(ship_info))
-            except Exception as e:
-                section('getPlayerShipInfo(%s) ERROR' % player_id, e)
-        own = battle.getSelfPlayerShip()
-        section('getSelfPlayerShip attrs', _public_attrs(own))
-        for ship in battle.getAllShips():
-            section('getAllShips item', _public_attrs(ship))
+        for pid in players:
+            p = players[pid]
+            info = _get(p, 'shipInfo')
+            params = _get(info, 'params')
+            tag = '%s %s team=%s' % (pid, _get(info, 'name'), _get(p, 'teamId'))
+            section(tag + ' | basics', {
+                'shipParamsId': _get(p, 'shipParamsId'),
+                'shipId': _get(p, 'shipId'),
+                'subtype': _get(info, 'subtype'),
+                'subtypeIDS': _get(info, 'subtypeIDS'),
+                'level': _get(info, 'level'),
+                'typeinfo': _get(params, 'typeinfo'),
+            })
+            section(tag + ' | shipComponents', _get(p, 'shipComponents'))
+            section(tag + ' | ShipUpgradeInfo', _get(params, 'ShipUpgradeInfo'))
+            for hk in _module_keys(params, '_Hull'):
+                section(tag + ' | ' + hk, _hull_summary(_get(params, hk)))
+            for ak in _module_keys(params, '_Artillery'):
+                section(tag + ' | ' + ak, _artillery_summary(_get(params, ak)))
     except Exception as e:
-        section('ERROR', e)
+        section('ERROR', repr(e))
 
     text = '\n'.join(lines)
-    print('[%s]\n%s' % (MOD_NAME, text))
+    print('[%s] dump written (%d chars)' % (MOD_NAME, len(text)))
     try:
-        with open(utils.getModDir() + '/probe_dump.txt', 'w') as f:
+        with open(utils.getModDir() + '/probe_dump2.txt', 'w') as f:
             f.write(text)
     except Exception as e:
         print('[%s] could not write file: %r' % (MOD_NAME, e))

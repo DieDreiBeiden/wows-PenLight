@@ -37,8 +37,8 @@ Nur gegnerisches Team.
 
 ## Datenbasis
 
-- Hauptkaliber, Bug/Heck- und Deckdicke je Schiff, offline erzeugt aus
-  `GameParams.data` (Tool: `wowsunpack`), als JSON mit der Mod ausgeliefert.
+- Bevorzugt: live aus `shipInfo.params` im Client (siehe Erkenntnisse).
+- Fallback: offline aus `GameParams.data` (Tool: `wowsunpack`), als JSON mitgeliefert.
 - Annahme: Gegner fährt voll ausgebaute Module.
 - Datenversion = Spielversion; Abweichung → Warnung statt falscher Farben.
 
@@ -49,14 +49,26 @@ Nur gegnerisches Team.
   `res_mods/PnFModsLoader.py`.
 - Gegnerliste über `battle.getPlayersInfo()` (nicht `getAllShips()` – liefert nur sichtbare Schiffe).
 
+## Erkenntnisse Probe v1 (Client 15.9.0.13357625)
+
+- `battle.getPlayersInfo()` liefert pro Spieler u. a. `teamId`, `shipId` (Entity),
+  `shipParamsId` (GameParams-ID), `shipComponents` und `shipInfo`.
+- `shipInfo.params` ist der **GameParams-Eintrag des Schiffs im Client**, inkl.
+  `A_Hull.armourDeck`, `A_Hull.armourExtremities`, `A_Artillery`, `typeinfo`.
+  Falls die Werte lesbar sind, entfällt der Offline-Daten-Generator (Probe v2).
+- `Ship.subtype` liefert `'Cruiser'` (bestätigt); `shipInfo.subtypeIDS` z. B. `'IDS_BATTLESHIP'`.
+- Eigenes Team `teamId` 0, Gegner 1 (Trainingsraum).
+- Beim Nutzer laufen bereits ModForge, TTaroTeamPanel, Crosshair-Marks u. a. →
+  Konfliktgefahr bei Teamliste und Fadenkreuz.
+
 ## Offene Punkte
 
 | # | Punkt | Klärung durch |
 |---|---|---|
-| 1 | Welche Schiffs-ID liefert `getPlayerShipInfo`, welche Werte hat `subtype`? | Probe-Mod |
-| 2 | Aufgeschaltetes Ziel erkennen (UI-Komponente `Target.flags`?) | Prototyp |
-| 3 | Integration in die Teamliste nur über überschriebene Spieldateien möglich | Prototyp |
-| 4 | Panzerungszonen aus GameParams sauber zuordnen | Daten-Generator |
+| 1 | Sind `armourDeck`/`armourExtremities`/`barrelDiameter` im Client lesbar, Einheit? | Probe v2 |
+| 2 | Welche Module sind ausgerüstet (`shipComponents`)? | Probe v2 |
+| 3 | Aufgeschaltetes Ziel erkennen | Prototyp |
+| 4 | Teamliste: über ModForge-Override oder eigenes Panel, Konflikt mit TTaroTeamPanel | Prototyp |
 
 ## Umsetzungsreihenfolge
 
