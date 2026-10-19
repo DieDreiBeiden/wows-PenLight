@@ -20,6 +20,9 @@ Bug und Heck werden als gleich dick behandelt (ein Wert „bow“).
 | ja | nein | Gelb *(Annahme)* | Gelb *(Annahme)* |
 | nein | nein | Rot | Grün |
 
+Häufigkeit bei Stufe VIII–X (alle Paarungen BB/CA, ungewichtet): beides 12,8 %,
+nur Deck 0,9 %, **nur Bug 14,1 %**, nichts 72,2 %.
+
 Die Zeile „Bug ja / Deck nein“ ist in der Ausgangsdefinition nicht enthalten
 (kommt z. B. bei 460 mm gegen 38-mm-Decks vor). Festgelegt als Gelb,
 änderbar über `BOW_ONLY_COLOR` in `src/overmatcher/logic.py`.
@@ -37,10 +40,24 @@ Nur gegnerisches Team.
 
 ## Datenbasis
 
-- Bevorzugt: live aus `shipInfo.params` im Client (siehe Erkenntnisse).
-- Fallback: offline aus `GameParams.data` (Tool: `wowsunpack`), als JSON mitgeliefert.
-- Annahme: Gegner fährt voll ausgebaute Module.
-- Datenversion = Spielversion; Abweichung → Warnung statt falscher Farben.
+- Der Client gibt GameParams-Werte an Mods nicht heraus (Probe v2.2: Werte `None`,
+  `__dict__` → `RuntimeError`). Daten kommen daher offline aus `content/GameParams.data`.
+- Generator: `tools/gameparams.py` → `mod/res_mods/PnFMods/Overmatcher/ships.json`
+  (`{gameVersion, ships: {name: [klasse, bug, deck, kaliber]}}`).
+- Panzerung: Hull-Modul `armor` = `{(lage << 16) | material_id: mm}`, Lage 1 = außen;
+  Material-Namen aus wowsunpack (MIT), `tools/data/collision_materials.json`.
+  - Bug/Heck = `Bow_ConstrSide` (Fallback `St_ConstrSide`)
+  - Deck = dünnste von `Cas_Deck`, `SSC_Deck`
+  - `armourDeck`/`armourExtremities` sind in 15.9 nur Platzhalter `[-1, -1]`.
+- Kaliber = größter `barrelDiameter` im Artillerie-Modul des letzten Upgrades.
+- Abgeglichen mit dem Wiki (Stand 08/2024): Yamato 32/57, North Carolina 32/38, Minotaur 16/16,
+  Colbert 16/16, Thunderer 32/32, Des Moines 27/30, Hindenburg 27/30, Bismarck 32/50,
+  Slava 25/32, Riga 25/35, Fuso 26/35, Incomparable 25/51 – alle plausibel.
+- Nicht abgedeckt: 21 Schiffe ohne `Cas_Deck`/`SSC_Deck` (v. a. leichte Kreuzer Stufe II–V,
+  Event-Schiffe `PX*`) → keine Anzeige.
+- Alternative Kanonenmodule (Mogami 155/203, Lion 406/419, FdG/Großdeutschland 406/420):
+  verwendet wird das letzte Upgrade; welches Modul ein Spieler fährt, liefert die API nicht.
+- `ships.json` gilt für genau eine Spielversion; bei Abweichung deaktiviert sich die Mod.
 
 ## Technik
 
@@ -72,8 +89,8 @@ Nur gegnerisches Team.
 
 | # | Punkt | Klärung durch |
 |---|---|---|
-| 1 | Sind `armourDeck`/`armourExtremities` im Client lesbar? v2.1: `None` – Filterung oder Zugriffsfehler? | Probe v2.2 |
-| 2 | Entsprechen `armourExtremities`/`armourDeck` der overmatch-relevanten Beplankung? | Abgleich bekannter Schiffe (Wiki) |
+| 1 | ~~Live-Zugriff auf Panzerung~~ – gesperrt (v2.2), Offline-Daten | erledigt |
+| 2 | ~~Overmatch-relevante Platten~~ – `Bow_ConstrSide`, `Cas_Deck`/`SSC_Deck`, Wiki-Abgleich ok | erledigt |
 | 3 | `shipComponents` aus `getPlayersInfo()` ist leer → Annahme „voll ausgebaut“ bleibt | – |
 | 4 | Aufgeschaltetes Ziel erkennen | Prototyp |
 | 5 | Teamliste: über ModForge-Override oder eigenes Panel, Konflikt mit TTaroTeamPanel | Prototyp |
