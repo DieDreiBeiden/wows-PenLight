@@ -85,6 +85,15 @@ Nur gegnerisches Team.
   (`'Cruiser'`/`'Battleship'`) bestätigt → Lookup-Schlüssel für die Datentabelle.
 - `params.A_Hull.armourDeck` per Item-Zugriff `None`.
 
+## Erkenntnisse 0.1.x im Client
+
+- `open()` verlangt immer `(pfad, modus)`; Modus `'a'` nur für vorhandene Dateien.
+- `print()` erscheint nicht im python.log, `utils.logInfo` schon.
+- `utils.getModDir()` lieferte den Ordner `OvermatcherProbe`, solange dieser existierte;
+  nach dem Löschen korrekt. Vermutlich Präfix-Zuordnung des Mod-Namens – Mod-Ordner nie
+  mit einem Präfix eines anderen Mod-Namens benennen. Die Mod korrigiert den Pfad selbst.
+- 0.1.2 im Client bestätigt: Hawaii gegen Minotaur ×2 und Yamato liefert die erwarteten Farben.
+
 ## Offene Punkte
 
 | # | Punkt | Klärung durch |
