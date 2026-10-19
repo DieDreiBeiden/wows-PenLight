@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-# Probe-Mod v2: liest pro Spieler Klasse, Panzerungs- und Artilleriewerte aus
+# Probe-Mod v2.1: liest pro Spieler Klasse, Panzerungs- und Artilleriewerte aus
 # shipInfo.params (GameParams im Client) und die ausgeruesteten Module.
 # Schreibt probe_dump2.txt in den Mod-Ordner. Zeigt nichts an, aendert nichts.
 API_VERSION = 'API_v1.0'
 MOD_NAME = 'OvermatcherProbe'
 
 MAX_DEPTH = 4
-MAX_ITEMS = 40
+MAX_ITEMS = 200
 
 _dumped = [False]
 
@@ -97,8 +97,19 @@ def _dump():
         players = battle.getPlayersInfo()
         for pid in players:
             p = players[pid]
-            info = _get(p, 'shipInfo')
+            # shipInfo aus getPlayersInfo() ist nur ein leeres Geruest (v2-Befund),
+            # die gefuellte Variante kommt aus getPlayerShipInfo().
+            info = battle.getPlayerShipInfo(pid)
             params = _get(info, 'params')
+            hull = _get(params, 'A_Hull')
+            section('%s | access check' % pid, {
+                'info.type': type(info).__name__,
+                'params.type': type(params).__name__,
+                'A_Hull.type': type(hull).__name__,
+                'A_Hull.armourDeck': _get(hull, 'armourDeck'),
+                'A_Hull.armourExtremities': _get(hull, 'armourExtremities'),
+                'params.keys': sorted(str(k) for k in _keys(params)),
+            })
             tag = '%s %s team=%s' % (pid, _get(info, 'name'), _get(p, 'teamId'))
             section(tag + ' | basics', {
                 'shipParamsId': _get(p, 'shipParamsId'),
