@@ -50,17 +50,15 @@ class ModTest(unittest.TestCase):
                           getPlayerShipInfo=lambda pid: Obj(name=ship_names[pid]),
                           getSelfPlayerInfo=lambda: {'id': 1}),
             'utils': Obj(getModDir=lambda: mod_dir, getGameVersion=lambda: VERSION,
-                         jsonDncode=json.loads),
+                         jsonDncode=json.loads, logInfo=lambda *a, **k: None),
             'events': Obj(onBattleShown=lambda f: handlers.setdefault('shown', f),
                           onPlayersListUpdated=lambda f: handlers.setdefault('players', f),
                           onBattleQuit=lambda f: handlers.setdefault('quit', f)),
         }
         exec(compile(open(build_mod.build()).read(), 'Main.py', 'exec'), env)
         handlers['shown']()
-        result_path = os.path.join(mod_dir, 'overmatcher_last.txt')
-        if not os.path.exists(result_path):
-            return None
-        return open(result_path).read().splitlines()
+        self.log = open(os.path.join(mod_dir, 'overmatcher_log.txt')).read()
+        return open(os.path.join(mod_dir, 'overmatcher_last.txt')).read().splitlines()
 
     def test_cruiser_vs_mixed_enemies(self):
         lines = self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PBSC110_Minotaur', 'PASD013_Gearing'])
@@ -74,7 +72,18 @@ class ModTest(unittest.TestCase):
         self.assertEqual(lines, ['PBSC110_Minotaur attack=green defense=green'])
 
     def test_version_mismatch_disables(self):
-        self.assertIsNone(self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'], data_version='15,8,0,1'))
+        lines = self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'], data_version='15,8,0,1')
+        self.assertTrue(lines[0].startswith('(keine relevanten Gegner'))
+        self.assertIn('data version 15,8,0,1 != game version', self.log)
+
+    def test_only_irrelevant_enemies_still_reports(self):
+        lines = self.run_mod('PASC720_Hawaii', ['PASD013_Gearing'])
+        self.assertTrue(lines[0].startswith('(keine relevanten Gegner'))
+        self.assertIn('Main.py loaded', self.log)
+
+    def test_unknown_enemy_is_logged(self):
+        self.run_mod('PASC720_Hawaii', ['PZZZ999_Unknown'])
+        self.assertIn('no data for enemy ship PZZZ999_Unknown', self.log)
 
 
 if __name__ == '__main__':

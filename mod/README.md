@@ -10,7 +10,9 @@ Spiel beenden. Ordner mit der **höchsten Nummer** unter `World_of_Warships\bin\
 | `PnFMods\Overmatcher\ships.json` | Panzerungs-/Kaliberdaten für genau eine Spielversion |
 
 Stand 0.1 zeigt noch nichts im Spiel an. Nach Gefechtsbeginn steht das Ergebnis in
-`PnFMods\Overmatcher\overmatcher_last.txt` und im `profile\python.log` (`[Overmatcher]`).
+`PnFMods\Overmatcher\overmatcher_last.txt`. Diagnose (wird fortlaufend angehängt):
+`PnFMods\Overmatcher\overmatcher_log.txt` und `profile\python.log` (Zeilen mit `[Overmatcher]`).
+Fehlt `overmatcher_log.txt` nach dem Spielstart ganz, wurde die Mod nicht geladen.
 
 Passt `ships.json` nicht zur Spielversion, deaktiviert sich die Mod und schreibt das ins Log.
 

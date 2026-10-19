@@ -4,12 +4,23 @@
 MOD_NAME = 'Overmatcher'
 DATA_FILE = 'ships.json'
 RESULT_FILE = 'overmatcher_last.txt'
+LOG_FILE = 'overmatcher_log.txt'
 
-_state = {'data': None, 'disabled': False, 'results': {}}
+_state = {'data': None, 'disabled': False, 'results': None}
 
 
 def _log(message):
-    print('[%s] %s' % (MOD_NAME, message))
+    # print() erscheint nicht im python.log (Probe-Befund), utils.logInfo schon.
+    line = '[%s] %s' % (MOD_NAME, message)
+    try:
+        utils.logInfo(line)
+    except Exception:
+        pass
+    try:
+        with open(utils.getModDir() + '/' + LOG_FILE, 'a') as f:
+            f.write(line + '\n')
+    except Exception:
+        pass
 
 
 def _get(obj, key):
@@ -79,11 +90,13 @@ def compute():
         return {}
     players = battle.getPlayersInfo()
     own_id = _self_player_id(players)
+    _log('%d players, own id %s' % (len(players), own_id))
     if own_id is None:
         _log('own player not found')
         return {}
     own_team = _get(players[own_id], 'teamId')
     own_name, me = _ship_record(ships, own_id)
+    _log('own ship %s, team %s' % (own_name, own_team))
     if me is None:
         _log('no data for own ship %s' % own_name)
         return {}
@@ -93,6 +106,7 @@ def compute():
             continue
         name, enemy = _ship_record(ships, pid)
         if enemy is None:
+            _log('no data for enemy ship %s' % name)
             continue
         verdict = evaluate(me, enemy)
         if verdict is not None:
@@ -104,7 +118,9 @@ def compute():
 def _report(results):
     lines = ['%s attack=%s defense=%s' % (r['ship'], r['attack'], r['defense'])
              for r in sorted(results.values(), key=lambda r: r['ship'])]
-    _log('%d relevant enemies\n%s' % (len(lines), '\n'.join(lines)))
+    if not lines:
+        lines = ['(keine relevanten Gegner oder Mod inaktiv, siehe %s)' % LOG_FILE]
+    _log('result:\n' + '\n'.join(lines))
     try:
         with open(utils.getModDir() + '/' + RESULT_FILE, 'w') as f:
             f.write('\n'.join(lines))
@@ -113,6 +129,7 @@ def _report(results):
 
 
 def _refresh(*args, **kwargs):
+    _log('refresh (battle shown / players updated)')
     try:
         results = compute()
     except Exception as e:
@@ -124,9 +141,10 @@ def _refresh(*args, **kwargs):
 
 
 def _on_battle_quit(*args, **kwargs):
-    _state['results'] = {}
+    _state['results'] = None
 
 
+_log('Main.py loaded, game version %s' % (utils.getGameVersion(),))
 events.onBattleShown(_refresh)
 events.onPlayersListUpdated(_refresh)
 events.onBattleQuit(_on_battle_quit)
