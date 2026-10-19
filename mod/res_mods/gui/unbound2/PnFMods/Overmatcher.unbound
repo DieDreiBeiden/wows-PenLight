@@ -4,6 +4,15 @@
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy). Prototyp: Text statt Icons.
 
+# Einstellungen
+(def constant OVERMATCHER_SETTINGS {
+	# Abstand zur Bildschirmmitte in Pixeln (x: + = rechts, y: + = unten)
+	offsetX: -70,
+	offsetY: 40,
+	# Abstand zwischen Granate und Schild
+	gap: 10
+})
+
 (def constant OVERMATCHER_COMPONENT_KEY 'modOvermatcher')
 
 # RGB ohne Alpha (wie $Sector-Farben in PenetrationCalculator)
@@ -85,8 +94,8 @@
 		(bind visible "hasVerdict")
 		(style
 			(position = "absolute")
-			(left = -70)
-			(top = 40)
+			(bind left "OVERMATCHER_SETTINGS.offsetX")
+			(bind top "OVERMATCHER_SETTINGS.offsetY")
 		)
 		(element OvermatcherBadge _label="'Granate'" _color="attackColor")
 		(element OvermatcherBadge _label="'Schild'" _color="defenseColor")
@@ -96,7 +105,7 @@
 (def element OvermatcherBadge(_label:str, _color:number) layout=true
 	(style
 		(flow = "Flow.HORIZONTAL")
-		(marginRight = 10)
+		(bind marginRight "OVERMATCHER_SETTINGS.gap")
 	)
 	(block
 		(style (width = 14) (height = 14) (marginTop = 4))
