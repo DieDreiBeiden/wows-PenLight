@@ -78,19 +78,38 @@ DATA_FILE = 'ships.json'
 RESULT_FILE = 'overmatcher_last.txt'
 LOG_FILE = 'overmatcher_log.txt'
 
-_state = {'data': None, 'disabled': False, 'results': None}
+LOG_KEEP = 300
+
+_state = {'data': None, 'disabled': False, 'results': None, 'log': []}
+
+# Client-Eigenheiten (python.log 15.9.0.13357625):
+# - open() verlangt immer (pfad, modus); Modus 'a' nur fuer bereits vorhandene Dateien.
+# - utils.getModDir() lieferte den Ordner einer anderen Mod (OvermatcherProbe).
+# - print() erscheint nicht im python.log, utils.logInfo schon.
+
+
+def _mod_dir():
+    path = str(utils.getModDir()).replace('\\', '/').rstrip('/')
+    parent, _, name = path.rpartition('/')
+    if name != MOD_NAME:
+        path = parent + '/' + MOD_NAME
+    return path
+
+
+def _mod_file(name):
+    return _mod_dir() + '/' + name
 
 
 def _log(message):
-    # print() erscheint nicht im python.log (Probe-Befund), utils.logInfo schon.
     line = '[%s] %s' % (MOD_NAME, message)
     try:
         utils.logInfo(line)
     except Exception:
         pass
+    _state['log'] = (_state['log'] + [line])[-LOG_KEEP:]
     try:
-        with open(utils.getModDir() + '/' + LOG_FILE, 'a') as f:
-            f.write(line + '\n')
+        with open(_mod_file(LOG_FILE), 'w') as f:
+            f.write('\n'.join(_state['log']) + '\n')
     except Exception:
         pass
 
@@ -114,7 +133,7 @@ def _load_data():
     if _state['data'] is not None or _state['disabled']:
         return _state['data']
     try:
-        with open(utils.getModDir() + '/' + DATA_FILE) as f:
+        with open(_mod_file(DATA_FILE), 'r') as f:
             data = _decode_json(f.read())
     except Exception as e:
         _log('could not load %s: %r' % (DATA_FILE, e))
@@ -194,7 +213,7 @@ def _report(results):
         lines = ['(keine relevanten Gegner oder Mod inaktiv, siehe %s)' % LOG_FILE]
     _log('result:\n' + '\n'.join(lines))
     try:
-        with open(utils.getModDir() + '/' + RESULT_FILE, 'w') as f:
+        with open(_mod_file(RESULT_FILE), 'w') as f:
             f.write('\n'.join(lines))
     except Exception as e:
         _log('could not write %s: %r' % (RESULT_FILE, e))
@@ -216,7 +235,8 @@ def _on_battle_quit(*args, **kwargs):
     _state['results'] = None
 
 
-_log('Main.py loaded, game version %s' % (utils.getGameVersion(),))
+_log('Main.py loaded, game version %s, getModDir %s -> %s'
+     % (utils.getGameVersion(), utils.getModDir(), _mod_dir()))
 events.onBattleShown(_refresh)
 events.onPlayersListUpdated(_refresh)
 events.onBattleQuit(_on_battle_quit)

@@ -34,8 +34,12 @@ VERSION = '15,9,0,13357625'
 
 class ModTest(unittest.TestCase):
     def run_mod(self, own_ship, enemies, data_version=VERSION):
-        mod_dir = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, mod_dir)
+        root = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, root)
+        mod_dir = os.path.join(root, 'Overmatcher')
+        wrong_dir = os.path.join(root, 'OvermatcherProbe')  # getModDir-Befund im Client
+        os.mkdir(mod_dir)
+        os.mkdir(wrong_dir)
         with open(os.path.join(mod_dir, 'ships.json'), 'w') as f:
             json.dump({'gameVersion': data_version, 'ships': SHIPS}, f)
         players = {1: {'teamId': 0, 'name': 'me'}}
@@ -44,12 +48,19 @@ class ModTest(unittest.TestCase):
             players[i] = {'teamId': 1, 'name': 'bot%d' % i}
             ship_names[i] = ship
         handlers = {}
+
+        def client_open(path, mode):
+            # wie im Client: Modus Pflicht, 'a' nur fuer vorhandene Dateien
+            if 'a' in mode and not os.path.exists(path):
+                raise IOError('Path %r does not exists' % path)
+            return open(path, mode)
         env = {
             '__name__': 'Main',
             'battle': Obj(getPlayersInfo=lambda: players,
                           getPlayerShipInfo=lambda pid: Obj(name=ship_names[pid]),
                           getSelfPlayerInfo=lambda: {'id': 1}),
-            'utils': Obj(getModDir=lambda: mod_dir, getGameVersion=lambda: VERSION,
+            'open': client_open,
+            'utils': Obj(getModDir=lambda: wrong_dir, getGameVersion=lambda: VERSION,
                          jsonDncode=json.loads, logInfo=lambda *a, **k: None),
             'events': Obj(onBattleShown=lambda f: handlers.setdefault('shown', f),
                           onPlayersListUpdated=lambda f: handlers.setdefault('players', f),
