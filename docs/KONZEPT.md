@@ -31,7 +31,7 @@ gewinkeltes Ziel kann trotz grüner Granate dort Abpraller erzeugen.
 
 ## Detailansicht (Alt gedrückt)
 
-Statt Granate/Schild eine Tabelle: Zeilen Granate (ich → Ziel) und Schild (Ziel → ich),
+Zusätzlich zu Granate/Schild (die immer sichtbar bleiben, auch bei Rot/Grün) eine Tabelle: Zeilen Granate (ich → Ziel) und Schild (Ziel → ich),
 Spalten Bug/Heck, Mitte, Deck. Punkt grün/rot = gut/schlecht für mich, grau = keine Daten.
 „Mitte“ = dünnste Seitenplatte mittschiffs (`Cas_Belt`, `SSC_ConstrSide`); sie fließt
 nur in die Detailansicht ein, nicht in die Ampel.

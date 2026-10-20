@@ -2,7 +2,7 @@
 # Daten: CC.mods_DataComponent 'modOvermatcher' aus Main.py
 #   {byId: {'<avatarId>': [attack, defense, detail]}, byName: {'<spielername>': [...]}}
 #   detail = [ich->ziel bug, mitte, deck, ziel->ich bug, mitte, deck], je 1/0/-1
-# Alt gedrueckt: Detailansicht statt Granate/Schild.
+# Granate/Schild sind immer sichtbar; mit Alt erscheint die Detailansicht darunter.
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
 # Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red}.png, 19x19 wie PenCalc.
@@ -15,7 +15,9 @@
 	# Abstand zwischen Granate und Schild
 	gap: 10,
 	# Spaltenbreite der Detailansicht (Alt)
-	detailColumn: 62
+	detailColumn: 62,
+	# Abstand der Detailansicht unter den Icons
+	detailOffsetY: 28
 })
 
 (def constant OVERMATCHER_COMPONENT_KEY 'modOvermatcher')
@@ -105,7 +107,7 @@
 	)
 
 	(hblock
-		(bind visible "hasVerdict && !(altVision && hasDetail)")
+		(bind visible "hasVerdict")
 		(style
 			(position = "absolute")
 			(bind left "OVERMATCHER_SETTINGS.offsetX")
@@ -120,7 +122,7 @@
 		(style
 			(position = "absolute")
 			(bind left "OVERMATCHER_SETTINGS.offsetX")
-			(bind top "OVERMATCHER_SETTINGS.offsetY")
+			(bind top "OVERMATCHER_SETTINGS.offsetY + OVERMATCHER_SETTINGS.detailOffsetY")
 		)
 		(element OvermatcherDetailHeader)
 		(element OvermatcherDetailRow _label="'Granate'" _bow="detail[0]" _mid="detail[1]" _deck="detail[2]" _isDefense=false)
