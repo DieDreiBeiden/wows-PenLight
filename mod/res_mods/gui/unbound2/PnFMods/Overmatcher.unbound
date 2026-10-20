@@ -7,8 +7,8 @@
 # (solange das Fadenkreuz sichtbar ist). Ampelfarben nur mit aufgeschaltetem, bewertetem Ziel,
 # sonst grau (kein Ziel, Zerstoerer/Flugzeugtraeger/U-Boot, keine Daten).
 # Solange Alt gedrueckt ist und eine Bewertung vorliegt, ersetzen die beschrifteten Detail-Schiffe die Symbole:
-# "TARGET" (Ziel, ich -> Ziel, an der Stelle der Granate) | "ME" (eigenes Schiff, Ziel -> ich,
-# an der Stelle des Schilds).
+# untereinander oben "TARGET" (Ziel, ich -> Ziel) und darunter "ME" (eigenes Schiff, Ziel -> ich),
+# linke obere Ecke an der Stelle der Symbole.
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
 # Alt-Ansicht (Prototyp): Spiel-Silhouetten img://gui/ship_bars/<shortName>_h.png in vier Sektionen
@@ -29,8 +29,8 @@
 	iconGap: 4,
 	# Groesse von Granate/Schild (Icons werden so erzeugt, tools/make_ampel_icons.py)
 	iconSize: 29,
-	# Abstand zwischen den beiden Detail-Schiffen (Alt)
-	shipGap: 8,
+	# senkrechter Abstand zwischen den beiden Detail-Schiffen (Alt, Target oben, Me unten)
+	shipGap: 4,
 	# Groesse der Detail-Schiffe (Bilder werden in dieser Groesse erzeugt, tools/make_detail_icons.py)
 	detailWidth: 125,
 	detailHeight: 75,
@@ -53,10 +53,11 @@
 	# dunkle Fuge zwischen den Sektionen (Anteil der Breite bzw. Hoehe)
 	zoneGap: 0.01,
 	zoneGapY: 0.03,
-	labelWidth: 70,
-	labelHeight: 16,
+	# Beschriftung (label_*.png, tools/make_detail_icons.py): Mini-Icon + Text mittig, Breite = silhouetteWidth
+	labelWidth: 186,
+	labelHeight: 24,
 	# die Bilder haben oben freien Raum; Beschriftung so weit in die Bildflaeche ziehen
-	labelOverlap: 6
+	labelOverlap: 8
 })
 
 # Einfaerbung der Silhouetten: Multiplikator 0 + Offset = Vollfarbe, Alpha bleibt (Form der Silhouette).
@@ -203,15 +204,15 @@
 			(element OvermatcherIcon _url="defenseIcon")
 		)
 		# absolut an derselben Stelle wie die Symbole, damit nichts springt
-		(hblock
+		(block
 			(bind visible "showDetail && !showSilhouettes")
 			(style (position = "absolute") (left = 0) (top = 0))
-			# links Target (gehoert zur Granate), rechts Me (gehoert zum Schild)
+			# untereinander: oben Target (gehoert zur Granate), unten Me (gehoert zum Schild)
 			(element OvermatcherShip _url="attackDetail")
 			(element OvermatcherShip _url="defenseDetail")
 		)
 		# Prototyp: dieselbe Stelle, Spiel-Silhouetten statt gezeichneter Schiffe
-		(hblock
+		(block
 			(bind visible "showSilhouettes")
 			(style (position = "absolute") (left = 0) (top = 0))
 			(element OvermatcherSilhouetteShip _shortName="targetShortName" _label="OVERMATCHER_ICON_PATH + 'label_target.png'"
@@ -229,7 +230,7 @@
 	(style
 		(bind width "OVERMATCHER_SETTINGS.detailWidth")
 		(bind height "OVERMATCHER_SETTINGS.detailHeight")
-		(bind marginRight "OVERMATCHER_SETTINGS.shipGap")
+		(bind marginBottom "OVERMATCHER_SETTINGS.shipGap")
 	)
 	(block
 		(bind visible "_url != ''")
@@ -255,7 +256,7 @@
 	)
 	(style
 		(bind width "s.silhouetteWidth")
-		(bind marginRight "s.shipGap")
+		(bind marginBottom "s.shipGap")
 	)
 	(block
 		(style

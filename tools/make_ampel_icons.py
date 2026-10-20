@@ -33,6 +33,8 @@ OUTLINE = (24, 26, 28)
 METAL = (168, 172, 176)
 GUIDE_RING = (92, 94, 98)
 LIGHT = (212, 214, 216)
+SHELL_SCALE = 1.28
+SHELL_SHIFT = 0.03  # Granate liegt sonst etwas links oben (Heck kuerzer als Spitze)
 
 
 def _grid():
@@ -65,8 +67,9 @@ def _outlined(rgb, alpha, px=1.1):
 
 def shell(color):
     x, y = _grid()
-    u = ((x - 0.5) + (y - 0.5)) / np.sqrt(2)    # entlang der Achse, Spitze bei +u
-    v = (-(x - 0.5) + (y - 0.5)) / np.sqrt(2)   # quer zur Achse
+    # SHELL_SCALE: gleiche Hoehe wie der Schild (sichtbar ~28 von 29 px)
+    u = ((x - 0.5 - SHELL_SHIFT) + (y - 0.5 - SHELL_SHIFT)) / np.sqrt(2) / SHELL_SCALE    # entlang der Achse, Spitze bei +u
+    v = (-(x - 0.5 - SHELL_SHIFT) + (y - 0.5 - SHELL_SHIFT)) / np.sqrt(2) / SHELL_SCALE   # quer zur Achse
     r, tail, ogive, tip = 0.15, -0.40, 0.12, 0.43
     t = np.clip((u - ogive) / (tip - ogive), 0, 1)
     radius = np.where(u < ogive, r, r * np.sqrt(np.clip(1 - t ** 1.6, 0, 1)))

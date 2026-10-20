@@ -125,16 +125,34 @@ def render(key, combo):
     return img.reduce(SUPERSAMPLE)
 
 
-LABEL_IMAGE = (70, 16)  # nur Mini-Icon + Beschriftung, fuer die Silhouetten-Ansicht
+# Beschriftung der Silhouetten-Ansicht: Mini-Icon + Text, waagerecht mittig ueber der
+# Silhouette (Breite wie silhouetteWidth in Overmatcher.unbound), beide senkrecht mittig.
+# Der Text wird direkt in Zielgroesse gezeichnet (FreeType-Hinting) statt verkleinert -> scharf.
+LABEL_IMAGE = (186, 24)
+LABEL_TEXT_SIZE = 13      # 1,5 x 8,5 px
+LABEL_ICON = 14           # Kantenlaenge Mini-Icon, passend zur Versalhoehe des Texts
+LABEL_ICON_GAP = 4
 
 
 def render_label(key):
     """Mini-Icon + Beschriftung allein (Silhouetten-Ansicht: Schiff kommt aus dem Spiel)."""
     text, kind = LABELS[key]
-    img = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    img.alpha_composite(_mini_icon(kind), (2 * SUPERSAMPLE, 1 * SUPERSAMPLE))
-    img.alpha_composite(_label(text))
-    return img.crop((0, 0, LABEL_IMAGE[0] * SUPERSAMPLE, LABEL_IMAGE[1] * SUPERSAMPLE)).reduce(SUPERSAMPLE)
+    w, h = LABEL_IMAGE
+    font = ImageFont.truetype(LABEL_FONT, LABEL_TEXT_SIZE)
+    box = font.getbbox(text, anchor='ls')     # Versalien: Oberkante bis Grundlinie
+    text_w, cap_h = box[2] - box[0], -box[1]
+    total = LABEL_ICON + LABEL_ICON_GAP + text_w
+    x0 = (w - total) // 2
+    img = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    draw = icons.shell if kind == 'shell' else icons.shield
+    icon = draw(icons.NEUTRAL['grey']).resize((LABEL_ICON * SUPERSAMPLE,) * 2, Image.LANCZOS).reduce(SUPERSAMPLE)
+    img.alpha_composite(icon, (x0, (h - LABEL_ICON) // 2))
+    baseline = (h + cap_h) // 2
+    tx = x0 + LABEL_ICON + LABEL_ICON_GAP - box[0]
+    d = ImageDraw.Draw(img)
+    d.text((tx + 1, baseline + 1), text, font=font, fill=(10, 12, 14, 200), anchor='ls')  # harter Schatten
+    d.text((tx, baseline), text, font=font, fill=LABEL_COLOR + (255,), anchor='ls')
+    return img
 
 
 def main():

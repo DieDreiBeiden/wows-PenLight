@@ -37,8 +37,8 @@ Layout (rechts unter dem Fadenkreuz, linke obere Ecke Standard x +30, y +8):
 - ohne Alt: Granate | Schild (29×29) kompakt, 4 px Abstand, immer sichtbar (solange das
   Fadenkreuz sichtbar ist); Ampelfarben nur bei aufgeschaltetem, bewertetem Ziel, sonst grau
   (kein Ziel, Zerstörer/Träger/U-Boot, keine Daten)
-- mit Alt (nur mit Bewertung, sonst bleiben die grauen Symbole): die Symbole werden ausgeblendet, an ihrer Stelle zwei Schiffe (125×75, 8 px
-  Abstand), freistehend ohne Hintergrund, Rumpf metallisch grau mit dunkler Kontur wie die
+- mit Alt (nur mit Bewertung, sonst bleiben die grauen Symbole): die Symbole werden ausgeblendet, an ihrer Stelle zwei Schiffe untereinander
+  (oben Target, unten Me; 125×75, 4 px Abstand), freistehend ohne Hintergrund, Rumpf metallisch grau mit dunkler Kontur wie die
   Icons; oben links graue Mini-Granate + „TARGET“ = Ziel (ich → Ziel, unter der Granate) bzw.
   Mini-Schild + „ME“ = eigenes Schiff (Ziel → ich, unter dem Schild); 16 Bilder
   `detail_<me|target>_<b>_<m>_<d>.png`, Schrift DejaVu Sans Bold 8,5 px (freie Lizenz);
@@ -51,7 +51,8 @@ Ziel über `vehicleInfo.shipInfoEntityId`). Lagen mit Maske + `colorTransform`: 
 0–22 %, Mitte 22–78 %, Bug 78–100 % der Bildbreite (Näherung, für alle Schiffe gleich);
 Deck = alles oberhalb der Decklinie (`deckLine` 0,71 der Bildhöhe, gemessen an Rhode Island,
 Vermont, Trento; der erste Prototyp mit Balken über der Silhouette passte optisch nicht).
-Beschriftung `label_<target|me>.png`. Ohne Silhouetten-Namen gelten die `detail_*.png`.
+Beschriftung `label_<target|me>.png` (186×24, Mini-Icon 14 px + Text 13 px mittig, Text in
+Zielgröße gezeichnet für Schärfe). Granate auf Schildhöhe skaliert (`SHELL_SCALE`). Ohne Silhouetten-Namen gelten die `detail_*.png`.
 Die Silhouetten werden nicht mitgeliefert (Spieldateien), passen also nach jedem Patch.
 PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
 
