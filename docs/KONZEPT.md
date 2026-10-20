@@ -33,9 +33,12 @@ der Beplankung, nicht Zitadellentreffer.
 
 ## Detailansicht (Alt gedrückt)
 
-Layout: zwei Spalten rechts knapp unter dem Fadenkreuz (Standard x +30, y +8 px),
-Granate | Schild, immer sichtbar. Mit Alt erscheint darunter eine zweite Zeile mit zwei Schiffen
-(125×75, ich → Ziel bzw. Ziel → ich) mit Bug/Heck, Mitte, Deck grün/rot = gut/schlecht für mich.
+Layout: zwei Spalten à 125 px (Abstand 8 px) rechts unter dem Fadenkreuz, linke obere Ecke
+Standard x +30, y +8 relativ zur Mitte. Oben je Spalte das Symbol (29×29, mittig), immer
+sichtbar; bei Alt darunter (4 px Abstand) das Schiff (125×75): links ich → Ziel, rechts
+Ziel → ich, Bug/Heck, Mitte, Deck grün/rot = gut/schlecht für mich. Die Spaltenbreite gilt
+auch ohne Alt, damit nichts verrutscht; x ≥ 30 hält die Schiffe von der senkrechten
+Fadenkreuzlinie fern.
 PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
 
 Position im Spiel per Ziehen über TTaroModUtils (wie BuildViewer): eigenes Schema

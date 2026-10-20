@@ -2,8 +2,9 @@
 # Daten: CC.mods_DataComponent 'modOvermatcher' aus Main.py
 #   {byId: {'<avatarId>': [attack, defense, detail, attackImage, defenseImage]}, byName: {...}}
 #   attackImage/defenseImage = Detail-Bild ohne .png (detail_<bugheck>_<mitte>_<deck>), '' = keine Daten
-# Layout rechts neben dem Fadenkreuz: Zeile 1 Granate | Schild (immer), Zeile 2 bei Alt die
-# beiden Detail-Schiffe (ich -> Ziel | Ziel -> ich).
+# Layout rechts neben dem Fadenkreuz: zwei Spalten je detailWidth breit, oben das Symbol
+# (mittig), darunter bei Alt das Detail-Schiff (links ich -> Ziel, rechts Ziel -> ich).
+# Die Spaltenbreite gilt auch ohne Alt, damit beim Druecken nichts verrutscht.
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
 # Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red}.png, 29x29 (Originale 19x19 in assets/).
@@ -13,16 +14,17 @@
 
 # Einstellungen
 (def constant OVERMATCHER_SETTINGS {
-	# Rueckfall-Position, solange TTaroModUtils keine Position liefert:
-	# Abstand zur Bildschirmmitte in Pixeln (x: + = rechts, y: + = unten)
+	# Rueckfall-Position (linke obere Ecke der Anzeige), solange TTaroModUtils keine liefert:
+	# Abstand zur Bildschirmmitte in Pixeln (x: + = rechts, y: + = unten). x >= 30 haelt die
+	# Detail-Schiffe von der senkrechten Fadenkreuzlinie fern.
 	offsetX: 30,
 	offsetY: 8,
 	# Abstand zwischen den Spalten Granate | Schild
-	gap: 6,
+	gap: 8,
 	# Groesse von Granate/Schild (Icons werden so erzeugt, tools/make_ampel_icons.py)
 	iconSize: 29,
-	# Abstand zwischen Symbolzeile und Detail-Schiffen (Alt)
-	detailGap: 3,
+	# Abstand zwischen Symbol und Detail-Schiff (Alt)
+	detailGap: 4,
 	# Groesse der Detail-Schiffe (Bilder werden in dieser Groesse erzeugt, tools/make_detail_icons.py)
 	detailWidth: 125,
 	detailHeight: 75
@@ -136,33 +138,35 @@
 			(macro TT_DRAGGABLE _fullKey="OVERMATCHER_PREF_POSITION" _isDragEnabled="!isPositionLocked")
 		)
 		(hblock
-			(element OvermatcherIcon _url="attackIcon")
-			(element OvermatcherIcon _url="defenseIcon")
-		)
-		(hblock
-			(bind visible "altVision")
-			(style (bind marginTop "OVERMATCHER_SETTINGS.detailGap"))
-			(element OvermatcherShip _url="attackDetail")
-			(element OvermatcherShip _url="defenseDetail")
+			(element OvermatcherColumn _icon="attackIcon" _ship="attackDetail" _showDetail="altVision")
+			(element OvermatcherColumn _icon="defenseIcon" _ship="defenseDetail" _showDetail="altVision")
 		)
 	)
 )
 
-# Detail-Schiff in der Farbkombination; Farbe immer "gut fuer mich" (Python waehlt das Bild).
-# Leeres _url (keine Daten) -> Platz bleibt frei, damit die zweite Spalte nicht verrutscht.
-(def element OvermatcherShip(_url:str) layout=true
+# Spalte: Symbol mittig, darunter bei Alt das Detail-Schiff in der Farbkombination.
+# Farbe immer "gut fuer mich" (Python waehlt das Bild). Leeres _ship (keine Daten) -> Platz bleibt.
+(def element OvermatcherColumn(_icon:str, _ship:str, _showDetail:bool) layout=true
 	(style
 		(bind width "OVERMATCHER_SETTINGS.detailWidth")
-		(bind height "OVERMATCHER_SETTINGS.detailHeight")
 		(bind marginRight "OVERMATCHER_SETTINGS.gap")
 	)
+	(element OvermatcherIcon _url="_icon")
 	(block
-		(bind visible "_url != ''")
+		(bind visible "_showDetail")
 		(style
-			(bind backgroundImage "_url")
+			(bind marginTop "OVERMATCHER_SETTINGS.detailGap")
 			(bind width "OVERMATCHER_SETTINGS.detailWidth")
 			(bind height "OVERMATCHER_SETTINGS.detailHeight")
-			(backgroundSize = "fill")
+		)
+		(block
+			(bind visible "_ship != ''")
+			(style
+				(bind backgroundImage "_ship")
+				(bind width "OVERMATCHER_SETTINGS.detailWidth")
+				(bind height "OVERMATCHER_SETTINGS.detailHeight")
+				(backgroundSize = "fill")
+			)
 		)
 	)
 )
@@ -172,7 +176,8 @@
 		(bind backgroundImage "_url")
 		(bind width "OVERMATCHER_SETTINGS.iconSize") (bind height "OVERMATCHER_SETTINGS.iconSize")
 		(backgroundSize = "fill")
-		(bind marginRight "OVERMATCHER_SETTINGS.gap")
+		# mittig in der Spalte
+		(bind marginLeft "(OVERMATCHER_SETTINGS.detailWidth - OVERMATCHER_SETTINGS.iconSize) / 2")
 	)
 )
 
