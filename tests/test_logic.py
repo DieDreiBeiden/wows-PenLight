@@ -40,14 +40,15 @@ class Colors(unittest.TestCase):
         self.assertEqual(attack_color(406, self.NEW_ORLEANS_LIKE), GREEN)
 
     def test_defense(self):
-        self.assertEqual(defense_color(460, self.THUNDERER), RED)
+        # gleiche Farben wie die Granate: Gruen = Gegner overmatcht mich
+        self.assertEqual(defense_color(460, self.THUNDERER), GREEN)
         self.assertEqual(defense_color(460, self.HAWAII), YELLOW)
-        self.assertEqual(defense_color(457, self.THUNDERER), GREEN)
+        self.assertEqual(defense_color(457, self.THUNDERER), RED)
 
     def test_deck_only_counts_as_nothing(self):
         ship = {'bow': 32.0, 'mid': 32.0, 'deck': 30.0}
         self.assertEqual(attack_color(457, ship), RED)
-        self.assertEqual(defense_color(457, ship), GREEN)
+        self.assertEqual(defense_color(457, ship), RED)
 
     def test_missing_mid_uses_bow_and_deck(self):
         self.assertEqual(attack_color(460, {'bow': 32.0, 'mid': None, 'deck': 32.0}), GREEN)
@@ -62,8 +63,8 @@ class Detail(unittest.TestCase):
 
     def test_icons(self):
         # ich overmatche Bug, nicht Mitte/Deck; Gegner overmatcht Bug+Mitte bei mir
-        self.assertEqual(detail_icons([1, 0, 0, 1, 1, 0]), ('detail_target_g_r_r', 'detail_me_r_r_g'))
-        self.assertEqual(detail_icons([0, -1, 0, 0, 0, 0]), ('', 'detail_me_g_g_g'))
+        self.assertEqual(detail_icons([1, 0, 0, 1, 1, 0]), ('detail_target_g_r_r', 'detail_me_g_g_r'))
+        self.assertEqual(detail_icons([0, -1, 0, 0, 0, 0]), ('', 'detail_me_r_r_r'))
 
     def test_unknown_zone(self):
         self.assertEqual(zone_detail(460, {'bow': 27.0, 'mid': None, 'deck': 36.0}), [1, -1, 0])
@@ -84,9 +85,9 @@ class Filter(unittest.TestCase):
         large = self.ship('Cruiser', 305, 27, 30)
         light = self.ship('Cruiser', 152, 16, 16)
         self.assertEqual(evaluate(large, light)['attack'], GREEN)
-        self.assertEqual(evaluate(large, light)['defense'], GREEN)
+        self.assertEqual(evaluate(large, light)['defense'], RED)
         self.assertEqual(evaluate(light, large)['attack'], RED)
-        self.assertEqual(evaluate(light, large)['defense'], RED)
+        self.assertEqual(evaluate(light, large)['defense'], GREEN)
 
     def test_battleship_vs_battleship_shown(self):
         bb = self.ship('Battleship', 460, 32, 32)

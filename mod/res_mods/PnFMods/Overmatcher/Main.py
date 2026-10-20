@@ -17,16 +17,21 @@ RED = 'red'
 RELEVANT_CLASSES = frozenset(['Cruiser', 'Battleship'])
 
 # Ampel nach Spieler-Definition (docs/KONZEPT.md, Variante B). Bug/Heck ist die
-# Grundvoraussetzung; Gruen bzw. Rot erst, wenn auch Mitte und Deck overmatcht werden.
-#   Bug/Heck  Mitte+Deck   Granate  Schild
-#   ja        beide ja     gruen    rot      ueberall durch / aktiv ausweichen
-#   ja        nicht beide  gelb     gelb     auf Bug/Heck zielen / Bug/Heck schuetzen
-#   nein      egal         rot      gruen    nur Breitseite / aggressiv anwinkeln
+# Grundvoraussetzung; Gruen erst, wenn auch Mitte und Deck overmatcht werden.
+# Farben bedeuten fuer Granate und Schild dasselbe: Gruen = Overmatch, Rot = kein Overmatch
+# (Granate: ich -> Ziel, Schild: Ziel -> ich).
+#   Bug/Heck  Mitte+Deck   Farbe
+#   ja        beide ja     gruen    ueberall Overmatch
+#   ja        nicht beide  gelb     nur Bug/Heck
+#   nein      egal         rot      kein Overmatch
 # Fehlt der Mitte-Wert, entscheiden Bug/Heck und Deck allein.
 
 
 def overmatches(caliber_mm, armor_mm):
     return caliber_mm > armor_mm * OVERMATCH_RATIO
+
+
+LEVEL_COLORS = (RED, YELLOW, GREEN)
 
 
 def _level(caliber_mm, ship):
@@ -39,12 +44,12 @@ def _level(caliber_mm, ship):
 
 def attack_color(my_caliber_mm, target):
     """Granate: kann ich das Ziel overmatchen? target: dict mit 'bow', 'deck', optional 'mid'."""
-    return (RED, YELLOW, GREEN)[_level(my_caliber_mm, target)]
+    return LEVEL_COLORS[_level(my_caliber_mm, target)]
 
 
 def defense_color(enemy_caliber_mm, me):
-    """Schild: kann der Gegner mich overmatchen?"""
-    return (GREEN, YELLOW, RED)[_level(enemy_caliber_mm, me)]
+    """Schild: kann der Gegner mich overmatchen? Gruen = ja (gleiche Farben wie die Granate)."""
+    return LEVEL_COLORS[_level(enemy_caliber_mm, me)]
 
 
 def is_relevant(my_class, enemy_class):
@@ -63,16 +68,15 @@ def zone_detail(caliber_mm, ship):
 def detail_icons(detail):
     """Bildnamen der Detailansicht (ohne .png) fuer [ich->ziel..., ziel->ich...].
 
-    Farbe = gut fuer mich: Granate g bei Overmatch, Schild r bei Overmatch.
+    Farbe wie die Ampel: g = Overmatch, r = kein Overmatch (Target und Me gleich).
     Fehlt eine Zone (-1), wird fuer diese Zeile kein Bild angezeigt ('').
     """
-    def name(prefix, values, overmatch_letter):
+    def name(prefix, values):
         if -1 in values:
             return ''
-        other = 'r' if overmatch_letter == 'g' else 'g'
-        return prefix + '_'.join(overmatch_letter if v else other for v in values)
+        return prefix + '_'.join('g' if v else 'r' for v in values)
     # Granate = Ziel ("Target"), Schild = eigenes Schiff ("Me"); Bilder sind beschriftet
-    return name('detail_target_', detail[:3], 'g'), name('detail_me_', detail[3:], 'r')
+    return name('detail_target_', detail[:3]), name('detail_me_', detail[3:])
 
 
 def evaluate(me, enemy):

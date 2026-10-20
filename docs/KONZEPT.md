@@ -13,14 +13,16 @@ Auf einen Blick erkennen, ob AP-Granaten Bug/Heck bzw. Deck overmatchen:
 Overmatch: `Kaliber > 14,3 × Plattendicke` (Gleichstand = kein Overmatch).
 Bug und Heck werden als gleich dick behandelt (ein Wert „bow“).
 
-Variante B (vom Nutzer gewählt): Bug/Heck ist Grundvoraussetzung, Grün bzw. Rot erst,
-wenn auch Mitte **und** Deck overmatcht werden.
+Variante B (vom Nutzer gewählt): Bug/Heck ist Grundvoraussetzung, Grün erst, wenn auch
+Mitte **und** Deck overmatcht werden. Die Farben bedeuten für Granate (ich → Ziel) und
+Schild (Ziel → ich) dasselbe: Grün = Overmatch, Rot = kein Overmatch (geändert vom Nutzer;
+vorher war der Schild „gut für mich“ gefärbt, also umgekehrt).
 
-| Bug/Heck | Mitte und Deck | Granate | Schild |
-|---|---|---|---|
-| ja | beide ja | Grün – überall durch, auch gewinkelt | Rot – aktiv ausweichen |
-| ja | nicht beide | Gelb – gezielt auf Bug/Heck | Gelb – Bug/Heck schützen, auf Distanz Panzerung nutzen |
-| nein | egal | Rot – nur Breitseite | Grün – aggressiv anwinkeln |
+| Bug/Heck | Mitte und Deck | Farbe | Granate | Schild |
+|---|---|---|---|---|
+| ja | beide ja | Grün | überall durch, auch gewinkelt | Gegner kommt überall durch – aktiv ausweichen |
+| ja | nicht beide | Gelb | gezielt auf Bug/Heck | Bug/Heck schützen, auf Distanz Panzerung nutzen |
+| nein | egal | Rot | nur Breitseite | aggressiv anwinkeln |
 
 Mitte = dünnste Seitenplatte mittschiffs (`Cas_Belt`, `SSC_ConstrSide`). Fehlt der Wert,
 entscheiden Bug/Heck und Deck allein.
@@ -42,7 +44,8 @@ Layout (rechts unter dem Fadenkreuz, linke obere Ecke Standard x +30, y +8):
   Icons; oben links graue Mini-Granate + „TARGET“ = Ziel (ich → Ziel, unter der Granate) bzw.
   Mini-Schild + „ME“ = eigenes Schiff (Ziel → ich, unter dem Schild); 16 Bilder
   `detail_<me|target>_<b>_<m>_<d>.png`, Schrift DejaVu Sans Bold 8,5 px (freie Lizenz);
-  Bug/Heck, Mitte, Deck grün/rot = gut/schlecht für mich. Die Schiffszeile liegt absolut an
+  Bug/Heck, Mitte, Deck grün/rot = Overmatch/kein Overmatch, für Target und Me gleich.
+  Die Mini-Icons der Beschriftung tragen die Ampelfarbe von Granate bzw. Schild. Die Schiffszeile liegt absolut an
   der Position der Symbole, damit nichts springt.
 Prototyp Silhouetten (`useSilhouettes` in `OVERMATCHER_SETTINGS`, Standard an): statt der
 gezeichneten Schiffe die Spiel-Silhouetten `img://gui/ship_bars/<shortName>_h.png` (wie der
@@ -51,7 +54,7 @@ Ziel über `vehicleInfo.shipInfoEntityId`). Lagen mit Maske + `colorTransform`: 
 0–22 %, Mitte 22–78 %, Bug 78–100 % der Bildbreite (Näherung, für alle Schiffe gleich);
 Deck = alles oberhalb der Decklinie (`deckLine` 0,71 der Bildhöhe, gemessen an Rhode Island,
 Vermont, Trento; der erste Prototyp mit Balken über der Silhouette passte optisch nicht).
-Beschriftung `label_<target|me>.png` (186×24, Mini-Icon 14 px + Text 13 px mittig, Text in
+Beschriftung `label_<target|me>_<farbe>.png` (186×24, Mini-Icon 14 px + Text 13 px mittig, Text in
 Zielgröße gezeichnet für Schärfe). Granate auf Schildhöhe skaliert (`SHELL_SCALE`).
 Unter jeder Silhouette der Schiffsname in der Spielschrift (`$TextDefaultBold13NM`,
 `toUpper(tr(ship.nameIDS))` wie im Spiel-Lebensbalken), mittig. Ohne Silhouetten-Namen gelten die `detail_*.png`.

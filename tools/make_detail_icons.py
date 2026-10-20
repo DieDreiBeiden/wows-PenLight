@@ -6,12 +6,13 @@
 Freistehendes Schiff (Seitenansicht, Bug rechts) ohne Hintergrund: Rumpf und Aufbauten
 metallisch grau wie die Granate, dunkle Kontur und weicher Schatten. Sektionen
 Bug/Heck, Mitte (unten mittig) und Deck (oberer Rumpfstreifen) in Gruen/Rot
-(= gut/schlecht fuer mich, Farben wie make_ampel_icons.AMPEL). Oben links die graue
+(= Overmatch / kein Overmatch, fuer Target und Me gleich; Farben wie make_ampel_icons.AMPEL). Oben links die graue
 Mini-Granate (Target) bzw. der Mini-Schild (Me) mit Beschriftung "TARGET"/"ME".
 Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
 Das fruehere Grund-Icon assets/detail_ship_source.png wird nicht mehr verwendet.
 Ausgabe: mod/res_mods/PnFMods/Overmatcher/detail_<me|target>_<bugheck>_<mitte>_<deck>.png (g/r)
-und label_<me|target>.png (nur Mini-Icon + Beschriftung, fuer die Silhouetten-Ansicht).
+und label_<me|target>_<green|yellow|red|grey>.png (Mini-Icon in Ampelfarbe + Beschriftung,
+fuer die Silhouetten-Ansicht).
 """
 import itertools
 import os
@@ -134,7 +135,7 @@ LABEL_ICON = 14           # Kantenlaenge Mini-Icon, passend zur Versalhoehe des 
 LABEL_ICON_GAP = 4
 
 
-def render_label(key):
+def render_label(key, color):
     """Mini-Icon + Beschriftung allein (Silhouetten-Ansicht: Schiff kommt aus dem Spiel)."""
     text, kind = LABELS[key]
     w, h = LABEL_IMAGE
@@ -145,7 +146,7 @@ def render_label(key):
     x0 = (w - total) // 2
     img = Image.new('RGBA', (w, h), (0, 0, 0, 0))
     draw = icons.shell if kind == 'shell' else icons.shield
-    icon = draw(icons.NEUTRAL['grey']).resize((LABEL_ICON * SUPERSAMPLE,) * 2, Image.LANCZOS).reduce(SUPERSAMPLE)
+    icon = draw(color).resize((LABEL_ICON * SUPERSAMPLE,) * 2, Image.LANCZOS).reduce(SUPERSAMPLE)
     img.alpha_composite(icon, (x0, (h - LABEL_ICON) // 2))
     baseline = (h + cap_h) // 2
     tx = x0 + LABEL_ICON + LABEL_ICON_GAP - box[0]
@@ -158,9 +159,11 @@ def render_label(key):
 def main():
     written = []
     for key in sorted(LABELS):
-        name = 'label_%s.png' % key
-        render_label(key).save(os.path.join(TARGET_DIR, name))
-        written.append(name)
+        # Mini-Icon in der Ampelfarbe der Granate (Target) bzw. des Schilds (Me)
+        for state, color in list(icons.AMPEL.items()) + list(icons.NEUTRAL.items()):
+            name = 'label_%s_%s.png' % (key, state)
+            render_label(key, color).save(os.path.join(TARGET_DIR, name))
+            written.append(name)
     for key in sorted(LABELS):
         for combo in itertools.product('gr', repeat=3):
             name = 'detail_%s_%s.png' % (key, '_'.join(combo))

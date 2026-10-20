@@ -79,28 +79,28 @@ class ModTest(unittest.TestCase):
     def test_cruiser_vs_mixed_enemies(self):
         lines = self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PBSC110_Minotaur', 'PASD013_Gearing'])
         self.assertEqual(lines, [
-            'PBSC110_Minotaur attack=red defense=green',
+            'PBSC110_Minotaur attack=red defense=red',
             'PJSB018_Yamato_1944 attack=red defense=yellow',  # 460 > 27 Bug, < 36 Deck
         ])
 
     def test_large_cruiser_overmatches_minotaur(self):
         lines = self.run_mod('PASC510_Alaska', ['PBSC110_Minotaur'])
-        self.assertEqual(lines, ['PBSC110_Minotaur attack=green defense=green'])
+        self.assertEqual(lines, ['PBSC110_Minotaur attack=green defense=red'])
 
     def test_ui_payload_for_unbound(self):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PASD013_Gearing'])
         self.assertEqual(self.ui_data[0], ('modOvermatcher', {'byId': {}, 'byName': {}}))
         self.assertEqual(self.ui_data[-1], ('update', {
             # Detail: ich->Ziel [Bug, Mitte, Deck], Ziel->ich [Bug, Mitte, Deck]
-            'byId': {'10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_r_r_g']},
-            'byName': {'bot10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_r_r_g']},
+            'byId': {'10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r']},
+            'byName': {'bot10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r']},
         }))
 
     def test_missing_mid_is_unknown(self):
         self.run_mod('PASC720_Hawaii', ['PBSC110_Minotaur'])  # Minotaur ohne Mitte-Wert
         entry = self.ui_data[-1][1]['byId']['10']
         self.assertEqual(entry[2], [0, -1, 0, 0, 0, 0])
-        self.assertEqual(entry[3:], ['', 'detail_me_g_g_g'])  # Granate ohne Bild, Schild alles sicher
+        self.assertEqual(entry[3:], ['', 'detail_me_r_r_r'])  # Granate ohne Bild, Schild: nirgends Overmatch
 
     def test_version_mismatch_disables(self):
         lines = self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'], data_version='15,8,0,1')

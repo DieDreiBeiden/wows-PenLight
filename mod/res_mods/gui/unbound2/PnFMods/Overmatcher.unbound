@@ -168,14 +168,17 @@
 		(var showSilhouettes:bool = "showDetail && OVERMATCHER_SETTINGS.useSilhouettes && targetShortName != '' && ownShortName != ''")
 
 		# Sektionsfarben: detail = [ich->Ziel Bug, Mitte, Deck, Ziel->ich Bug, Mitte, Deck], 1/0/-1
-		# Target gruen bei Overmatch (gut fuer mich), Me rot bei Overmatch.
+		# fuer Target und Me gleich: gruen = Overmatch, rot = kein Overmatch, grau = keine Daten.
 		(var detail:array = "verdict.length >= 3 && verdict[2].length >= 6 ? verdict[2] : [-1, -1, -1, -1, -1, -1]")
 		(var tBow:str = "detail[0] == 1 ? 'green' : (detail[0] == 0 ? 'red' : 'grey')")
 		(var tMid:str = "detail[1] == 1 ? 'green' : (detail[1] == 0 ? 'red' : 'grey')")
 		(var tDeck:str = "detail[2] == 1 ? 'green' : (detail[2] == 0 ? 'red' : 'grey')")
-		(var mBow:str = "detail[3] == 1 ? 'red' : (detail[3] == 0 ? 'green' : 'grey')")
-		(var mMid:str = "detail[4] == 1 ? 'red' : (detail[4] == 0 ? 'green' : 'grey')")
-		(var mDeck:str = "detail[5] == 1 ? 'red' : (detail[5] == 0 ? 'green' : 'grey')")
+		(var mBow:str = "detail[3] == 1 ? 'green' : (detail[3] == 0 ? 'red' : 'grey')")
+		(var mMid:str = "detail[4] == 1 ? 'green' : (detail[4] == 0 ? 'red' : 'grey')")
+		(var mDeck:str = "detail[5] == 1 ? 'green' : (detail[5] == 0 ? 'red' : 'grey')")
+		# Mini-Icons der Beschriftung in der Ampelfarbe von Granate bzw. Schild
+		(var targetLabel:str = "OVERMATCHER_ICON_PATH + 'label_target_' + (hasVerdict ? verdict[0] : 'grey') + '.png'")
+		(var ownLabel:str = "OVERMATCHER_ICON_PATH + 'label_me_' + (hasVerdict ? verdict[1] : 'grey') + '.png'")
 	)
 
 	(controller $Repeat renderer='OvermatcherTargetTracker'
@@ -219,16 +222,16 @@
 		(block
 			(bind visible "showSilhouettes")
 			(style (position = "absolute") (left = 0) (top = 0))
-			(element OvermatcherSilhouetteShip _shortName="targetShortName" _label="OVERMATCHER_ICON_PATH + 'label_target.png'" _nameIDS="targetNameIDS"
+			(element OvermatcherSilhouetteShip _shortName="targetShortName" _label="targetLabel" _nameIDS="targetNameIDS"
 				_bow="tBow" _mid="tMid" _deck="tDeck")
-			(element OvermatcherSilhouetteShip _shortName="ownShortName" _label="OVERMATCHER_ICON_PATH + 'label_me.png'" _nameIDS="ownNameIDS"
+			(element OvermatcherSilhouetteShip _shortName="ownShortName" _label="ownLabel" _nameIDS="ownNameIDS"
 				_bow="mBow" _mid="mMid" _deck="mDeck")
 		)
 	)
 )
 
-# Detail-Schiff mit eingebauter Beschriftung. Farbe immer "gut fuer mich" (Python waehlt das Bild):
-# Me = eigenes Schiff (gruen = Gegner overmatcht hier nicht), Target = Ziel (gruen = ich overmatche).
+# Detail-Schiff mit eingebauter Beschriftung (Python waehlt das Bild). Gruen = Overmatch:
+# Target = Ziel (ich overmatche hier), Me = eigenes Schiff (Gegner overmatcht hier).
 # Leeres _url (keine Daten) -> Platz bleibt, damit das andere Schiff nicht verrutscht.
 (def element OvermatcherShip(_url:str) layout=true
 	(style
