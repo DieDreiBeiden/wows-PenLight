@@ -3,13 +3,15 @@
 #   {byId: {'<avatarId>': [attack, defense, detail, attackImage, defenseImage]}, byName: {...}}
 #   attackImage/defenseImage = Detail-Bild ohne .png (detail_<target|me>_<bugheck>_<mitte>_<deck>),
 #   '' = keine Daten. Die Beschriftung "Me"/"Target" ist Teil des Bildes.
-# Layout rechts neben dem Fadenkreuz: standardmaessig Granate | Schild kompakt nebeneinander;
-# solange Alt gedrueckt ist, ersetzen die beschrifteten Detail-Schiffe die Symbole:
+# Layout rechts neben dem Fadenkreuz: Granate | Schild kompakt nebeneinander, immer sichtbar
+# (solange das Fadenkreuz sichtbar ist). Ampelfarben nur mit aufgeschaltetem, bewertetem Ziel,
+# sonst grau (kein Ziel, Zerstoerer/Flugzeugtraeger/U-Boot, keine Daten).
+# Solange Alt gedrueckt ist und eine Bewertung vorliegt, ersetzen die beschrifteten Detail-Schiffe die Symbole:
 # "Target" (Ziel, ich -> Ziel, an der Stelle der Granate) | "Me" (eigenes Schiff, Ziel -> ich,
 # an der Stelle des Schilds).
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
-# Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red}.png, 29x29 (gezeichnet von tools/make_ampel_icons.py).
+# Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red,grey}.png, 29x29 (gezeichnet von tools/make_ampel_icons.py).
 # Position: per Ziehen ueber TTaroModUtils (Schema ModSchemas/diedreibeiden-overmatcher.schema.json,
 # Muster wie BuildViewer). Benoetigt TTaroModUtils (Makros TT_DRAGGABLE_POSITION/TT_DRAGGABLE/TT_GET_PREF).
 # Ohne gespeicherte Position gelten offsetX/offsetY relativ zur Bildschirmmitte.
@@ -110,8 +112,9 @@
 		# Detailansicht solange Alt gedrueckt ist (wie PenetrationCalculator)
 		(var cameraEntity:gfx = "$datahub.getSingleEntity(CC.camera)")
 		(var altVision:bool = "cameraEntity.camera.altVision" (event "cameraEntity.camera.evAltVisionChanged"))
-		(var attackIcon:str = "hasVerdict ? OVERMATCHER_ICON_PATH + 'shell_' + verdict[0] + '.png' : ''")
-		(var defenseIcon:str = "hasVerdict ? OVERMATCHER_ICON_PATH + 'shield_' + verdict[1] + '.png' : ''")
+		(var attackIcon:str = "OVERMATCHER_ICON_PATH + 'shell_' + (hasVerdict ? verdict[0] : 'grey') + '.png'")
+		(var defenseIcon:str = "OVERMATCHER_ICON_PATH + 'shield_' + (hasVerdict ? verdict[1] : 'grey') + '.png'")
+		(var showDetail:bool = "altVision && hasVerdict")
 	)
 
 	(controller $Repeat renderer='OvermatcherTargetTracker'
@@ -124,7 +127,6 @@
 	)
 
 	(block
-		(bind visible "hasVerdict")
 		(style
 			(position = "absolute")
 			(bind left "posX")
@@ -140,13 +142,13 @@
 			(macro TT_DRAGGABLE _fullKey="OVERMATCHER_PREF_POSITION" _isDragEnabled="!isPositionLocked")
 		)
 		(hblock
-			(bind visible "!altVision")
+			(bind visible "!showDetail")
 			(element OvermatcherIcon _url="attackIcon")
 			(element OvermatcherIcon _url="defenseIcon")
 		)
 		# absolut an derselben Stelle wie die Symbole, damit nichts springt
 		(hblock
-			(bind visible "altVision")
+			(bind visible "showDetail")
 			(style (position = "absolute") (left = 0) (top = 0))
 			# links Target (gehoert zur Granate), rechts Me (gehoert zum Schild)
 			(element OvermatcherShip _url="attackDetail")
