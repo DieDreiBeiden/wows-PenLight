@@ -11,7 +11,7 @@ Mini-Granate (Target) bzw. der Mini-Schild (Me) mit Beschriftung "TARGET"/"ME".
 Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
 Das fruehere Grund-Icon assets/detail_ship_source.png wird nicht mehr verwendet.
 Ausgabe: mod/res_mods/PnFMods/Overmatcher/detail_<me|target>_<bugheck>_<mitte>_<deck>.png (g/r)
-und label_<me|target>_<green|yellow|red|grey>.png (Mini-Icon in Ampelfarbe + Beschriftung,
+und label_<me|target>_[cb_]<green|yellow|red|grey>.png (Mini-Icon in Ampelfarbe + Beschriftung,
 fuer die Silhouetten-Ansicht).
 """
 import itertools
@@ -160,10 +160,11 @@ def main():
     written = []
     for key in sorted(LABELS):
         # Mini-Icon in der Ampelfarbe der Granate (Target) bzw. des Schilds (Me)
-        for state, color in list(icons.AMPEL.items()) + list(icons.NEUTRAL.items()):
-            name = 'label_%s_%s.png' % (key, state)
-            render_label(key, color).save(os.path.join(TARGET_DIR, name))
-            written.append(name)
+        for prefix, palette in sorted(icons.PALETTES.items()):
+            for state, color in palette.items():
+                name = 'label_%s_%s%s.png' % (key, prefix, state)
+                render_label(key, color).save(os.path.join(TARGET_DIR, name))
+                written.append(name)
     for key in sorted(LABELS):
         for combo in itertools.product('gr', repeat=3):
             name = 'detail_%s_%s.png' % (key, '_'.join(combo))

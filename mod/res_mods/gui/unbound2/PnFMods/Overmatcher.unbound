@@ -70,12 +70,25 @@
 	grey:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:128,greenOffset:132,blueOffset:136,alphaOffset:0 },
 	base:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:40,greenOffset:42,blueOffset:44,alphaOffset:0 }
 })
+# Farbenblind-Schema (AMPEL_CB in tools/make_ampel_icons.py): blau = Overmatch, orange = kein Overmatch
+(def constant OVERMATCHER_CT_CB {
+	green: { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:86,greenOffset:180,blueOffset:233,alphaOffset:0 },
+	red:   { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:213,greenOffset:94,blueOffset:0,alphaOffset:0 },
+	grey:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:128,greenOffset:132,blueOffset:136,alphaOffset:0 },
+	base:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:40,greenOffset:42,blueOffset:44,alphaOffset:0 }
+})
 
 (def constant OVERMATCHER_COMPONENT_KEY 'modOvermatcher')
 
 # TTaroModUtils-Schluessel = author + '.' + key aus dem Schema
 (def constant OVERMATCHER_PREF_POSITION 'diedreibeiden.overmatcher.position')
 (def constant OVERMATCHER_PREF_LOCK 'diedreibeiden.overmatcher.disableDragDrop')
+(def constant OVERMATCHER_PREF_SCALE 'diedreibeiden.overmatcher.scale')
+(def constant OVERMATCHER_PREF_SILHOUETTES 'diedreibeiden.overmatcher.useSilhouettes')
+(def constant OVERMATCHER_PREF_COLOR_MODE 'diedreibeiden.overmatcher.colorMode')
+(def constant OVERMATCHER_PREF_DETAIL_MODE 'diedreibeiden.overmatcher.detailMode')
+# Seite in TTaro Mod Config = author + '.' + slug aus dem Schema (fuer das eigene Zahnrad)
+(def constant OVERMATCHER_MOD_SLUG 'diedreibeiden.overmatcher')
 
 # Pfad relativ zu gui/unbound2/PnFMods/ (wie PenetrationCalculator)
 (def constant OVERMATCHER_ICON_PATH 'url:../../../PnFMods/Overmatcher/')
@@ -124,6 +137,19 @@
 		(var posX:number = "hasDragPosition ? dragX : stageWidth / 2 + OVERMATCHER_SETTINGS.offsetX")
 		(var posY:number = "hasDragPosition ? dragY : stageHeight / 2 + OVERMATCHER_SETTINGS.offsetY")
 
+		# Optionen aus TTaro Mod Config (Schema ModSchemas/diedreibeiden-overmatcher.schema.json)
+		(macro TT_GET_PREF _varName="'scalePref'" _key="OVERMATCHER_PREF_SCALE")
+		(var uiScale:number = "null != scalePref && null != scalePref.value ? scalePref.value : 1")
+		(macro TT_GET_PREF _varName="'silhouettePref'" _key="OVERMATCHER_PREF_SILHOUETTES")
+		(var useSilhouettes:bool = "null != silhouettePref && null != silhouettePref.value ? silhouettePref.value : OVERMATCHER_SETTINGS.useSilhouettes")
+		(macro TT_GET_PREF _varName="'colorModePref'" _key="OVERMATCHER_PREF_COLOR_MODE")
+		(var isColorBlind:bool = "null != colorModePref && null != colorModePref.value ? colorModePref.value == 1 : false")
+		(macro TT_GET_PREF _varName="'detailModePref'" _key="OVERMATCHER_PREF_DETAIL_MODE")
+		(var isDetailAlways:bool = "null != detailModePref && null != detailModePref.value ? detailModePref.value == 1 : false")
+		# Farbschema: Dateipraefix der Icons und Einfaerbung der Silhouetten
+		(var palettePrefix:str = "isColorBlind ? 'cb_' : ''")
+		(var palette:dict = "isColorBlind ? OVERMATCHER_CT_CB : OVERMATCHER_CT")
+
 		# Zielerkennung: jeder Avatar meldet per evTargetChanged, ob er aufgeschaltet ist
 		(event evTargetChanged)
 		(var enemies:gfx = "$datahub.getCollection(CC.avatar)")
@@ -149,9 +175,10 @@
 		# Detailansicht solange Alt gedrueckt ist (wie PenetrationCalculator)
 		(var cameraEntity:gfx = "$datahub.getSingleEntity(CC.camera)")
 		(var altVision:bool = "cameraEntity.camera.altVision" (event "cameraEntity.camera.evAltVisionChanged"))
-		(var attackIcon:str = "OVERMATCHER_ICON_PATH + 'shell_' + (hasVerdict ? verdict[0] : 'grey') + '.png'")
-		(var defenseIcon:str = "OVERMATCHER_ICON_PATH + 'shield_' + (hasVerdict ? verdict[1] : 'grey') + '.png'")
-		(var showDetail:bool = "altVision && hasVerdict")
+		(var attackIcon:str = "OVERMATCHER_ICON_PATH + 'shell_' + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
+		(var defenseIcon:str = "OVERMATCHER_ICON_PATH + 'shield_' + palettePrefix + (hasVerdict ? verdict[1] : 'grey') + '.png'")
+		# Option "Immer AN": Detailansicht auch ohne Alt (nur mit Bewertung, sonst graue Symbole)
+		(var showDetail:bool = "(altVision || isDetailAlways) && hasVerdict")
 
 		# Silhouetten-Namen wie im Spiel-Lebensbalken: shipInfo.ship.shortName
 		(var targetVehicleInfo:gfx = "currentTarget && currentTarget.hasComponent(CC.vehicleInfo) ? currentTarget.vehicleInfo : null" (event "evTargetChanged"))
@@ -165,7 +192,7 @@
 		(var ownShipInfo:gfx = "ownShipInfoId ? $datahub.getEntity(ownShipInfoId) : null")
 		(var ownShortName:str = "ownShipInfo ? ownShipInfo.ship.shortName : ''")
 		(var ownNameIDS:str = "ownShipInfo ? ownShipInfo.ship.nameIDS : ''")
-		(var showSilhouettes:bool = "showDetail && OVERMATCHER_SETTINGS.useSilhouettes && targetShortName != '' && ownShortName != ''")
+		(var showSilhouettes:bool = "showDetail && useSilhouettes && targetShortName != '' && ownShortName != ''")
 
 		# Sektionsfarben: detail = [ich->Ziel Bug, Mitte, Deck, Ziel->ich Bug, Mitte, Deck], 1/0/-1
 		# fuer Target und Me gleich: gruen = Overmatch, rot = kein Overmatch, grau = keine Daten.
@@ -177,8 +204,8 @@
 		(var mMid:str = "detail[4] == 1 ? 'green' : (detail[4] == 0 ? 'red' : 'grey')")
 		(var mDeck:str = "detail[5] == 1 ? 'green' : (detail[5] == 0 ? 'red' : 'grey')")
 		# Mini-Icons der Beschriftung in der Ampelfarbe von Granate bzw. Schild
-		(var targetLabel:str = "OVERMATCHER_ICON_PATH + 'label_target_' + (hasVerdict ? verdict[0] : 'grey') + '.png'")
-		(var ownLabel:str = "OVERMATCHER_ICON_PATH + 'label_me_' + (hasVerdict ? verdict[1] : 'grey') + '.png'")
+		(var targetLabel:str = "OVERMATCHER_ICON_PATH + 'label_target_' + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
+		(var ownLabel:str = "OVERMATCHER_ICON_PATH + 'label_me_' + palettePrefix + (hasVerdict ? verdict[1] : 'grey') + '.png'")
 	)
 
 	(controller $Repeat renderer='OvermatcherTargetTracker'
@@ -195,6 +222,17 @@
 			(position = "absolute")
 			(bind left "posX")
 			(bind top "posY")
+			# Option "Groessenskalierung" (um die linke obere Ecke)
+			(bind scaleX "uiScale")
+			(bind scaleY "uiScale")
+		)
+		# eigenes Zahnrad links neben der Anzeige, sichtbar bei aktivem Mauszeiger (Strg);
+		# oeffnet TTaro Mod Config direkt auf der Overmatcher-Seite (wie BuildViewer)
+		(element TT_ConfigButtonElement _modSlug="OVERMATCHER_MOD_SLUG" _tooltipAlign="outerTop|outerLeft"
+			(style
+				(left = -30px)
+				(top = 0px)
+			)
 		)
 		# Greifflaeche zum Verschieben (Mauszeiger im Gefecht z. B. per Strg), wie BuildViewer
 		(block
@@ -223,9 +261,9 @@
 			(bind visible "showSilhouettes")
 			(style (position = "absolute") (left = 0) (top = 0))
 			(element OvermatcherSilhouetteShip _shortName="targetShortName" _label="targetLabel" _nameIDS="targetNameIDS"
-				_bow="tBow" _mid="tMid" _deck="tDeck")
+				_bow="tBow" _mid="tMid" _deck="tDeck" _palette="palette")
 			(element OvermatcherSilhouetteShip _shortName="ownShortName" _label="ownLabel" _nameIDS="ownNameIDS"
-				_bow="mBow" _mid="mMid" _deck="mDeck")
+				_bow="mBow" _mid="mMid" _deck="mDeck" _palette="palette")
 		)
 	)
 )
@@ -255,7 +293,7 @@
 # Spiel-Lebensbalken: toUpper(tr(ship.nameIDS))), mittig.
 # Die Silhouette wird mehrfach uebereinander gelegt; jede Lage zeigt per Maske nur ihren
 # Bereich und wird per colorTransform eingefaerbt (Muster: OwnHealthBarValue im Spiel).
-(def element OvermatcherSilhouetteShip(_shortName:str, _label:str, _nameIDS:str, _bow:str, _mid:str, _deck:str) layout=true
+(def element OvermatcherSilhouetteShip(_shortName:str, _label:str, _nameIDS:str, _bow:str, _mid:str, _deck:str, _palette:dict) layout=true
 	(scope
 		(var s:dict = "OVERMATCHER_SETTINGS")
 		(var url:str = "'img://gui/ship_bars/' + _shortName + '_h.png'")
@@ -279,11 +317,11 @@
 			(bind width "s.silhouetteWidth")
 			(bind height "s.silhouetteHeight")
 		)
-		(element OvermatcherZone _url="url" _from="0" _to="1" _top="0" _bottom="1" _ct="OVERMATCHER_CT.base")
-		(element OvermatcherZone _url="url" _from="0" _to="1" _top="0" _bottom="s.deckLine - gapY" _ct="OVERMATCHER_CT[_deck]")
-		(element OvermatcherZone _url="url" _from="0" _to="s.sternEnd - gap" _top="s.deckLine + gapY" _bottom="1" _ct="OVERMATCHER_CT[_bow]")
-		(element OvermatcherZone _url="url" _from="s.sternEnd + gap" _to="s.bowStart - gap" _top="s.deckLine + gapY" _bottom="1" _ct="OVERMATCHER_CT[_mid]")
-		(element OvermatcherZone _url="url" _from="s.bowStart + gap" _to="1" _top="s.deckLine + gapY" _bottom="1" _ct="OVERMATCHER_CT[_bow]")
+		(element OvermatcherZone _url="url" _from="0" _to="1" _top="0" _bottom="1" _ct="_palette.base")
+		(element OvermatcherZone _url="url" _from="0" _to="1" _top="0" _bottom="s.deckLine - gapY" _ct="_palette[_deck]")
+		(element OvermatcherZone _url="url" _from="0" _to="s.sternEnd - gap" _top="s.deckLine + gapY" _bottom="1" _ct="_palette[_bow]")
+		(element OvermatcherZone _url="url" _from="s.sternEnd + gap" _to="s.bowStart - gap" _top="s.deckLine + gapY" _bottom="1" _ct="_palette[_mid]")
+		(element OvermatcherZone _url="url" _from="s.bowStart + gap" _to="1" _top="s.deckLine + gapY" _bottom="1" _ct="_palette[_bow]")
 	)
 	(block
 		(bind visible "_nameIDS != ''")

@@ -9,7 +9,8 @@ Schild  = Wappenschild mit drei Sparren, Rand metallisch grau wie die Granate,
           Sparren in Ampelfarbe auf Hellgrau.
 Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
 Die frueheren 19x19-Vorlagen in assets/icons_19/ werden nicht mehr verwendet.
-Ausgabe: mod/res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red,grey}.png
+Ausgabe: mod/res_mods/PnFMods/Overmatcher/{shell,shield}_[cb_]{green,yellow,red,grey}.png
+(cb_ = Farbenblind-Schema AMPEL_CB)
 (grey = kein Ziel aufgeschaltet bzw. Ziel ohne Bewertung)
 """
 import os
@@ -29,6 +30,11 @@ W = SIZE * SUPERSAMPLE
 AMPEL = {'green': (0x3D, 0xDC, 0x5A), 'yellow': (0xFF, 0x8C, 0x00), 'red': (232, 72, 52)}
 # ohne aufgeschaltetes Ziel (oder ohne Bewertung): neutrales Grau statt Ampelfarbe
 NEUTRAL = {'grey': (128, 132, 136)}
+# Farbenblind-Schema (Okabe-Ito, unterscheidbar bei Rot-Gruen-Schwaeche): Blau = Overmatch,
+# Gelb = nur Bug/Heck, Orange = kein Overmatch. Dateien mit Praefix 'cb_'.
+AMPEL_CB = {'green': (0x56, 0xB4, 0xE9), 'yellow': (0xF0, 0xE4, 0x42), 'red': (0xD5, 0x5E, 0x00)}
+# Praefix im Dateinamen -> Farben (Zustandsnamen bleiben green/yellow/red/grey)
+PALETTES = {'': dict(AMPEL, **NEUTRAL), 'cb_': dict(AMPEL_CB, **NEUTRAL)}
 OUTLINE = (24, 26, 28)
 METAL = (168, 172, 176)
 GUIDE_RING = (92, 94, 98)
@@ -121,10 +127,11 @@ def shield(color):
 def main():
     written = []
     for kind, draw in (('shell', shell), ('shield', shield)):
-        for state, color in list(AMPEL.items()) + list(NEUTRAL.items()):
-            name = '%s_%s.png' % (kind, state)
-            draw(color).reduce(SUPERSAMPLE).save(os.path.join(TARGET_DIR, name))
-            written.append(name)
+        for prefix, palette in sorted(PALETTES.items()):
+            for state, color in palette.items():
+                name = '%s_%s%s.png' % (kind, prefix, state)
+                draw(color).reduce(SUPERSAMPLE).save(os.path.join(TARGET_DIR, name))
+                written.append(name)
     print('%d Icons, %dx%d: %s' % (len(written), SIZE, SIZE, ' '.join(written)))
     return 0
 

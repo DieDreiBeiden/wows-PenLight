@@ -61,6 +61,18 @@ Unter jeder Silhouette der Schiffsname in der Spielschrift (`$TextDefaultBold13N
 Die Silhouetten werden nicht mitgeliefert (Spieldateien), passen also nach jedem Patch.
 PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
 
+Optionen (TTaro Mod Config, Seite `diedreibeiden.overmatcher`; eigenes Zahnrad
+`TT_ConfigButtonElement` links neben der Anzeige wie bei BuildViewer):
+- `overmatcher.detailMode` 0 = Detail mit Alt, 1 = immer (ersetzt die Symbole bei Bewertung)
+- `overmatcher.useSilhouettes` Spiel-Silhouetten an/aus (aus = gezeichnete `detail_*.png`)
+- `overmatcher.colorMode` 0 = Standard, 1 = Farbenblind (Okabe-Ito: Blau #56B4E9 = Overmatch,
+  Gelb #F0E442 = nur Bug/Heck, Orange #D55E00 = kein Overmatch); Icons mit Präfix `cb_`,
+  Silhouetten per `OVERMATCHER_CT_CB`. Die gezeichneten Ersatzbilder bleiben Standardfarben.
+- `overmatcher.scale` 0,5–2,0 (scaleX/scaleY der ganzen Anzeige)
+Beschriftungen: vorhandene TTaro-Texte (`IDS_TT_DISPLAY_MODE`, `IDS_TT_UI_SCALE`, …) plus
+eigene `IDS_OM_*` in `texts/<sprache>/overmatcher.mo` (wie TTaroModUtils; Quelle
+`tools/data/texts.json`, erzeugt von `tools/make_texts.py`).
+
 Position im Spiel per Ziehen über TTaroModUtils (wie BuildViewer): eigenes Schema
 `ModSchemas/diedreibeiden-overmatcher.schema.json` (eigene `id`, nicht kopiert – TTaro warnt,
 doppelte IDs sperren beide Mods), Schlüssel `diedreibeiden.overmatcher.position` und
