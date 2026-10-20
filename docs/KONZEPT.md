@@ -13,28 +13,30 @@ Auf einen Blick erkennen, ob AP-Granaten Bug/Heck bzw. Deck overmatchen:
 Overmatch: `Kaliber > 14,3 × Plattendicke` (Gleichstand = kein Overmatch).
 Bug und Heck werden als gleich dick behandelt (ein Wert „bow“).
 
-| Bug/Heck | Deck | Granate | Schild |
+Variante B (vom Nutzer gewählt): Bug/Heck ist Grundvoraussetzung, Grün bzw. Rot erst,
+wenn auch Mitte **und** Deck overmatcht werden.
+
+| Bug/Heck | Mitte und Deck | Granate | Schild |
 |---|---|---|---|
-| ja | ja | Grün – überall durch, auch gewinkelt | Rot – aktiv ausweichen |
-| ja | nein | Gelb – gezielt auf Bug/Heck | Gelb – Bug/Heck schützen, auf Distanz Panzerung nutzen |
-| nein | nein | Rot – nur Breitseite | Grün – aggressiv anwinkeln |
-| nein | ja | Rot | Grün |
+| ja | beide ja | Grün – überall durch, auch gewinkelt | Rot – aktiv ausweichen |
+| ja | nicht beide | Gelb – gezielt auf Bug/Heck | Gelb – Bug/Heck schützen, auf Distanz Panzerung nutzen |
+| nein | egal | Rot – nur Breitseite | Grün – aggressiv anwinkeln |
 
-Bug/Heck ist die taktische Kategorie; das Deck zählt nur zusammen mit dem Bug
-(„Kirsche obendrauf“). Der seltene Fall „nur Deck“ wird daher wie „nichts“ behandelt.
+Mitte = dünnste Seitenplatte mittschiffs (`Cas_Belt`, `SSC_ConstrSide`). Fehlt der Wert,
+entscheiden Bug/Heck und Deck allein.
 
-Häufigkeit Stufe VIII–X (alle Paarungen BB/CA, ungewichtet): beides 12,8 %,
-nur Bug 14,1 %, nur Deck 0,9 %, nichts 72,2 % → Granate grün/gelb/rot 12,8/14,1/73,1 %.
+Häufigkeit Stufe VIII–X (alle Paarungen BB/CA, ungewichtet): alle drei 10,5 %,
+Bug ohne alles 16,4 %, Bug nicht 73,1 % → Granate grün/gelb/rot 10,5/16,4/73,1 %.
 
-Bewusste Vereinfachung: Gürtel und Kasematte mittschiffs werden nicht bewertet. Ein
-gewinkeltes Ziel kann trotz grüner Granate dort Abpraller erzeugen.
+Bewusste Vereinfachung: Der Zitadellengürtel wird nicht bewertet; Grün heißt Overmatch
+der Beplankung, nicht Zitadellentreffer.
 
 ## Detailansicht (Alt gedrückt)
 
 Zusätzlich zu Granate/Schild (die immer sichtbar bleiben, auch bei Rot/Grün) eine Tabelle: Zeilen Granate (ich → Ziel) und Schild (Ziel → ich),
 Spalten Bug/Heck, Mitte, Deck. Punkt grün/rot = gut/schlecht für mich, grau = keine Daten.
-„Mitte“ = dünnste Seitenplatte mittschiffs (`Cas_Belt`, `SSC_ConstrSide`); sie fließt
-nur in die Detailansicht ein, nicht in die Ampel.
+„Mitte“ = dünnste Seitenplatte mittschiffs (`Cas_Belt`, `SSC_ConstrSide`); seit Variante B
+auch Teil der Ampel.
 
 Abgleich Mitte mit dem Wiki: Thunderer/Conqueror 32, Moskva/Stalingrad 50, Petropavlovsk 40,
 Des Moines/Hindenburg/Zao 30, Worcester 25, Minotaur/Neptune 16 – alle passend;

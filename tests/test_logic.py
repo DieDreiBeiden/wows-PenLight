@@ -27,23 +27,31 @@ class OvermatchRule(unittest.TestCase):
 
 
 class Colors(unittest.TestCase):
-    # (Kaliber, Bug, Deck) je Fall; Werte aus ships.json 15.9
-    BOTH = (460, 32, 32)       # Yamato gegen Thunderer
-    BOW_ONLY = (460, 27, 36)   # Yamato gegen Hawaii
-    DECK_ONLY = (457, 32, 30)  # 457 mm gegen 32 mm Bug / 30 mm Deck
-    NONE = (305, 25, 30)
+    # Zonen in mm; Werte aus ships.json 15.9
+    HAWAII = {'bow': 27.0, 'mid': 28.0, 'deck': 36.0}
+    THUNDERER = {'bow': 32.0, 'mid': 32.0, 'deck': 32.0}
+    NEW_ORLEANS_LIKE = {'bow': 25.0, 'mid': 25.0, 'deck': 25.0}
 
     def test_attack(self):
-        self.assertEqual(attack_color(*self.BOTH), GREEN)
-        self.assertEqual(attack_color(*self.BOW_ONLY), YELLOW)
-        self.assertEqual(attack_color(*self.DECK_ONLY), RED)
-        self.assertEqual(attack_color(*self.NONE), RED)
+        self.assertEqual(attack_color(460, self.THUNDERER), GREEN)          # alles
+        self.assertEqual(attack_color(460, self.HAWAII), YELLOW)            # Bug+Mitte, Deck nicht
+        self.assertEqual(attack_color(400, self.HAWAII), YELLOW)            # nur Bug
+        self.assertEqual(attack_color(457, self.THUNDERER), RED)            # Bug nicht
+        self.assertEqual(attack_color(406, self.NEW_ORLEANS_LIKE), GREEN)
 
     def test_defense(self):
-        self.assertEqual(defense_color(*self.BOTH), RED)
-        self.assertEqual(defense_color(*self.BOW_ONLY), YELLOW)
-        self.assertEqual(defense_color(*self.DECK_ONLY), GREEN)
-        self.assertEqual(defense_color(*self.NONE), GREEN)
+        self.assertEqual(defense_color(460, self.THUNDERER), RED)
+        self.assertEqual(defense_color(460, self.HAWAII), YELLOW)
+        self.assertEqual(defense_color(457, self.THUNDERER), GREEN)
+
+    def test_deck_only_counts_as_nothing(self):
+        ship = {'bow': 32.0, 'mid': 32.0, 'deck': 30.0}
+        self.assertEqual(attack_color(457, ship), RED)
+        self.assertEqual(defense_color(457, ship), GREEN)
+
+    def test_missing_mid_uses_bow_and_deck(self):
+        self.assertEqual(attack_color(460, {'bow': 32.0, 'mid': None, 'deck': 32.0}), GREEN)
+        self.assertEqual(attack_color(460, {'bow': 32.0, 'deck': 38.0}), YELLOW)
 
 
 class Detail(unittest.TestCase):
