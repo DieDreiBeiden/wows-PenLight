@@ -21,7 +21,7 @@ Zurücksetzen/Sperren in TTaro Mod Config → Overmatcher. Gespeichert wird in `
 Ablageorte wie bei PenetrationCalculator (vom Nutzer bestätigt).
 
 Die Mod zeigt Granate und Schild immer als Icons am Fadenkreuz: grau ohne Ziel, in Ampelfarben
-bei aufgeschaltetem Kreuzer/Schlachtschiff (andere Ziele: ausgeblendet), mit gedrückter Alt-Taste die Detailansicht (Bug/Heck, Mitte, Deck). Zusätzlich steht das Ergebnis in
+bei aufgeschaltetem Kreuzer/Schlachtschiff, mit gedrückter Alt-Taste die Detailansicht (Bug/Heck, Mitte, Deck). Zusätzlich steht das Ergebnis in
 `PnFMods\Overmatcher\overmatcher_last.txt`. Diagnose (wird fortlaufend angehängt):
 `PnFMods\Overmatcher\overmatcher_log.txt` und `profile\python.log` (Zeilen mit `[Overmatcher]`).
 Fehlt `overmatcher_log.txt` nach dem Spielstart ganz, wurde die Mod nicht geladen.
