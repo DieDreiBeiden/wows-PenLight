@@ -27,20 +27,23 @@ class OvermatchRule(unittest.TestCase):
 
 
 class Colors(unittest.TestCase):
+    # (Kaliber, Bug, Deck) je Fall; Werte aus ships.json 15.9
+    BOTH = (460, 32, 32)       # Yamato gegen Thunderer
+    BOW_ONLY = (460, 27, 36)   # Yamato gegen Hawaii
+    DECK_ONLY = (457, 32, 30)  # 457 mm gegen 32 mm Bug / 30 mm Deck
+    NONE = (305, 25, 30)
+
     def test_attack(self):
-        self.assertEqual(attack_color(460, 32, 32), GREEN)
-        self.assertEqual(attack_color(457, 32, 30), YELLOW)
-        self.assertEqual(attack_color(305, 25, 30), RED)
+        self.assertEqual(attack_color(*self.BOTH), GREEN)
+        self.assertEqual(attack_color(*self.BOW_ONLY), YELLOW)
+        self.assertEqual(attack_color(*self.DECK_ONLY), RED)
+        self.assertEqual(attack_color(*self.NONE), RED)
 
     def test_defense(self):
-        self.assertEqual(defense_color(460, 32, 32), RED)
-        self.assertEqual(defense_color(457, 32, 30), YELLOW)
-        self.assertEqual(defense_color(203, 25, 27), GREEN)
-
-    def test_bow_only_is_yellow(self):
-        # 460 mm gegen 32 mm Bug / 38 mm Deck (US-BB-Muster)
-        self.assertEqual(attack_color(460, 32, 38), YELLOW)
-        self.assertEqual(defense_color(460, 32, 38), YELLOW)
+        self.assertEqual(defense_color(*self.BOTH), RED)
+        self.assertEqual(defense_color(*self.BOW_ONLY), YELLOW)
+        self.assertEqual(defense_color(*self.DECK_ONLY), GREEN)
+        self.assertEqual(defense_color(*self.NONE), GREEN)
 
 
 class Filter(unittest.TestCase):

@@ -15,17 +15,19 @@ Bug und Heck werden als gleich dick behandelt (ein Wert „bow“).
 
 | Bug/Heck | Deck | Granate | Schild |
 |---|---|---|---|
-| ja | ja | Grün | Rot |
-| nein | ja | Gelb | Gelb |
-| ja | nein | Gelb *(Annahme)* | Gelb *(Annahme)* |
-| nein | nein | Rot | Grün |
+| ja | ja | Grün – überall durch, auch gewinkelt | Rot – aktiv ausweichen |
+| ja | nein | Gelb – gezielt auf Bug/Heck | Gelb – Bug/Heck schützen, auf Distanz Panzerung nutzen |
+| nein | nein | Rot – nur Breitseite | Grün – aggressiv anwinkeln |
+| nein | ja | Rot | Grün |
 
-Häufigkeit bei Stufe VIII–X (alle Paarungen BB/CA, ungewichtet): beides 12,8 %,
-nur Deck 0,9 %, **nur Bug 14,1 %**, nichts 72,2 %.
+Bug/Heck ist die taktische Kategorie; das Deck zählt nur zusammen mit dem Bug
+(„Kirsche obendrauf“). Der seltene Fall „nur Deck“ wird daher wie „nichts“ behandelt.
 
-Die Zeile „Bug ja / Deck nein“ ist in der Ausgangsdefinition nicht enthalten
-(kommt z. B. bei 460 mm gegen 38-mm-Decks vor). Festgelegt als Gelb,
-änderbar über `BOW_ONLY_COLOR` in `src/overmatcher/logic.py`.
+Häufigkeit Stufe VIII–X (alle Paarungen BB/CA, ungewichtet): beides 12,8 %,
+nur Bug 14,1 %, nur Deck 0,9 %, nichts 72,2 % → Granate grün/gelb/rot 12,8/14,1/73,1 %.
+
+Bewusste Vereinfachung: Gürtel und Kasematte mittschiffs werden nicht bewertet. Ein
+gewinkeltes Ziel kann trotz grüner Granate dort Abpraller erzeugen.
 
 ## Sichtbarkeit
 
