@@ -11,6 +11,8 @@
 # an der Stelle des Schilds).
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
+# Alt-Ansicht (Prototyp): Spiel-Silhouetten img://gui/ship_bars/<shortName>_h.png in drei Sektionen,
+# Deck als Balken darueber; Rueckfall auf detail_*.png (useSilhouettes in OVERMATCHER_SETTINGS).
 # Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red,grey}.png, 29x29 (gezeichnet von tools/make_ampel_icons.py).
 # Position: per Ziehen ueber TTaroModUtils (Schema ModSchemas/diedreibeiden-overmatcher.schema.json,
 # Muster wie BuildViewer). Benoetigt TTaroModUtils (Makros TT_DRAGGABLE_POSITION/TT_DRAGGABLE/TT_GET_PREF).
@@ -31,8 +33,39 @@
 	shipGap: 8,
 	# Groesse der Detail-Schiffe (Bilder werden in dieser Groesse erzeugt, tools/make_detail_icons.py)
 	detailWidth: 125,
-	detailHeight: 75
+	detailHeight: 75,
+	# Alt-Ansicht mit den Spiel-Silhouetten (img://gui/ship_bars/<shortName>_h.png, wie der
+	# Lebensbalken unten links). false = gezeichnete Detail-Bilder (detail_*.png).
+	# Ohne Silhouetten-Name (Ziel oder eigenes Schiff unbekannt) gelten ebenfalls die Bilder.
+	useSilhouettes: true,
+	# Bildflaeche wie im Spiel-Lebensbalken (BAR_IMAGE_WIDTH/HEIGHT in own_ship_health.unbound)
+	silhouetteWidth: 186,
+	silhouetteHeight: 48,
+	# Sektionsgrenzen als Anteil der Silhouettenbreite (Naeherung, gleich fuer alle Schiffe):
+	# Heck 0..sternEnd, Mitte sternEnd..bowStart, Bug bowStart..1. Bug und Heck haben dieselbe
+	# Farbe, die Blickrichtung der Silhouette spielt daher keine Rolle.
+	sternEnd: 0.22,
+	bowStart: 0.78,
+	# graue Fuge zwischen den Sektionen (Anteil der Breite)
+	zoneGap: 0.01,
+	# Deck als Balken ueber der Silhouette (Decklinie ist je Schiff verschieden hoch)
+	deckBarHeight: 3,
+	deckBarGap: 2,
+	deckBarLeft: 0.06,
+	deckBarRight: 0.94,
+	labelWidth: 70,
+	labelHeight: 16
 })
+
+# Einfaerbung der Silhouetten: Multiplikator 0 + Offset = Vollfarbe, Alpha bleibt (Form der Silhouette).
+# Farben wie tools/make_ampel_icons.py (gruen #3DDC5A, rot, grau) bzw. dunkle Fuge.
+(def constant OVERMATCHER_CT {
+	green: { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:61,greenOffset:220,blueOffset:90,alphaOffset:0 },
+	red:   { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:232,greenOffset:72,blueOffset:52,alphaOffset:0 },
+	grey:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:128,greenOffset:132,blueOffset:136,alphaOffset:0 },
+	base:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:40,greenOffset:42,blueOffset:44,alphaOffset:0 }
+})
+(def constant OVERMATCHER_DECK_COLORS { green: 0xFF3DDC5A, red: 0xFFE84834, grey: 0xFF808488 })
 
 (def constant OVERMATCHER_COMPONENT_KEY 'modOvermatcher')
 
@@ -115,6 +148,28 @@
 		(var attackIcon:str = "OVERMATCHER_ICON_PATH + 'shell_' + (hasVerdict ? verdict[0] : 'grey') + '.png'")
 		(var defenseIcon:str = "OVERMATCHER_ICON_PATH + 'shield_' + (hasVerdict ? verdict[1] : 'grey') + '.png'")
 		(var showDetail:bool = "altVision && hasVerdict")
+
+		# Silhouetten-Namen wie im Spiel-Lebensbalken: shipInfo.ship.shortName
+		(var targetVehicleInfo:gfx = "currentTarget && currentTarget.hasComponent(CC.vehicleInfo) ? currentTarget.vehicleInfo : null" (event "evTargetChanged"))
+		(var targetShipInfo:gfx = "targetVehicleInfo ? $datahub.getEntity(targetVehicleInfo.shipInfoEntityId) : null" (event "evTargetChanged"))
+		(var targetShortName:str = "targetShipInfo ? targetShipInfo.ship.shortName : ''" (event "evTargetChanged"))
+		(var ownPlayerAvatar:gfx = "$datahub.getSingleEntity(CC.playerAvatar)")
+		(var ownAvatarEntity:gfx = "ownPlayerAvatar ? $datahub.getPrimaryEntity(CC.avatar, ownPlayerAvatar.avatar.id) : null")
+		(var ownVehicleInfo:gfx = "ownAvatarEntity && ownAvatarEntity.hasComponent(CC.vehicleInfo) ? ownAvatarEntity.vehicleInfo : null" (event "ownAvatarEntity.evAdded"))
+		(var ownShipInfoId:number = "ownVehicleInfo ? ownVehicleInfo.shipInfoEntityId : 0" (event "ownVehicleInfo.evShipInfoEntityIdChanged"))
+		(var ownShipInfo:gfx = "ownShipInfoId ? $datahub.getEntity(ownShipInfoId) : null")
+		(var ownShortName:str = "ownShipInfo ? ownShipInfo.ship.shortName : ''")
+		(var showSilhouettes:bool = "showDetail && OVERMATCHER_SETTINGS.useSilhouettes && targetShortName != '' && ownShortName != ''")
+
+		# Sektionsfarben: detail = [ich->Ziel Bug, Mitte, Deck, Ziel->ich Bug, Mitte, Deck], 1/0/-1
+		# Target gruen bei Overmatch (gut fuer mich), Me rot bei Overmatch.
+		(var detail:array = "verdict.length >= 3 && verdict[2].length >= 6 ? verdict[2] : [-1, -1, -1, -1, -1, -1]")
+		(var tBow:str = "detail[0] == 1 ? 'green' : (detail[0] == 0 ? 'red' : 'grey')")
+		(var tMid:str = "detail[1] == 1 ? 'green' : (detail[1] == 0 ? 'red' : 'grey')")
+		(var tDeck:str = "detail[2] == 1 ? 'green' : (detail[2] == 0 ? 'red' : 'grey')")
+		(var mBow:str = "detail[3] == 1 ? 'red' : (detail[3] == 0 ? 'green' : 'grey')")
+		(var mMid:str = "detail[4] == 1 ? 'red' : (detail[4] == 0 ? 'green' : 'grey')")
+		(var mDeck:str = "detail[5] == 1 ? 'red' : (detail[5] == 0 ? 'green' : 'grey')")
 	)
 
 	(controller $Repeat renderer='OvermatcherTargetTracker'
@@ -148,11 +203,20 @@
 		)
 		# absolut an derselben Stelle wie die Symbole, damit nichts springt
 		(hblock
-			(bind visible "showDetail")
+			(bind visible "showDetail && !showSilhouettes")
 			(style (position = "absolute") (left = 0) (top = 0))
 			# links Target (gehoert zur Granate), rechts Me (gehoert zum Schild)
 			(element OvermatcherShip _url="attackDetail")
 			(element OvermatcherShip _url="defenseDetail")
+		)
+		# Prototyp: dieselbe Stelle, Spiel-Silhouetten statt gezeichneter Schiffe
+		(hblock
+			(bind visible "showSilhouettes")
+			(style (position = "absolute") (left = 0) (top = 0))
+			(element OvermatcherSilhouetteShip _shortName="targetShortName" _label="OVERMATCHER_ICON_PATH + 'label_target.png'"
+				_bow="tBow" _mid="tMid" _deck="tDeck")
+			(element OvermatcherSilhouetteShip _shortName="ownShortName" _label="OVERMATCHER_ICON_PATH + 'label_me.png'"
+				_bow="mBow" _mid="mMid" _deck="mDeck")
 		)
 	)
 )
@@ -175,6 +239,70 @@
 			(backgroundSize = "fill")
 		)
 	)
+)
+
+# Silhouetten-Ansicht (Prototyp): Beschriftung, Deck-Balken, Silhouette in drei Sektionen.
+# Die Silhouette wird mehrfach uebereinander gelegt; jede Lage zeigt per Maske nur ihren
+# Bereich und wird per colorTransform eingefaerbt (Muster: OwnHealthBarValue im Spiel).
+(def element OvermatcherSilhouetteShip(_shortName:str, _label:str, _bow:str, _mid:str, _deck:str) layout=true
+	(scope
+		(var s:dict = "OVERMATCHER_SETTINGS")
+		(var url:str = "'img://gui/ship_bars/' + _shortName + '_h.png'")
+		(var gap:number = "s.zoneGap / 2")
+	)
+	(style
+		(bind width "s.silhouetteWidth")
+		(bind marginRight "s.shipGap")
+	)
+	(block
+		(style
+			(bind backgroundImage "_label")
+			(bind width "s.labelWidth") (bind height "s.labelHeight")
+			(backgroundSize = "fill")
+		)
+	)
+	(block
+		(style
+			(bind marginLeft "s.silhouetteWidth * s.deckBarLeft")
+			(bind width "s.silhouetteWidth * (s.deckBarRight - s.deckBarLeft)")
+			(bind height "s.deckBarHeight")
+			(bind marginBottom "s.deckBarGap")
+			(bind backgroundColor "OVERMATCHER_DECK_COLORS[_deck]")
+		)
+	)
+	(block
+		(style
+			(bind width "s.silhouetteWidth")
+			(bind height "s.silhouetteHeight")
+		)
+		(element OvermatcherZone _url="url" _from="0" _to="1" _ct="OVERMATCHER_CT.base")
+		(element OvermatcherZone _url="url" _from="0" _to="s.sternEnd - gap" _ct="OVERMATCHER_CT[_bow]")
+		(element OvermatcherZone _url="url" _from="s.sternEnd + gap" _to="s.bowStart - gap" _ct="OVERMATCHER_CT[_mid]")
+		(element OvermatcherZone _url="url" _from="s.bowStart + gap" _to="1" _ct="OVERMATCHER_CT[_bow]")
+	)
+)
+
+# Eine Lage der Silhouette: zentriert wie im Spiel-Lebensbalken, Maske von _from bis _to (Anteil der Breite).
+(def element OvermatcherZone(_url:str, _from:number, _to:number, _ct:dict) layout=true
+	(style
+		(position = "absolute")
+		(left = 50%)
+		(marginLeft = -50%)
+		(backgroundSize = "autosize")
+		(bind backgroundImage "_url")
+	)
+	(block
+		(style
+			(position = "absolute")
+			(top = 0)
+			(height = 100%)
+			(bind left "100% * _from")
+			(bind width "100% * (_to - _from)")
+			(backgroundColor = 0x11000000)
+		)
+		(isMask = true)
+	)
+	(bind colorTransform "_ct")
 )
 
 (def element OvermatcherIcon(_url:str) layout=true

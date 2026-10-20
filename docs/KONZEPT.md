@@ -44,6 +44,14 @@ Layout (rechts unter dem Fadenkreuz, linke obere Ecke Standard x +30, y +8):
   `detail_<me|target>_<b>_<m>_<d>.png`, Schrift DejaVu Sans Bold 8,5 px (freie Lizenz);
   Bug/Heck, Mitte, Deck grün/rot = gut/schlecht für mich. Die Schiffszeile liegt absolut an
   der Position der Symbole, damit nichts springt.
+Prototyp Silhouetten (`useSilhouettes` in `OVERMATCHER_SETTINGS`, Standard an): statt der
+gezeichneten Schiffe die Spiel-Silhouetten `img://gui/ship_bars/<shortName>_h.png` (wie der
+Lebensbalken unten links, `own_ship_health.unbound`; `shortName` aus `shipInfo.ship.shortName`,
+Ziel über `vehicleInfo.shipInfoEntityId`). Drei Lagen mit Maske + `colorTransform`: Heck
+0–22 %, Mitte 22–78 %, Bug 78–100 % der Bildbreite (Näherung, für alle Schiffe gleich);
+Deck als Balken über der Silhouette, weil die Decklinie je Schiff verschieden hoch liegt.
+Beschriftung `label_<target|me>.png`. Ohne Silhouetten-Namen gelten die `detail_*.png`.
+Die Silhouetten werden nicht mitgeliefert (Spieldateien), passen also nach jedem Patch.
 PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
 
 Position im Spiel per Ziehen über TTaroModUtils (wie BuildViewer): eigenes Schema

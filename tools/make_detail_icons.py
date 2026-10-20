@@ -11,6 +11,7 @@ Mini-Granate (Target) bzw. der Mini-Schild (Me) mit Beschriftung "TARGET"/"ME".
 Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
 Das fruehere Grund-Icon assets/detail_ship_source.png wird nicht mehr verwendet.
 Ausgabe: mod/res_mods/PnFMods/Overmatcher/detail_<me|target>_<bugheck>_<mitte>_<deck>.png (g/r)
+und label_<me|target>.png (nur Mini-Icon + Beschriftung, fuer die Silhouetten-Ansicht).
 """
 import itertools
 import os
@@ -124,14 +125,30 @@ def render(key, combo):
     return img.reduce(SUPERSAMPLE)
 
 
+LABEL_IMAGE = (70, 16)  # nur Mini-Icon + Beschriftung, fuer die Silhouetten-Ansicht
+
+
+def render_label(key):
+    """Mini-Icon + Beschriftung allein (Silhouetten-Ansicht: Schiff kommt aus dem Spiel)."""
+    text, kind = LABELS[key]
+    img = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    img.alpha_composite(_mini_icon(kind), (2 * SUPERSAMPLE, 1 * SUPERSAMPLE))
+    img.alpha_composite(_label(text))
+    return img.crop((0, 0, LABEL_IMAGE[0] * SUPERSAMPLE, LABEL_IMAGE[1] * SUPERSAMPLE)).reduce(SUPERSAMPLE)
+
+
 def main():
     written = []
+    for key in sorted(LABELS):
+        name = 'label_%s.png' % key
+        render_label(key).save(os.path.join(TARGET_DIR, name))
+        written.append(name)
     for key in sorted(LABELS):
         for combo in itertools.product('gr', repeat=3):
             name = 'detail_%s_%s.png' % (key, '_'.join(combo))
             render(key, combo).save(os.path.join(TARGET_DIR, name))
             written.append(name)
-    print('%d Dateien, %dx%d: %s' % (len(written), SIZE[0], SIZE[1], ' '.join(written)))
+    print('%d Dateien: %s' % (len(written), ' '.join(written)))
     return 0
 
 
