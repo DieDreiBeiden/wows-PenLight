@@ -96,6 +96,10 @@ try:
     import events, ui, utils, battle
 except Exception:
     pass
+try:
+    import Keys
+except Exception:
+    Keys = globals().get('Keys')
 
 MOD_NAME = 'Overmatcher'
 # Datenkomponente fuer Overmatcher.unbound (CC.mods_DataComponent mit dieser ID)
@@ -106,7 +110,17 @@ LOG_FILE = 'overmatcher_log.txt'
 
 LOG_KEEP = 300
 
-_state = {'data': None, 'disabled': False, 'results': None, 'log': [], 'ui_id': None}
+# Position der Anzeige relativ zur Bildschirmmitte (px). Verschieben im Gefecht mit
+# Strg+Alt+Pfeiltasten (mit Umschalt: 1 px statt 5 px), Strg+Alt+Pos1 = zuruecksetzen.
+DEFAULT_POSITION = {'x': 30, 'y': 8}
+POSITION_STEP = 5
+SETTINGS_NAME = 'diedreibeiden-overmatcher.json'
+# Bevorzugt im Spielverzeichnis (ueberlebt Patches), sonst im Mod-Ordner. Vom Mod-Ordner
+# res_mods/PnFMods/Overmatcher aus: PnFMods, res_mods, <Build>, bin, Spielverzeichnis.
+SETTINGS_DIRS = ('/../../../../../ModPrefs', '')
+
+_state = {'data': None, 'disabled': False, 'results': None, 'log': [], 'ui_id': None,
+          'position': None}
 
 # Client-Eigenheiten (python.log 15.9.0.13357625):
 # - open() verlangt immer (pfad, modus); Modus 'a' nur fuer bereits vorhandene Dateien.
@@ -247,6 +261,77 @@ def _report(results):
         _log('could not write %s: %r' % (RESULT_FILE, e))
 
 
+def _settings_paths():
+    return [_mod_dir() + d + '/' + SETTINGS_NAME for d in SETTINGS_DIRS]
+
+
+def load_position():
+    for path in _settings_paths():
+        try:
+            with open(path, 'r') as f:
+                pos = _decode_json(f.read()).get('position') or {}
+            return {'x': int(pos['x']), 'y': int(pos['y'])}
+        except Exception:
+            continue
+    return dict(DEFAULT_POSITION)
+
+
+def save_position(pos):
+    text = '{"position": {"x": %d, "y": %d}}' % (pos['x'], pos['y'])
+    for path in _settings_paths():
+        try:
+            with open(path, 'w') as f:
+                f.write(text)
+            return path
+        except Exception:
+            continue
+    _log('could not save position')
+    return None
+
+
+def _position():
+    if _state['position'] is None:
+        _state['position'] = load_position()
+    return _state['position']
+
+
+def _key(*names):
+    for name in names:
+        value = getattr(Keys, name, None) if Keys is not None else None
+        if value is not None:
+            return value
+    return None
+
+
+def _move_keys():
+    return {
+        _key('KEY_LEFTARROW'): (-1, 0), _key('KEY_RIGHTARROW'): (1, 0),
+        _key('KEY_UPARROW'): (0, -1), _key('KEY_DOWNARROW'): (0, 1),
+    }
+
+
+def on_key(event):
+    """Strg+Alt+Pfeil verschiebt, Strg+Alt+Pos1 setzt zurueck."""
+    try:
+        if not (event.isKeyDown() and event.isCtrlDown() and event.isAltDown()):
+            return
+        pos = _position()
+        if event.key == _key('KEY_HOME') and event.key is not None:
+            pos.update(DEFAULT_POSITION)
+        else:
+            direction = _move_keys().get(event.key)
+            if direction is None or event.key is None:
+                return
+            step = 1 if event.isShiftDown() else POSITION_STEP
+            pos['x'] += direction[0] * step
+            pos['y'] += direction[1] * step
+        path = save_position(pos)
+        _log('position %d/%d saved to %s' % (pos['x'], pos['y'], path))
+        _publish(_state['results'] or {})
+    except Exception as e:
+        _log('key handling failed: %r' % (e,))
+
+
 def ui_payload(results):
     """Daten fuer Overmatcher.unbound: Schluessel = Avatar-ID (als Text) bzw. Spielername.
 
@@ -259,7 +344,7 @@ def ui_payload(results):
         by_id[str(pid)] = pair
         if r.get('player'):
             by_name[r['player']] = pair
-    return {'byId': by_id, 'byName': by_name}
+    return {'byId': by_id, 'byName': by_name, 'position': dict(_position())}
 
 
 def _publish(results):
@@ -300,8 +385,10 @@ def _on_battle_quit(*args, **kwargs):
     _remove_ui()
 
 
-_log('Main.py loaded, game version %s, getModDir %s -> %s'
-     % (utils.getGameVersion(), utils.getModDir(), _mod_dir()))
+_log('Main.py loaded, game version %s, getModDir %s -> %s, keys %s'
+     % (utils.getGameVersion(), utils.getModDir(), _mod_dir(),
+        'ok' if None not in _move_keys() and _key('KEY_HOME') is not None else 'MISSING'))
 events.onBattleShown(_refresh)
 events.onPlayersListUpdated(_refresh)
 events.onBattleQuit(_on_battle_quit)
+events.onKeyEvent(on_key)

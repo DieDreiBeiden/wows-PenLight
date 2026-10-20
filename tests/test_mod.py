@@ -49,6 +49,7 @@ class ModTest(unittest.TestCase):
             ship_names[i] = ship
         handlers = {}
         self.ui_data = []
+        self.mod_dir = mod_dir
 
         def client_open(path, mode):
             # wie im Client: Modus Pflicht, 'a' nur fuer vorhandene Dateien
@@ -69,8 +70,12 @@ class ModTest(unittest.TestCase):
                          jsonDncode=json.loads, logInfo=lambda *a, **k: None),
             'events': Obj(onBattleShown=lambda f: handlers.setdefault('shown', f),
                           onPlayersListUpdated=lambda f: handlers.setdefault('players', f),
-                          onBattleQuit=lambda f: handlers.setdefault('quit', f)),
+                          onBattleQuit=lambda f: handlers.setdefault('quit', f),
+                          onKeyEvent=lambda f: handlers.setdefault('key', f)),
+            'Keys': Obj(KEY_LEFTARROW=203, KEY_RIGHTARROW=205, KEY_UPARROW=200,
+                        KEY_DOWNARROW=208, KEY_HOME=199),
         }
+        self.handlers = handlers
         exec(compile(open(build_mod.build()).read(), 'Main.py', 'exec'), env)
         handlers['shown']()
         self.log = open(os.path.join(mod_dir, 'overmatcher_log.txt')).read()
@@ -89,12 +94,35 @@ class ModTest(unittest.TestCase):
 
     def test_ui_payload_for_unbound(self):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PASD013_Gearing'])
-        self.assertEqual(self.ui_data[0], ('modOvermatcher', {'byId': {}, 'byName': {}}))
+        self.assertEqual(self.ui_data[0], ('modOvermatcher', {'byId': {}, 'byName': {},
+                                                              'position': {'x': 30, 'y': 8}}))
         self.assertEqual(self.ui_data[-1], ('update', {
+            'position': {'x': 30, 'y': 8},
             # Detail: ich->Ziel [Bug, Mitte, Deck], Ziel->ich [Bug, Mitte, Deck]
             'byId': {'10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_r_r_r', 'detail_r_r_g']},
             'byName': {'bot10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_r_r_r', 'detail_r_r_g']},
         }))
+
+    def key(self, code, ctrl=True, alt=True, shift=False):
+        self.handlers['key'](Obj(key=code, isKeyDown=lambda: True, isCtrlDown=lambda: ctrl,
+                                 isAltDown=lambda: alt, isShiftDown=lambda: shift))
+
+    def test_position_keys_move_save_and_reset(self):
+        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
+        self.key(205)                 # rechts, 5 px
+        self.key(208, shift=True)     # runter, 1 px
+        self.assertEqual(self.ui_data[-1][1]['position'], {'x': 35, 'y': 9})
+        # ModPrefs existiert im Test nicht -> Rueckfall in den Mod-Ordner
+        saved = json.load(open(os.path.join(self.mod_dir, 'diedreibeiden-overmatcher.json')))
+        self.assertEqual(saved, {'position': {'x': 35, 'y': 9}})
+        self.key(199)                 # Pos1 = zuruecksetzen
+        self.assertEqual(self.ui_data[-1][1]['position'], {'x': 30, 'y': 8})
+
+    def test_keys_without_ctrl_alt_are_ignored(self):
+        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
+        count = len(self.ui_data)
+        self.key(205, alt=False)
+        self.assertEqual(len(self.ui_data), count)
 
     def test_missing_mid_is_unknown(self):
         self.run_mod('PASC720_Hawaii', ['PBSC110_Minotaur'])  # Minotaur ohne Mitte-Wert

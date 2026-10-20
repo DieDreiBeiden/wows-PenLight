@@ -38,13 +38,15 @@ Granate | Schild, immer sichtbar. Mit Alt erscheint unter jedem Symbol das Schif
 (50×30, ich → Ziel bzw. Ziel → ich) mit Bug/Heck, Mitte, Deck grün/rot = gut/schlecht für mich.
 PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
 
-Position im Spiel per Ziehen über TTaroModUtils (wie BuildViewer): eigenes Schema
-`ModSchemas/diedreibeiden-overmatcher.schema.json` (eigene `id`, nicht kopiert – TTaro warnt,
-doppelte IDs sperren beide Mods), Schlüssel `diedreibeiden.overmatcher.position` und
-`…disableDragDrop`. Ohne gespeicherte Position gilt der Rückfall aus `OVERMATCHER_SETTINGS`.
-Abhängigkeit: ModForge + TTaroModUtils (Makros `TT_GET_PREF`, `TT_DRAGGABLE_POSITION`,
-`TT_DRAGGABLE`). Referenz-Repos: github.com/AndrewTaro (ohne Lizenzdatei → nur als Referenz,
-kein Code übernommen).
+Position: Strg+Alt+Pfeiltasten (5 px, mit Umschalt 1 px), Strg+Alt+Pos1 = Standard
+(x +30, y +8 relativ zur Bildschirmmitte). Main.py speichert nach `(wows)/ModPrefs/` (falls
+vorhanden, übersteht Patches), sonst in den Mod-Ordner, und gibt die Position über
+`modOvermatcher.position` an die Anzeige. Keine Abhängigkeit von TTaroModUtils (bewusst
+entfernt: Standalone-Ziel; TTaro nutzt verschleierte Systemzugriffe, Referenz-Repos ohne
+Lizenz). Verbleibende Abhängigkeit: ModForge (Einbindung der Anzeige).
+
+Hinweis Datenkomponente: `ui.updateUiElementData` **merged** (laut Doku), Einträge werden
+nicht entfernt. Veraltete byId-Einträge (verlassene Spieler) bleiben bis Gefechtsende stehen.
 
 - 8 Bilder `detail_<bugheck>_<mitte>_<deck>.png` (g/r), erzeugt mit
   `tools/make_detail_icons.py` aus `assets/detail_ship_source.png` (weiße Flächen = Sektionen,
