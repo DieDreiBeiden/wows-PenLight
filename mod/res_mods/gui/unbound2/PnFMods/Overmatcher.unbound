@@ -9,7 +9,7 @@
 # an der Stelle des Schilds).
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
-# Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red}.png, 29x29 (Originale 19x19 in assets/).
+# Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red}.png, 29x29 (gezeichnet von tools/make_ampel_icons.py).
 # Position: per Ziehen ueber TTaroModUtils (Schema ModSchemas/diedreibeiden-overmatcher.schema.json,
 # Muster wie BuildViewer). Benoetigt TTaroModUtils (Makros TT_DRAGGABLE_POSITION/TT_DRAGGABLE/TT_GET_PREF).
 # Ohne gespeicherte Position gelten offsetX/offsetY relativ zur Bildschirmmitte.
