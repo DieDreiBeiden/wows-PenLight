@@ -25,8 +25,8 @@ SIZE = 29  # muss zu iconSize in Overmatcher.unbound passen
 SUPERSAMPLE = 16
 W = SIZE * SUPERSAMPLE
 
-# an die HUD-Farben angelehnt
-AMPEL = {'green': (76, 226, 160), 'yellow': (240, 190, 60), 'red': (232, 72, 52)}
+# Gruen wie die Detail-Schiffe, Orange; beides bewusst abgesetzt vom tuerkisen/gelben HUD
+AMPEL = {'green': (0x3D, 0xDC, 0x5A), 'yellow': (0xFF, 0x8C, 0x00), 'red': (232, 72, 52)}
 # ohne aufgeschaltetes Ziel (oder ohne Bewertung): neutrales Grau statt Ampelfarbe
 NEUTRAL = {'grey': (128, 132, 136)}
 OUTLINE = (24, 26, 28)
