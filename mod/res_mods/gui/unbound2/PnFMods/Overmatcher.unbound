@@ -84,7 +84,6 @@
 (def constant OVERMATCHER_PREF_POSITION 'diedreibeiden.overmatcher.position')
 (def constant OVERMATCHER_PREF_LOCK 'diedreibeiden.overmatcher.disableDragDrop')
 (def constant OVERMATCHER_PREF_SCALE 'diedreibeiden.overmatcher.scale')
-(def constant OVERMATCHER_PREF_SILHOUETTES 'diedreibeiden.overmatcher.useSilhouettes')
 (def constant OVERMATCHER_PREF_COLOR_MODE 'diedreibeiden.overmatcher.colorMode')
 (def constant OVERMATCHER_PREF_DETAIL_MODE 'diedreibeiden.overmatcher.detailMode')
 # Seite in TTaro Mod Config = author + '.' + slug aus dem Schema (fuer das eigene Zahnrad)
@@ -140,8 +139,6 @@
 		# Optionen aus TTaro Mod Config (Schema ModSchemas/diedreibeiden-overmatcher.schema.json)
 		(macro TT_GET_PREF _varName="'scalePref'" _key="OVERMATCHER_PREF_SCALE")
 		(var uiScale:number = "null != scalePref && null != scalePref.value ? scalePref.value : 1")
-		(macro TT_GET_PREF _varName="'silhouettePref'" _key="OVERMATCHER_PREF_SILHOUETTES")
-		(var useSilhouettes:bool = "null != silhouettePref && null != silhouettePref.value ? silhouettePref.value : OVERMATCHER_SETTINGS.useSilhouettes")
 		(macro TT_GET_PREF _varName="'colorModePref'" _key="OVERMATCHER_PREF_COLOR_MODE")
 		(var isColorBlind:bool = "null != colorModePref && null != colorModePref.value ? colorModePref.value == 1 : false")
 		(macro TT_GET_PREF _varName="'detailModePref'" _key="OVERMATCHER_PREF_DETAIL_MODE")
@@ -192,7 +189,7 @@
 		(var ownShipInfo:gfx = "ownShipInfoId ? $datahub.getEntity(ownShipInfoId) : null")
 		(var ownShortName:str = "ownShipInfo ? ownShipInfo.ship.shortName : ''")
 		(var ownNameIDS:str = "ownShipInfo ? ownShipInfo.ship.nameIDS : ''")
-		(var showSilhouettes:bool = "showDetail && useSilhouettes && targetShortName != '' && ownShortName != ''")
+		(var showSilhouettes:bool = "showDetail && OVERMATCHER_SETTINGS.useSilhouettes && targetShortName != '' && ownShortName != ''")
 
 		# Sektionsfarben: detail = [ich->Ziel Bug, Mitte, Deck, Ziel->ich Bug, Mitte, Deck], 1/0/-1
 		# fuer Target und Me gleich: gruen = Overmatch, rot = kein Overmatch, grau = keine Daten.

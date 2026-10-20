@@ -35,16 +35,6 @@
         },
         {
           "kind": "setting",
-          "control": "toggle",
-          "key": "overmatcher.useSilhouettes",
-          "label": "IDS_OM_USE_SILHOUETTES",
-          "hint": {
-            "text": "IDS_OM_HINT_USE_SILHOUETTES"
-          },
-          "default": true
-        },
-        {
-          "kind": "setting",
           "control": "dropdown",
           "key": "overmatcher.colorMode",
           "label": "IDS_OM_COLOR_MODE",

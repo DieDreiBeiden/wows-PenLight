@@ -64,7 +64,8 @@ PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −1
 Optionen (TTaro Mod Config, Seite `diedreibeiden.overmatcher`; eigenes Zahnrad
 `TT_ConfigButtonElement` links neben der Anzeige wie bei BuildViewer):
 - `overmatcher.detailMode` 0 = Detail mit Alt, 1 = immer (ersetzt die Symbole bei Bewertung)
-- `overmatcher.useSilhouettes` Spiel-Silhouetten an/aus (aus = gezeichnete `detail_*.png`)
+- Silhouetten an/aus nur als `useSilhouettes` in `OVERMATCHER_SETTINGS` (aus der Optionsseite
+  entfernt, Nutzerentscheidung)
 - `overmatcher.colorMode` 0 = Standard, 1 = Farbenblind (Okabe-Ito: Blau #56B4E9 = Overmatch,
   Gelb #F0E442 = nur Bug/Heck, Orange #D55E00 = kein Overmatch); Icons mit Präfix `cb_`,
   Silhouetten per `OVERMATCHER_CT_CB`. Die gezeichneten Ersatzbilder bleiben Standardfarben.

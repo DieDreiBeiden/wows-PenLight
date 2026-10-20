@@ -22,7 +22,6 @@ Zurücksetzen/Sperren in TTaro Mod Config → Overmatcher. Gespeichert wird in `
 Optionen: Zahnrad links neben der Anzeige (sichtbar bei Mauszeiger, z. B. Strg halten) oder
 TTaro Mod Config → Overmatcher:
 - Darstellungsmodus: Detailansicht mit Alt-Taste oder immer
-- Spiel-Silhouetten in der Detailansicht an/aus
 - Farben: Standard (Grün/Orange/Rot) oder Farbenblind (Blau/Gelb/Orange)
 - Größenskalierung 0,5–2,0
 
