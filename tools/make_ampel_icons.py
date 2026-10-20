@@ -5,7 +5,8 @@
 
 Granate = AP-Granate wie im Bewaffnungs-Fenster (grau-metallisch, schraeg nach unten rechts),
 Ampelfarbe auf Spitze und Ring (wo im Original Rot ist).
-Schild  = Signalflaggen Hotel Yankee in Grau, Ampelfarbe auf der rechten Haelfte der H-Flagge.
+Schild  = Wappenschild mit drei Sparren, Rand metallisch grau wie die Granate,
+          Sparren in Ampelfarbe auf Hellgrau.
 Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
 Die frueheren 19x19-Vorlagen in assets/icons_19/ werden nicht mehr verwendet.
 Ausgabe: mod/res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red}.png
@@ -28,7 +29,7 @@ AMPEL = {'green': (76, 226, 160), 'yellow': (240, 190, 60), 'red': (232, 72, 52)
 OUTLINE = (24, 26, 28)
 METAL = (168, 172, 176)
 GUIDE_RING = (92, 94, 98)
-LIGHT, MID, DARK = (205, 208, 210), (128, 132, 136), (88, 92, 96)
+LIGHT = (212, 214, 216)
 
 
 def _grid():
@@ -82,24 +83,38 @@ def shell(color):
     return _outlined(rgb, alpha)
 
 
-def flag(color):
+def _shield_mask(x, y, inset=0.0):
+    """Spitz zulaufender Wappenschild; inset verkleinert ihn fuer die Innenflaeche."""
+    top, bottom, half = 0.04 + inset, 0.97 - inset * 2.2, 0.34 - inset
+    top_y = top + 0.025 * (1 - ((x - 0.5) / 0.34) ** 2)
+    t = np.clip((y - 0.30) / (bottom - 0.30), 0, 1)
+    w = half * np.where(y < 0.30, 1.0, np.clip(1 - t ** 1.5, 0, 1) ** 0.75)
+    return ((y > top_y) & (y < bottom) & (np.abs(x - 0.5) < w)).astype(np.float32)
+
+
+def shield(color):
     x, y = _grid()
-    wave = 0.018 * np.sin(x * 2 * np.pi * 1.2)
-    fold = (0.88 + 0.12 * np.cos(x * 2 * np.pi * 1.2 + 0.6))[..., None]  # Faltenwurf
-    left, right = 0.10, 0.90
-    h_mask = ((x > left) & (x < right) & (y > 0.12 + wave) & (y < 0.48 + wave)).astype(np.float32)
-    y_mask = ((x > left + 0.04) & (x < right - 0.04) &
-              (y > 0.50 + wave) & (y < 0.88 + wave * 1.4)).astype(np.float32)
-    h_col = np.where((x < 0.5)[..., None], np.array(LIGHT, np.float32), np.array(color, np.float32))
-    stripes = (np.floor((x + y) / 0.11) % 2 == 0)[..., None]
-    y_col = np.where(stripes, np.array(MID, np.float32), np.array(DARK, np.float32))
-    rgb, alpha = _compose([(h_mask, h_col * fold), (y_mask, y_col * fold)])
+    outer = _shield_mask(x, y)
+    inner = _shield_mask(x, y, inset=0.065)
+    # Rand metallisch wie der Granatenkoerper (gleiches Grau, Licht von rechts)
+    s = np.clip((x - 0.5) / 0.34, -1, 1)
+    rim_shade = (0.62 + 0.38 * np.cos((s - 0.35) * 1.5) - 0.18 * np.clip(-s, 0, 1))[..., None]
+    # Sparren mit Spitze nach oben, unten in Ampelfarbe auslaufend
+    k = (y - 0.85 * np.abs(x - 0.5) - 0.03) / 0.15
+    chevron = (((np.floor(k) % 2 == 0) & (k > 0)) | (k > 4.0))[..., None]
+    face = np.where(chevron, np.array(color, np.float32), np.array(LIGHT, np.float32))
+    face_shade = (1.0 + 0.10 * (x - 0.5) / 0.34 - 0.08 * y)[..., None]
+    rgb, alpha = _compose([
+        (outer, np.array(METAL, np.float32) * rim_shade),
+        (_shield_mask(x, y, inset=0.055), np.array(GUIDE_RING, np.float32)),  # Fuge wie Fuehrungsring
+        (inner, face * face_shade),
+    ])
     return _outlined(rgb, alpha)
 
 
 def main():
     written = []
-    for kind, draw in (('shell', shell), ('shield', flag)):
+    for kind, draw in (('shell', shell), ('shield', shield)):
         for state, color in AMPEL.items():
             name = '%s_%s.png' % (kind, state)
             draw(color).reduce(SUPERSAMPLE).save(os.path.join(detail.TARGET_DIR, name))
