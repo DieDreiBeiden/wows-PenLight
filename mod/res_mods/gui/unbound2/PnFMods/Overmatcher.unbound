@@ -5,7 +5,8 @@
 #   '' = keine Daten. Die Beschriftung "Me"/"Target" ist Teil des Bildes.
 # Layout rechts neben dem Fadenkreuz: standardmaessig Granate | Schild kompakt nebeneinander;
 # solange Alt gedrueckt ist, ersetzen die beschrifteten Detail-Schiffe die Symbole:
-# "Me" (eigenes Schiff, Ziel -> ich) | "Target" (Ziel, ich -> Ziel).
+# "Target" (Ziel, ich -> Ziel, an der Stelle der Granate) | "Me" (eigenes Schiff, Ziel -> ich,
+# an der Stelle des Schilds).
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
 # Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red}.png, 29x29 (Originale 19x19 in assets/).
@@ -147,8 +148,9 @@
 		(hblock
 			(bind visible "altVision")
 			(style (position = "absolute") (left = 0) (top = 0))
-			(element OvermatcherShip _url="defenseDetail")
+			# links Target (gehoert zur Granate), rechts Me (gehoert zum Schild)
 			(element OvermatcherShip _url="attackDetail")
+			(element OvermatcherShip _url="defenseDetail")
 		)
 	)
 )

@@ -36,8 +36,8 @@ der Beplankung, nicht Zitadellentreffer.
 Layout (rechts unter dem Fadenkreuz, linke obere Ecke Standard x +30, y +8):
 - ohne Alt: Granate | Schild (29×29) kompakt, 4 px Abstand
 - mit Alt: die Symbole werden ausgeblendet, an ihrer Stelle zwei Schiffe (125×75, 8 px
-  Abstand) mit eingebauter Beschriftung oben links auf dem Türkis: „Me“ = eigenes Schiff
-  (Ziel → ich), „Target“ = Ziel (ich → Ziel); 16 Bilder `detail_<me|target>_<b>_<m>_<d>.png`,
+  Abstand) mit eingebauter Beschriftung oben links auf dem Türkis: links „Target“ = Ziel
+  (ich → Ziel, unter der Granate), rechts „Me“ = eigenes Schiff (Ziel → ich, unter dem Schild); 16 Bilder `detail_<me|target>_<b>_<m>_<d>.png`,
   Schrift DejaVu Sans Bold 10 px (freie Lizenz);
   Bug/Heck, Mitte, Deck grün/rot = gut/schlecht für mich. Die Schiffszeile liegt absolut an
   der Position der Symbole, damit nichts springt.
