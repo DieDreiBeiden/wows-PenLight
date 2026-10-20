@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 5,
+  "id": "ombfa94db7db89439222ff66",
+  "author": "diedreibeiden",
+  "modName": "Overmatcher",
+  "slug": "overmatcher",
+  "order": 50,
+  "tree": [
+    {
+      "kind": "group",
+      "key": "overmatcher.general",
+      "display": "section",
+      "label": "IDS_TT_TITLE_GENERAL",
+      "collapse": "expanded",
+      "children": [
+        {
+          "kind": "setting",
+          "control": "toggle",
+          "key": "overmatcher.disableDragDrop",
+          "label": "IDS_TT_DISABLE_DRAG_DROP",
+          "hint": {
+            "text": "IDS_TT_HINT_DISABLE_DRAG_DROP"
+          },
+          "default": false
+        },
+        {
+          "kind": "setting",
+          "control": "position",
+          "key": "overmatcher.position",
+          "label": "IDS_TT_DRAGDROP_RESET",
+          "hint": {
+            "text": "IDS_TT_HINT_DRAGDROP_RESET"
+          },
+          "defaultPosition": {
+            "x": {
+              "anchor": "center",
+              "offset": 30
+            },
+            "y": {
+              "anchor": "middle",
+              "offset": 8
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

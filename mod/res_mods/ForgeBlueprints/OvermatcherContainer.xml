@@ -5,6 +5,6 @@
   <ubMountInBattle unbound="2"
                    rootElementId="OvermatcherRoot"
                    name="unbound2Overmatcher"
-                   hitTest="false"
+                   hitTest="true"
                    after="CrosshairContainer"/>
 </mod>

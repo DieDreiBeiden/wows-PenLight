@@ -11,6 +11,12 @@ Spiel beenden. Ordner mit der **höchsten Nummer** unter `World_of_Warships\bin\
 | `PnFMods\Overmatcher\shell_*.png`, `shield_*.png` | Icons Granate/Schild (19×19) |
 | `gui\unbound2\PnFMods\Overmatcher.unbound` | Anzeige am Fadenkreuz (ab 0.2, benötigt ModForge) |
 | `ForgeBlueprints\OvermatcherContainer.xml` | ModForge-Manifest für die Anzeige |
+| `ModSchemas\diedreibeiden-overmatcher.schema.json` | Einstellungsseite in TTaro Mod Config (Position, Sperre) |
+
+Voraussetzung: **ModForge** und **TTaroModUtils** (TTaro Mod Config) müssen installiert sein.
+
+Position: im Gefecht mit Mauszeiger (z. B. Strg halten) die Symbole greifen und ziehen.
+Zurücksetzen/Sperren in TTaro Mod Config → Overmatcher. Gespeichert wird in `(wows)/ModPrefs/`.
 
 Ablageorte wie bei PenetrationCalculator (vom Nutzer bestätigt).
 

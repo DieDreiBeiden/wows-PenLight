@@ -38,6 +38,14 @@ Granate | Schild, immer sichtbar. Mit Alt erscheint unter jedem Symbol das Schif
 (50×30, ich → Ziel bzw. Ziel → ich) mit Bug/Heck, Mitte, Deck grün/rot = gut/schlecht für mich.
 PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
 
+Position im Spiel per Ziehen über TTaroModUtils (wie BuildViewer): eigenes Schema
+`ModSchemas/diedreibeiden-overmatcher.schema.json` (eigene `id`, nicht kopiert – TTaro warnt,
+doppelte IDs sperren beide Mods), Schlüssel `diedreibeiden.overmatcher.position` und
+`…disableDragDrop`. Ohne gespeicherte Position gilt der Rückfall aus `OVERMATCHER_SETTINGS`.
+Abhängigkeit: ModForge + TTaroModUtils (Makros `TT_GET_PREF`, `TT_DRAGGABLE_POSITION`,
+`TT_DRAGGABLE`). Referenz-Repos: github.com/AndrewTaro (ohne Lizenzdatei → nur als Referenz,
+kein Code übernommen).
+
 - 8 Bilder `detail_<bugheck>_<mitte>_<deck>.png` (g/r), erzeugt mit
   `tools/make_detail_icons.py` aus `assets/detail_ship_source.png` (weiße Flächen = Sektionen,
   Hintergrund und Umriss bleiben).
