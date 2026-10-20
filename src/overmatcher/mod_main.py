@@ -160,11 +160,12 @@ def _report(results):
 def ui_payload(results):
     """Daten fuer Overmatcher.unbound: Schluessel = Avatar-ID (als Text) bzw. Spielername.
 
-    Wert: [granate, schild, [ich->ziel bug, mitte, deck, ziel->ich bug, mitte, deck]]
+    Wert: [granate, schild, [ich->ziel bug, mitte, deck, ziel->ich bug, mitte, deck],
+           bild_granate, bild_schild]  (Bildnamen ohne .png, '' = keine Daten)
     """
     by_id, by_name = {}, {}
     for pid, r in results.items():
-        pair = [r['attack'], r['defense'], r['detail']]
+        pair = [r['attack'], r['defense'], r['detail']] + list(detail_icons(r['detail']))
         by_id[str(pid)] = pair
         if r.get('player'):
             by_name[r['player']] = pair

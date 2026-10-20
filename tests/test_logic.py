@@ -8,7 +8,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from overmatcher.logic import (GREEN, RED, YELLOW, attack_color, defense_color,
-                               evaluate, overmatches, zone_detail)
+                               detail_icons, evaluate, overmatches, zone_detail)
 
 
 class OvermatchRule(unittest.TestCase):
@@ -59,6 +59,11 @@ class Detail(unittest.TestCase):
         hawaii = {'bow': 27.0, 'mid': 28.0, 'deck': 36.0}
         self.assertEqual(zone_detail(460, hawaii), [1, 1, 0])
         self.assertEqual(zone_detail(400, hawaii), [1, 0, 0])  # 400/14,3 = 27,97 mm
+
+    def test_icons(self):
+        # ich overmatche Bug, nicht Mitte/Deck; Gegner overmatcht Bug+Mitte bei mir
+        self.assertEqual(detail_icons([1, 0, 0, 1, 1, 0]), ('detail_g_r_r', 'detail_r_r_g'))
+        self.assertEqual(detail_icons([0, -1, 0, 0, 0, 0]), ('', 'detail_g_g_g'))
 
     def test_unknown_zone(self):
         self.assertEqual(zone_detail(460, {'bow': 27.0, 'mid': None, 'deck': 36.0}), [1, -1, 0])

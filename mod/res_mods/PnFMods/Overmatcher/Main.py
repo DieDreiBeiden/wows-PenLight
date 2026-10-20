@@ -60,6 +60,20 @@ def zone_detail(caliber_mm, ship):
     return out
 
 
+def detail_icons(detail):
+    """Bildnamen der Detailansicht (ohne .png) fuer [ich->ziel..., ziel->ich...].
+
+    Farbe = gut fuer mich: Granate g bei Overmatch, Schild r bei Overmatch.
+    Fehlt eine Zone (-1), wird fuer diese Zeile kein Bild angezeigt ('').
+    """
+    def name(values, overmatch_letter):
+        if -1 in values:
+            return ''
+        other = 'r' if overmatch_letter == 'g' else 'g'
+        return 'detail_' + '_'.join(overmatch_letter if v else other for v in values)
+    return name(detail[:3], 'g'), name(detail[3:], 'r')
+
+
 def evaluate(me, enemy):
     """me/enemy: dict mit 'class', 'caliber', 'bow', 'deck', optional 'mid' (mm).
 
@@ -236,11 +250,12 @@ def _report(results):
 def ui_payload(results):
     """Daten fuer Overmatcher.unbound: Schluessel = Avatar-ID (als Text) bzw. Spielername.
 
-    Wert: [granate, schild, [ich->ziel bug, mitte, deck, ziel->ich bug, mitte, deck]]
+    Wert: [granate, schild, [ich->ziel bug, mitte, deck, ziel->ich bug, mitte, deck],
+           bild_granate, bild_schild]  (Bildnamen ohne .png, '' = keine Daten)
     """
     by_id, by_name = {}, {}
     for pid, r in results.items():
-        pair = [r['attack'], r['defense'], r['detail']]
+        pair = [r['attack'], r['defense'], r['detail']] + list(detail_icons(r['detail']))
         by_id[str(pid)] = pair
         if r.get('player'):
             by_name[r['player']] = pair

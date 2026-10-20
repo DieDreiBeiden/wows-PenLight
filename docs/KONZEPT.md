@@ -33,10 +33,15 @@ der Beplankung, nicht Zitadellentreffer.
 
 ## Detailansicht (Alt gedrückt)
 
-Zusätzlich zu Granate/Schild (die immer sichtbar bleiben, auch bei Rot/Grün) eine Tabelle: Zeilen Granate (ich → Ziel) und Schild (Ziel → ich),
-Spalten Bug/Heck, Mitte, Deck. Punkt grün/rot = gut/schlecht für mich, grau = keine Daten.
-„Mitte“ = dünnste Seitenplatte mittschiffs (`Cas_Belt`, `SSC_ConstrSide`); seit Variante B
-auch Teil der Ampel.
+Zusätzlich zu Granate/Schild (die immer sichtbar bleiben) zwei Zeilen unter den Icons:
+Granate-Icon + Schiff (ich → Ziel), Schild-Icon + Schiff (Ziel → ich). Das Schiff
+(50×30) zeigt Bug/Heck, Mitte und Deck grün/rot = gut/schlecht für mich.
+
+- 8 Bilder `detail_<bugheck>_<mitte>_<deck>.png` (g/r), erzeugt mit
+  `tools/make_detail_icons.py` aus `assets/detail_ship_source.png` (weiße Flächen = Sektionen,
+  Hintergrund und Umriss bleiben).
+- Python wählt das Bild (`detail_icons`), fehlende Daten → Zeile ausgeblendet.
+- „Mitte“ = dünnste Seitenplatte mittschiffs (`Cas_Belt`, `SSC_ConstrSide`), Teil der Ampel.
 
 Abgleich Mitte mit dem Wiki: Thunderer/Conqueror 32, Moskva/Stalingrad 50, Petropavlovsk 40,
 Des Moines/Hindenburg/Zao 30, Worcester 25, Minotaur/Neptune 16 – alle passend;

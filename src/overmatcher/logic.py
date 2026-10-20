@@ -54,6 +54,20 @@ def zone_detail(caliber_mm, ship):
     return out
 
 
+def detail_icons(detail):
+    """Bildnamen der Detailansicht (ohne .png) fuer [ich->ziel..., ziel->ich...].
+
+    Farbe = gut fuer mich: Granate g bei Overmatch, Schild r bei Overmatch.
+    Fehlt eine Zone (-1), wird fuer diese Zeile kein Bild angezeigt ('').
+    """
+    def name(values, overmatch_letter):
+        if -1 in values:
+            return ''
+        other = 'r' if overmatch_letter == 'g' else 'g'
+        return 'detail_' + '_'.join(overmatch_letter if v else other for v in values)
+    return name(detail[:3], 'g'), name(detail[3:], 'r')
+
+
 def evaluate(me, enemy):
     """me/enemy: dict mit 'class', 'caliber', 'bow', 'deck', optional 'mid' (mm).
 
