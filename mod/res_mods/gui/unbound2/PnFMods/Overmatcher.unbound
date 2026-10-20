@@ -6,7 +6,7 @@
 # beiden Detail-Schiffe (ich -> Ziel | Ziel -> ich).
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
-# Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red}.png, 19x19 wie PenCalc.
+# Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red}.png, 29x29 (Originale 19x19 in assets/).
 # Position: per Ziehen ueber TTaroModUtils (Schema ModSchemas/diedreibeiden-overmatcher.schema.json,
 # Muster wie BuildViewer). Benoetigt TTaroModUtils (Makros TT_DRAGGABLE_POSITION/TT_DRAGGABLE/TT_GET_PREF).
 # Ohne gespeicherte Position gelten offsetX/offsetY relativ zur Bildschirmmitte.
@@ -19,6 +19,8 @@
 	offsetY: 8,
 	# Abstand zwischen den Spalten Granate | Schild
 	gap: 6,
+	# Groesse von Granate/Schild (Icons werden so erzeugt, tools/make_ampel_icons.py)
+	iconSize: 29,
 	# Abstand zwischen Symbolzeile und Detail-Schiffen (Alt)
 	detailGap: 3,
 	# Groesse der Detail-Schiffe (Bilder werden in dieser Groesse erzeugt, tools/make_detail_icons.py)
@@ -168,7 +170,7 @@
 (def element OvermatcherIcon(_url:str) layout=true
 	(style
 		(bind backgroundImage "_url")
-		(width = 19) (height = 19)
+		(bind width "OVERMATCHER_SETTINGS.iconSize") (bind height "OVERMATCHER_SETTINGS.iconSize")
 		(backgroundSize = "fill")
 		(bind marginRight "OVERMATCHER_SETTINGS.gap")
 	)

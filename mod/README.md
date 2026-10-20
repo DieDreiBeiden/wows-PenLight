@@ -8,7 +8,7 @@ Spiel beenden. Ordner mit der **höchsten Nummer** unter `World_of_Warships\bin\
 | `PnFModsLoader.py` | leere Datei, aktiviert Python-Mods (bei dir schon vorhanden) |
 | `PnFMods\Overmatcher\Main.py` | die Mod (generiert, siehe unten) |
 | `PnFMods\Overmatcher\ships.json` | Panzerungs-/Kaliberdaten für genau eine Spielversion |
-| `PnFMods\Overmatcher\shell_*.png`, `shield_*.png` | Icons Granate/Schild (19×19) |
+| `PnFMods\Overmatcher\shell_*.png`, `shield_*.png` | Icons Granate/Schild (29×29) |
 | `gui\unbound2\PnFMods\Overmatcher.unbound` | Anzeige am Fadenkreuz (ab 0.2, benötigt ModForge) |
 | `ForgeBlueprints\OvermatcherContainer.xml` | ModForge-Manifest für die Anzeige |
 | `ModSchemas\diedreibeiden-overmatcher.schema.json` | Einstellungsseite in TTaro Mod Config (Position, Sperre) |
@@ -37,3 +37,6 @@ gebraucht und kann ebenfalls gelöscht werden.
 2. `python3 -I tools/gameparams.py GameParams.data ships_full.json mod/res_mods/PnFMods/Overmatcher/ships.json <Version>`
    (`<Version>` wie im python.log, z. B. `15,9,0,13357625`)
 3. `python3 -I tools/build_mod.py`, Tests: `python3 -m unittest discover -s tests`
+
+Icons neu erzeugen (nur nach Änderung der Grafiken): `python3 -I tools/make_ampel_icons.py`
+(Quelle `assets/icons_19/`) und `python3 -I tools/make_detail_icons.py` (Quelle `assets/detail_ship_source.png`).
