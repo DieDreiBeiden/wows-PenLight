@@ -2,9 +2,9 @@
 # Daten: CC.mods_DataComponent 'modOvermatcher' aus Main.py
 #   {byId: {'<avatarId>': [attack, defense, detail, attackImage, defenseImage]}, byName: {...}}
 #   attackImage/defenseImage = Detail-Bild ohne .png (detail_<bugheck>_<mitte>_<deck>), '' = keine Daten
-# Layout rechts neben dem Fadenkreuz: zwei Spalten je detailWidth breit, oben das Symbol
-# (mittig), darunter bei Alt das Detail-Schiff (links ich -> Ziel, rechts Ziel -> ich).
-# Die Spaltenbreite gilt auch ohne Alt, damit beim Druecken nichts verrutscht.
+# Layout rechts neben dem Fadenkreuz: standardmaessig Granate | Schild kompakt nebeneinander;
+# solange Alt gedrueckt ist, ersetzen die beschrifteten Detail-Schiffe die Symbole:
+# "Me" (eigenes Schiff, Ziel -> ich) | "Target" (Ziel, ich -> Ziel).
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
 # Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red}.png, 29x29 (Originale 19x19 in assets/).
@@ -16,15 +16,17 @@
 (def constant OVERMATCHER_SETTINGS {
 	# Rueckfall-Position (linke obere Ecke der Anzeige), solange TTaroModUtils keine liefert:
 	# Abstand zur Bildschirmmitte in Pixeln (x: + = rechts, y: + = unten). x >= 30 haelt die
-	# Detail-Schiffe von der senkrechten Fadenkreuzlinie fern.
+	# Detail-Schiffe (Alt) von der senkrechten Fadenkreuzlinie fern.
 	offsetX: 30,
 	offsetY: 8,
-	# Abstand zwischen den Spalten Granate | Schild
-	gap: 8,
+	# Abstand zwischen Granate und Schild
+	iconGap: 4,
 	# Groesse von Granate/Schild (Icons werden so erzeugt, tools/make_ampel_icons.py)
 	iconSize: 29,
-	# Abstand zwischen Symbol und Detail-Schiff (Alt)
-	detailGap: 4,
+	# Abstand zwischen den beiden Detail-Schiffen (Alt)
+	shipGap: 8,
+	# Abstand Beschriftung -> Detail-Schiff
+	labelGap: 1,
 	# Groesse der Detail-Schiffe (Bilder werden in dieser Groesse erzeugt, tools/make_detail_icons.py)
 	detailWidth: 125,
 	detailHeight: 75
@@ -138,31 +140,46 @@
 			(macro TT_DRAGGABLE _fullKey="OVERMATCHER_PREF_POSITION" _isDragEnabled="!isPositionLocked")
 		)
 		(hblock
-			(element OvermatcherColumn _icon="attackIcon" _ship="attackDetail" _showDetail="altVision")
-			(element OvermatcherColumn _icon="defenseIcon" _ship="defenseDetail" _showDetail="altVision")
+			(bind visible "!altVision")
+			(element OvermatcherIcon _url="attackIcon")
+			(element OvermatcherIcon _url="defenseIcon")
+		)
+		# absolut an derselben Stelle wie die Symbole, damit nichts springt
+		(hblock
+			(bind visible "altVision")
+			(style (position = "absolute") (left = 0) (top = 0))
+			(element OvermatcherShip _label="'Me'" _url="defenseDetail")
+			(element OvermatcherShip _label="'Target'" _url="attackDetail")
 		)
 	)
 )
 
-# Spalte: Symbol mittig, darunter bei Alt das Detail-Schiff in der Farbkombination.
-# Farbe immer "gut fuer mich" (Python waehlt das Bild). Leeres _ship (keine Daten) -> Platz bleibt.
-(def element OvermatcherColumn(_icon:str, _ship:str, _showDetail:bool) layout=true
+# Beschriftetes Detail-Schiff. Farbe immer "gut fuer mich" (Python waehlt das Bild):
+# Me = eigenes Schiff (gruen = Gegner overmatcht hier nicht), Target = Ziel (gruen = ich overmatche).
+# Leeres _url (keine Daten) -> Platz bleibt, damit das andere Schiff nicht verrutscht.
+(def element OvermatcherShip(_label:str, _url:str) layout=true
 	(style
 		(bind width "OVERMATCHER_SETTINGS.detailWidth")
-		(bind marginRight "OVERMATCHER_SETTINGS.gap")
+		(bind marginRight "OVERMATCHER_SETTINGS.shipGap")
 	)
-	(element OvermatcherIcon _url="_icon")
-	(block
-		(bind visible "_showDetail")
+	(tf
+		(class $OvermatcherText)
+		(bind text "_label")
 		(style
-			(bind marginTop "OVERMATCHER_SETTINGS.detailGap")
+			(bind width "OVERMATCHER_SETTINGS.detailWidth")
+			(textAlign = "center")
+		)
+	)
+	(block
+		(style
+			(bind marginTop "OVERMATCHER_SETTINGS.labelGap")
 			(bind width "OVERMATCHER_SETTINGS.detailWidth")
 			(bind height "OVERMATCHER_SETTINGS.detailHeight")
 		)
 		(block
-			(bind visible "_ship != ''")
+			(bind visible "_url != ''")
 			(style
-				(bind backgroundImage "_ship")
+				(bind backgroundImage "_url")
 				(bind width "OVERMATCHER_SETTINGS.detailWidth")
 				(bind height "OVERMATCHER_SETTINGS.detailHeight")
 				(backgroundSize = "fill")
@@ -176,8 +193,7 @@
 		(bind backgroundImage "_url")
 		(bind width "OVERMATCHER_SETTINGS.iconSize") (bind height "OVERMATCHER_SETTINGS.iconSize")
 		(backgroundSize = "fill")
-		# mittig in der Spalte
-		(bind marginLeft "(OVERMATCHER_SETTINGS.detailWidth - OVERMATCHER_SETTINGS.iconSize) / 2")
+		(bind marginRight "OVERMATCHER_SETTINGS.iconGap")
 	)
 )
 
