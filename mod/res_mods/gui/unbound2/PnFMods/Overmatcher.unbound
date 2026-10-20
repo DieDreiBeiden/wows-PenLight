@@ -57,7 +57,9 @@
 	labelWidth: 186,
 	labelHeight: 24,
 	# die Bilder haben oben freien Raum; Beschriftung so weit in die Bildflaeche ziehen
-	labelOverlap: 8
+	labelOverlap: 8,
+	# Abstand Silhouette -> Schiffsname
+	nameGap: 3
 })
 
 # Einfaerbung der Silhouetten: Multiplikator 0 + Offset = Vollfarbe, Alpha bleibt (Form der Silhouette).
@@ -155,12 +157,14 @@
 		(var targetVehicleInfo:gfx = "currentTarget && currentTarget.hasComponent(CC.vehicleInfo) ? currentTarget.vehicleInfo : null" (event "evTargetChanged"))
 		(var targetShipInfo:gfx = "targetVehicleInfo ? $datahub.getEntity(targetVehicleInfo.shipInfoEntityId) : null" (event "evTargetChanged"))
 		(var targetShortName:str = "targetShipInfo ? targetShipInfo.ship.shortName : ''" (event "evTargetChanged"))
+		(var targetNameIDS:str = "targetShipInfo ? targetShipInfo.ship.nameIDS : ''" (event "evTargetChanged"))
 		(var ownPlayerAvatar:gfx = "$datahub.getSingleEntity(CC.playerAvatar)")
 		(var ownAvatarEntity:gfx = "ownPlayerAvatar ? $datahub.getPrimaryEntity(CC.avatar, ownPlayerAvatar.avatar.id) : null")
 		(var ownVehicleInfo:gfx = "ownAvatarEntity && ownAvatarEntity.hasComponent(CC.vehicleInfo) ? ownAvatarEntity.vehicleInfo : null" (event "ownAvatarEntity.evAdded"))
 		(var ownShipInfoId:number = "ownVehicleInfo ? ownVehicleInfo.shipInfoEntityId : 0" (event "ownVehicleInfo.evShipInfoEntityIdChanged"))
 		(var ownShipInfo:gfx = "ownShipInfoId ? $datahub.getEntity(ownShipInfoId) : null")
 		(var ownShortName:str = "ownShipInfo ? ownShipInfo.ship.shortName : ''")
+		(var ownNameIDS:str = "ownShipInfo ? ownShipInfo.ship.nameIDS : ''")
 		(var showSilhouettes:bool = "showDetail && OVERMATCHER_SETTINGS.useSilhouettes && targetShortName != '' && ownShortName != ''")
 
 		# Sektionsfarben: detail = [ich->Ziel Bug, Mitte, Deck, Ziel->ich Bug, Mitte, Deck], 1/0/-1
@@ -215,9 +219,9 @@
 		(block
 			(bind visible "showSilhouettes")
 			(style (position = "absolute") (left = 0) (top = 0))
-			(element OvermatcherSilhouetteShip _shortName="targetShortName" _label="OVERMATCHER_ICON_PATH + 'label_target.png'"
+			(element OvermatcherSilhouetteShip _shortName="targetShortName" _label="OVERMATCHER_ICON_PATH + 'label_target.png'" _nameIDS="targetNameIDS"
 				_bow="tBow" _mid="tMid" _deck="tDeck")
-			(element OvermatcherSilhouetteShip _shortName="ownShortName" _label="OVERMATCHER_ICON_PATH + 'label_me.png'"
+			(element OvermatcherSilhouetteShip _shortName="ownShortName" _label="OVERMATCHER_ICON_PATH + 'label_me.png'" _nameIDS="ownNameIDS"
 				_bow="mBow" _mid="mMid" _deck="mDeck")
 		)
 	)
@@ -244,10 +248,11 @@
 )
 
 # Silhouetten-Ansicht (Prototyp): Beschriftung, Silhouette in vier Sektionen (Deck oben,
-# Heck/Mitte/Bug unten).
+# Heck/Mitte/Bug unten), darunter der Schiffsname in der Spielschrift (wie ShipLabel im
+# Spiel-Lebensbalken: toUpper(tr(ship.nameIDS))), mittig.
 # Die Silhouette wird mehrfach uebereinander gelegt; jede Lage zeigt per Maske nur ihren
 # Bereich und wird per colorTransform eingefaerbt (Muster: OwnHealthBarValue im Spiel).
-(def element OvermatcherSilhouetteShip(_shortName:str, _label:str, _bow:str, _mid:str, _deck:str) layout=true
+(def element OvermatcherSilhouetteShip(_shortName:str, _label:str, _nameIDS:str, _bow:str, _mid:str, _deck:str) layout=true
 	(scope
 		(var s:dict = "OVERMATCHER_SETTINGS")
 		(var url:str = "'img://gui/ship_bars/' + _shortName + '_h.png'")
@@ -276,6 +281,19 @@
 		(element OvermatcherZone _url="url" _from="0" _to="s.sternEnd - gap" _top="s.deckLine + gapY" _bottom="1" _ct="OVERMATCHER_CT[_bow]")
 		(element OvermatcherZone _url="url" _from="s.sternEnd + gap" _to="s.bowStart - gap" _top="s.deckLine + gapY" _bottom="1" _ct="OVERMATCHER_CT[_mid]")
 		(element OvermatcherZone _url="url" _from="s.bowStart + gap" _to="1" _top="s.deckLine + gapY" _bottom="1" _ct="OVERMATCHER_CT[_bow]")
+	)
+	(block
+		(bind visible "_nameIDS != ''")
+		(style
+			(bind width "s.silhouetteWidth")
+			(bind marginTop "s.nameGap")
+			(align = "center")
+		)
+		(tf
+			(class $TextDefaultBold13NM)
+			(class $FontEnableReadability)
+			(bind text "toUpper(tr(_nameIDS))")
+		)
 	)
 )
 

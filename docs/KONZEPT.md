@@ -52,7 +52,9 @@ Ziel über `vehicleInfo.shipInfoEntityId`). Lagen mit Maske + `colorTransform`: 
 Deck = alles oberhalb der Decklinie (`deckLine` 0,71 der Bildhöhe, gemessen an Rhode Island,
 Vermont, Trento; der erste Prototyp mit Balken über der Silhouette passte optisch nicht).
 Beschriftung `label_<target|me>.png` (186×24, Mini-Icon 14 px + Text 13 px mittig, Text in
-Zielgröße gezeichnet für Schärfe). Granate auf Schildhöhe skaliert (`SHELL_SCALE`). Ohne Silhouetten-Namen gelten die `detail_*.png`.
+Zielgröße gezeichnet für Schärfe). Granate auf Schildhöhe skaliert (`SHELL_SCALE`).
+Unter jeder Silhouette der Schiffsname in der Spielschrift (`$TextDefaultBold13NM`,
+`toUpper(tr(ship.nameIDS))` wie im Spiel-Lebensbalken), mittig. Ohne Silhouetten-Namen gelten die `detail_*.png`.
 Die Silhouetten werden nicht mitgeliefert (Spieldateien), passen also nach jedem Patch.
 PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
 
