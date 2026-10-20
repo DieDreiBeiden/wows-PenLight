@@ -92,7 +92,8 @@ def _ship_record(ships, player_id):
     row = ships.get(name)
     if row is None:
         return name, None
-    return name, {'class': row[0], 'bow': row[1], 'deck': row[2], 'caliber': row[3]}
+    mid = row[4] if len(row) > 4 else None
+    return name, {'class': row[0], 'bow': row[1], 'deck': row[2], 'caliber': row[3], 'mid': mid}
 
 
 def _self_player_id(players):
@@ -157,10 +158,13 @@ def _report(results):
 
 
 def ui_payload(results):
-    """Daten fuer Overmatcher.unbound: Schluessel = Avatar-ID (als Text) bzw. Spielername."""
+    """Daten fuer Overmatcher.unbound: Schluessel = Avatar-ID (als Text) bzw. Spielername.
+
+    Wert: [granate, schild, [ich->ziel bug, mitte, deck, ziel->ich bug, mitte, deck]]
+    """
     by_id, by_name = {}, {}
     for pid, r in results.items():
-        pair = [r['attack'], r['defense']]
+        pair = [r['attack'], r['defense'], r['detail']]
         by_id[str(pid)] = pair
         if r.get('player'):
             by_name[r['player']] = pair

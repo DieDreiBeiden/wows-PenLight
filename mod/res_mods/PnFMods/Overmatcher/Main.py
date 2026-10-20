@@ -48,8 +48,17 @@ def is_relevant(my_class, enemy_class):
     return my_class in RELEVANT_CLASSES and enemy_class in RELEVANT_CLASSES
 
 
+def zone_detail(caliber_mm, ship):
+    """Detailansicht: [bug, mitte, deck] je 1 (overmatch), 0 (nein), -1 (keine Daten)."""
+    out = []
+    for zone in ('bow', 'mid', 'deck'):
+        mm = ship.get(zone)
+        out.append(-1 if mm is None else int(overmatches(caliber_mm, mm)))
+    return out
+
+
 def evaluate(me, enemy):
-    """me/enemy: dict mit 'class', 'caliber', 'bow', 'deck' (mm).
+    """me/enemy: dict mit 'class', 'caliber', 'bow', 'deck', optional 'mid' (mm).
 
     Liefert None, wenn die Paarung nicht angezeigt werden soll.
     """
@@ -58,6 +67,7 @@ def evaluate(me, enemy):
     return {
         'attack': attack_color(me['caliber'], enemy['bow'], enemy['deck']),
         'defense': defense_color(enemy['caliber'], me['bow'], me['deck']),
+        'detail': zone_detail(me['caliber'], enemy) + zone_detail(enemy['caliber'], me),
     }
 
 
@@ -155,7 +165,8 @@ def _ship_record(ships, player_id):
     row = ships.get(name)
     if row is None:
         return name, None
-    return name, {'class': row[0], 'bow': row[1], 'deck': row[2], 'caliber': row[3]}
+    mid = row[4] if len(row) > 4 else None
+    return name, {'class': row[0], 'bow': row[1], 'deck': row[2], 'caliber': row[3], 'mid': mid}
 
 
 def _self_player_id(players):
@@ -220,10 +231,13 @@ def _report(results):
 
 
 def ui_payload(results):
-    """Daten fuer Overmatcher.unbound: Schluessel = Avatar-ID (als Text) bzw. Spielername."""
+    """Daten fuer Overmatcher.unbound: Schluessel = Avatar-ID (als Text) bzw. Spielername.
+
+    Wert: [granate, schild, [ich->ziel bug, mitte, deck, ziel->ich bug, mitte, deck]]
+    """
     by_id, by_name = {}, {}
     for pid, r in results.items():
-        pair = [r['attack'], r['defense']]
+        pair = [r['attack'], r['defense'], r['detail']]
         by_id[str(pid)] = pair
         if r.get('player'):
             by_name[r['player']] = pair

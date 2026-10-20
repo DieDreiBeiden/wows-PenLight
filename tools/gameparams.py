@@ -12,6 +12,7 @@ Panzerung: Hull-Modul 'armor' = {(lage << 16) | material_id: mm}, Lage 1 = ausse
 Material-Namen: tools/data/collision_materials.json.
 - Bug/Heck = Seitenbeplankung Bug ('Bow_ConstrSide'), Fallback Heck.
 - Deck     = duennste Mittschiffs-Deckplatte ('Cas_Deck', 'SSC_Deck').
+- Mitte    = duennste Mittschiffs-Seitenplatte ('Cas_Belt', 'SSC_ConstrSide'), nur Detailansicht.
 Die Felder 'armourDeck'/'armourExtremities' sind in Build 15.9 nur Platzhalter [-1, -1].
 - Hauptkaliber = 'barrelDiameter' (m) der Geschuetze im Artillerie-Modul.
 - Voll ausgebaut = jeweils letztes Modul in ShipUpgradeInfo.
@@ -27,6 +28,7 @@ RELEVANT_SPECIES = ('Cruiser', 'Battleship')
 
 BOW_MATERIALS = ('Bow_ConstrSide', 'St_ConstrSide')
 DECK_MATERIALS = ('Cas_Deck', 'SSC_Deck')
+MID_MATERIALS = ('Cas_Belt', 'SSC_ConstrSide')
 
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'collision_materials.json')) as _f:
     MATERIAL_NAMES = json.load(_f)
@@ -50,9 +52,17 @@ def bow_mm(plates):
     return None
 
 
-def deck_mm(plates):
-    values = [plates[n] for n in DECK_MATERIALS if n in plates]
+def _thinnest(plates, names):
+    values = [plates[n] for n in names if n in plates]
     return min(values) if values else None
+
+
+def deck_mm(plates):
+    return _thinnest(plates, DECK_MATERIALS)
+
+
+def mid_mm(plates):
+    return _thinnest(plates, MID_MATERIALS)
 
 
 class GPObject(dict):
@@ -151,6 +161,7 @@ def extract(params):
         art_name = _pick(entry, '_Artillery', 'artillery', '_Artillery')
         hull = entry.get(hull_name) or {}
         art = entry.get(art_name) or {}
+        plates = outer_plates(hull.get('armor') or {})
         # Schluessel = voller Name wie shipInfo.name im Client (z. B. PJSB018_Yamato_1944)
         ships[index] = {
             'id': entry.get('id'),
@@ -159,20 +170,21 @@ def extract(params):
             'level': entry.get('level'),
             'hull': hull_name,
             'artillery': art_name,
-            'bow': bow_mm(outer_plates(hull.get('armor') or {})),
-            'deck': deck_mm(outer_plates(hull.get('armor') or {})),
+            'bow': bow_mm(plates),
+            'deck': deck_mm(plates),
+            'mid': mid_mm(plates),
             'caliber': _main_caliber_mm(art),
         }
     return ships
 
 
 def mod_table(ships, game_version):
-    """Kompakte Tabelle fuer die Mod: {name: [klasse, bug, deck, kaliber]}."""
+    """Kompakte Tabelle fuer die Mod: {name: [klasse, bug, deck, kaliber, mitte|None]}."""
     table = {}
     for name, s in ships.items():
         if name.startswith('PX') or None in (s['bow'], s['deck'], s['caliber']):
             continue  # Event-/Operationsschiffe bzw. unvollstaendige Daten
-        table[name] = [s['class'], s['bow'], s['deck'], s['caliber']]
+        table[name] = [s['class'], s['bow'], s['deck'], s['caliber'], s['mid']]
     return {'gameVersion': game_version, 'ships': table}
 
 

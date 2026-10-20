@@ -23,8 +23,8 @@ class Obj(object):
 
 
 SHIPS = {
-    'PASC720_Hawaii': ['Cruiser', 27.0, 36.0, 127.0],
-    'PJSB018_Yamato_1944': ['Battleship', 32.0, 57.0, 460.0],
+    'PASC720_Hawaii': ['Cruiser', 27.0, 36.0, 127.0, 28.0],
+    'PJSB018_Yamato_1944': ['Battleship', 32.0, 57.0, 460.0, 32.0],
     'PBSC110_Minotaur': ['Cruiser', 16.0, 16.0, 152.0],
     'PASC510_Alaska': ['Cruiser', 27.0, 36.0, 305.0],
     'PASD013_Gearing': ['Destroyer', 19.0, 19.0, 127.0],
@@ -91,9 +91,14 @@ class ModTest(unittest.TestCase):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PASD013_Gearing'])
         self.assertEqual(self.ui_data[0], ('modOvermatcher', {'byId': {}, 'byName': {}}))
         self.assertEqual(self.ui_data[-1], ('update', {
-            'byId': {'10': ['red', 'yellow']},
-            'byName': {'bot10': ['red', 'yellow']},
+            # Detail: ich->Ziel [Bug, Mitte, Deck], Ziel->ich [Bug, Mitte, Deck]
+            'byId': {'10': ['red', 'yellow', [0, 0, 0, 1, 1, 0]]},
+            'byName': {'bot10': ['red', 'yellow', [0, 0, 0, 1, 1, 0]]},
         }))
+
+    def test_missing_mid_is_unknown(self):
+        self.run_mod('PASC720_Hawaii', ['PBSC110_Minotaur'])  # Minotaur ohne Mitte-Wert
+        self.assertEqual(self.ui_data[-1][1]['byId']['10'][2], [0, -1, 0, 0, 0, 0])
 
     def test_version_mismatch_disables(self):
         lines = self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'], data_version='15,8,0,1')

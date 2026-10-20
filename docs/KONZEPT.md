@@ -29,6 +29,17 @@ nur Bug 14,1 %, nur Deck 0,9 %, nichts 72,2 % → Granate grün/gelb/rot 12,8/14
 Bewusste Vereinfachung: Gürtel und Kasematte mittschiffs werden nicht bewertet. Ein
 gewinkeltes Ziel kann trotz grüner Granate dort Abpraller erzeugen.
 
+## Detailansicht (Alt gedrückt)
+
+Statt Granate/Schild eine Tabelle: Zeilen Granate (ich → Ziel) und Schild (Ziel → ich),
+Spalten Bug/Heck, Mitte, Deck. Punkt grün/rot = gut/schlecht für mich, grau = keine Daten.
+„Mitte“ = dünnste Seitenplatte mittschiffs (`Cas_Belt`, `SSC_ConstrSide`); sie fließt
+nur in die Detailansicht ein, nicht in die Ampel.
+
+Abgleich Mitte mit dem Wiki: Thunderer/Conqueror 32, Moskva/Stalingrad 50, Petropavlovsk 40,
+Des Moines/Hindenburg/Zao 30, Worcester 25, Minotaur/Neptune 16 – alle passend;
+Bismarck 320 (deutsche BB ohne dünne Kasematte).
+
 ## Sichtbarkeit
 
 Nur wenn eigenes Schiff **und** Gegner Kreuzer oder Schlachtschiff sind

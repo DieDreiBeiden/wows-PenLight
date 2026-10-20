@@ -8,7 +8,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from overmatcher.logic import (GREEN, RED, YELLOW, attack_color, defense_color,
-                               evaluate, overmatches)
+                               evaluate, overmatches, zone_detail)
 
 
 class OvermatchRule(unittest.TestCase):
@@ -46,6 +46,16 @@ class Colors(unittest.TestCase):
         self.assertEqual(defense_color(*self.NONE), GREEN)
 
 
+class Detail(unittest.TestCase):
+    def test_zones(self):
+        hawaii = {'bow': 27.0, 'mid': 28.0, 'deck': 36.0}
+        self.assertEqual(zone_detail(460, hawaii), [1, 1, 0])
+        self.assertEqual(zone_detail(400, hawaii), [1, 0, 0])  # 400/14,3 = 27,97 mm
+
+    def test_unknown_zone(self):
+        self.assertEqual(zone_detail(460, {'bow': 27.0, 'mid': None, 'deck': 36.0}), [1, -1, 0])
+
+
 class Filter(unittest.TestCase):
     def ship(self, cls, caliber, bow, deck):
         return {'class': cls, 'caliber': caliber, 'bow': bow, 'deck': deck}
@@ -60,8 +70,10 @@ class Filter(unittest.TestCase):
         # grosser Kreuzer 305 mm gegen leichten Kreuzer mit 16 mm Huelle
         large = self.ship('Cruiser', 305, 27, 30)
         light = self.ship('Cruiser', 152, 16, 16)
-        self.assertEqual(evaluate(large, light), {'attack': GREEN, 'defense': GREEN})
-        self.assertEqual(evaluate(light, large), {'attack': RED, 'defense': RED})
+        self.assertEqual(evaluate(large, light)['attack'], GREEN)
+        self.assertEqual(evaluate(large, light)['defense'], GREEN)
+        self.assertEqual(evaluate(light, large)['attack'], RED)
+        self.assertEqual(evaluate(light, large)['defense'], RED)
 
     def test_battleship_vs_battleship_shown(self):
         bb = self.ship('Battleship', 460, 32, 32)

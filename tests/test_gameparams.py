@@ -26,11 +26,14 @@ GPData.__module__ = 'GameParams'
 _mod.GPData = GPData
 
 
-def armor(bow, deck, inner_deck=None):
+def armor(bow, deck, inner_deck=None, mid=None):
     """armor-Dict im GameParams-Format: (lage << 16) | material_id -> mm."""
     mat = gameparams.MATERIAL_NAMES.index
     out = {(1 << 16) | mat('Bow_ConstrSide'): bow, (1 << 16) | mat('Cas_Deck'): deck,
            (1 << 16) | mat('Bow_Trans'): 0.0}
+    if mid is not None:
+        out[(1 << 16) | mat('Cas_Belt')] = mid
+        out[(1 << 16) | mat('SSC_ConstrSide')] = mid + 10
     if inner_deck is not None:
         out[(2 << 16) | mat('Cas_Deck')] = inner_deck
     return out
@@ -56,7 +59,7 @@ class GameParamsTest(unittest.TestCase):
         self.path = os.path.join(tempfile.mkdtemp(), 'GameParams.data')
         yamato = ship(
             'PJSB018_Yamato_1944', 'Battleship',
-            {'A_Hull': GPData(armourExtremities=[-1, -1], armourDeck=[-1, -1], armor=armor(32.0, 57.0, inner_deck=200.0))},
+            {'A_Hull': GPData(armourExtremities=[-1, -1], armourDeck=[-1, -1], armor=armor(32.0, 57.0, inner_deck=200.0, mid=32.0))},
             {'A_Artillery': GPData(HP_JGM_1=GPData(barrelDiameter=0.46, numBarrels=3), maxDist=26000)},
             {'H1': GPData(ucType='_Hull', prev='', components={'hull': ['A_Hull']}),
              'A1': GPData(ucType='_Artillery', prev='', components={'artillery': ['A_Artillery']})})
@@ -74,7 +77,8 @@ class GameParamsTest(unittest.TestCase):
         ships = gameparams.extract(gameparams.load(self.path))
         self.assertEqual(sorted(ships), ['PJSB018_Yamato_1944', 'PXSC001_Test'])
         y = ships['PJSB018_Yamato_1944']
-        self.assertEqual((y['class'], y['bow'], y['deck'], y['caliber']), ('Battleship', 32.0, 57.0, 460.0))
+        self.assertEqual((y['class'], y['bow'], y['deck'], y['caliber'], y['mid']),
+                         ('Battleship', 32.0, 57.0, 460.0, 32.0))
 
     def test_final_hull_is_used(self):
         ships = gameparams.extract(gameparams.load(self.path))

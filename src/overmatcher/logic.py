@@ -42,8 +42,17 @@ def is_relevant(my_class, enemy_class):
     return my_class in RELEVANT_CLASSES and enemy_class in RELEVANT_CLASSES
 
 
+def zone_detail(caliber_mm, ship):
+    """Detailansicht: [bug, mitte, deck] je 1 (overmatch), 0 (nein), -1 (keine Daten)."""
+    out = []
+    for zone in ('bow', 'mid', 'deck'):
+        mm = ship.get(zone)
+        out.append(-1 if mm is None else int(overmatches(caliber_mm, mm)))
+    return out
+
+
 def evaluate(me, enemy):
-    """me/enemy: dict mit 'class', 'caliber', 'bow', 'deck' (mm).
+    """me/enemy: dict mit 'class', 'caliber', 'bow', 'deck', optional 'mid' (mm).
 
     Liefert None, wenn die Paarung nicht angezeigt werden soll.
     """
@@ -52,4 +61,5 @@ def evaluate(me, enemy):
     return {
         'attack': attack_color(me['caliber'], enemy['bow'], enemy['deck']),
         'defense': defense_color(enemy['caliber'], me['bow'], me['deck']),
+        'detail': zone_detail(me['caliber'], enemy) + zone_detail(enemy['caliber'], me),
     }

@@ -1,6 +1,8 @@
 # Overmatcher – Anzeige am Fadenkreuz fuer das aufgeschaltete Ziel.
 # Daten: CC.mods_DataComponent 'modOvermatcher' aus Main.py
-#   {byId: {'<avatarId>': [attack, defense]}, byName: {'<spielername>': [...]}}
+#   {byId: {'<avatarId>': [attack, defense, detail]}, byName: {'<spielername>': [...]}}
+#   detail = [ich->ziel bug, mitte, deck, ziel->ich bug, mitte, deck], je 1/0/-1
+# Alt gedrueckt: Detailansicht statt Granate/Schild.
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy). Prototyp: Text statt Icons.
 
@@ -10,7 +12,9 @@
 	offsetX: -70,
 	offsetY: 40,
 	# Abstand zwischen Granate und Schild
-	gap: 10
+	gap: 10,
+	# Spaltenbreite der Detailansicht (Alt)
+	detailColumn: 62
 })
 
 (def constant OVERMATCHER_COMPONENT_KEY 'modOvermatcher')
@@ -76,7 +80,13 @@
 
 		(var verdict:array = "(targetKey != '' && targetKey in byId) ? byId[targetKey]
 								: ((targetName != '' && targetName in byName) ? byName[targetName] : [])")
-		(var hasVerdict:bool = "verdict.length == 2")
+		(var hasVerdict:bool = "verdict.length >= 2")
+		(var detail:array = "verdict.length >= 3 && null != verdict[2] ? verdict[2] : []")
+		(var hasDetail:bool = "detail.length == 6")
+
+		# Detailansicht solange Alt gedrueckt ist (wie PenetrationCalculator)
+		(var cameraEntity:gfx = "$datahub.getSingleEntity(CC.camera)")
+		(var altVision:bool = "cameraEntity.camera.altVision" (event "cameraEntity.camera.evAltVisionChanged"))
 		(var attackColor:number = "hasVerdict ? OVERMATCHER_COLORS[verdict[0]] : 0x808080")
 		(var defenseColor:number = "hasVerdict ? OVERMATCHER_COLORS[verdict[1]] : 0x808080")
 	)
@@ -91,7 +101,7 @@
 	)
 
 	(hblock
-		(bind visible "hasVerdict")
+		(bind visible "hasVerdict && !(altVision && hasDetail)")
 		(style
 			(position = "absolute")
 			(bind left "OVERMATCHER_SETTINGS.offsetX")
@@ -99,6 +109,62 @@
 		)
 		(element OvermatcherBadge _label="'Granate'" _color="attackColor")
 		(element OvermatcherBadge _label="'Schild'" _color="defenseColor")
+	)
+
+	(block
+		(bind visible "hasVerdict && altVision && hasDetail")
+		(style
+			(position = "absolute")
+			(bind left "OVERMATCHER_SETTINGS.offsetX")
+			(bind top "OVERMATCHER_SETTINGS.offsetY")
+		)
+		(element OvermatcherDetailHeader)
+		(element OvermatcherDetailRow _label="'Granate'" _bow="detail[0]" _mid="detail[1]" _deck="detail[2]" _isDefense=false)
+		(element OvermatcherDetailRow _label="'Schild'" _bow="detail[3]" _mid="detail[4]" _deck="detail[5]" _isDefense=true)
+	)
+)
+
+(def element OvermatcherDetailHeader() layout=true
+	(style (flow = "Flow.HORIZONTAL"))
+	(block (style (bind width "OVERMATCHER_SETTINGS.detailColumn")))
+	(element OvermatcherCell _text="'Bug/Heck'")
+	(element OvermatcherCell _text="'Mitte'")
+	(element OvermatcherCell _text="'Deck'")
+)
+
+# Zelle: 1 = Overmatch, 0 = nein, -1 = keine Daten.
+# Farbe immer "gut fuer mich": Granate 1 = gruen, Schild 1 = rot.
+(def element OvermatcherDetailRow(_label:str, _bow:number, _mid:number, _deck:number, _isDefense:bool) layout=true
+	(style (flow = "Flow.HORIZONTAL"))
+	(element OvermatcherCell _text="_label")
+	(element OvermatcherZoneDot _value="_bow" _isDefense="_isDefense")
+	(element OvermatcherZoneDot _value="_mid" _isDefense="_isDefense")
+	(element OvermatcherZoneDot _value="_deck" _isDefense="_isDefense")
+)
+
+(def element OvermatcherCell(_text:str) layout=true
+	(style (bind width "OVERMATCHER_SETTINGS.detailColumn"))
+	(tf
+		(class $OvermatcherText)
+		(bind text "_text")
+	)
+)
+
+(def element OvermatcherZoneDot(_value:number, _isDefense:bool) layout=true
+	(scope
+		(var good:number = "_isDefense ? OVERMATCHER_COLORS.red : OVERMATCHER_COLORS.green")
+		(var bad:number = "_isDefense ? OVERMATCHER_COLORS.green : OVERMATCHER_COLORS.red")
+		(var color:number = "_value < 0 ? 0x808080 : (_value > 0 ? good : bad)")
+	)
+	(style (bind width "OVERMATCHER_SETTINGS.detailColumn") (height = 18))
+	(block
+		(style (width = 14) (height = 14) (marginTop = 4))
+		(controller $Sector
+			(arc = 360)
+			(bind radius "6")
+			(bind color "color")
+			(offset = 0)
+		)
 	)
 )
 
