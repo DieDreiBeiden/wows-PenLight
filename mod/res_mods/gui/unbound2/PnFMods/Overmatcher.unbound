@@ -4,7 +4,8 @@
 #   detail = [ich->ziel bug, mitte, deck, ziel->ich bug, mitte, deck], je 1/0/-1
 # Alt gedrueckt: Detailansicht statt Granate/Schild.
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
-# XTargetTracker (Battle Expert, AutoSpy). Prototyp: Text statt Icons.
+# XTargetTracker (Battle Expert, AutoSpy).
+# Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red}.png, 19x19 wie PenCalc.
 
 # Einstellungen
 (def constant OVERMATCHER_SETTINGS {
@@ -19,12 +20,15 @@
 
 (def constant OVERMATCHER_COMPONENT_KEY 'modOvermatcher')
 
-# RGB ohne Alpha (wie $Sector-Farben in PenetrationCalculator)
+# RGB ohne Alpha (wie $Sector-Farben in PenetrationCalculator), gleich den Icon-Farben
 (def constant OVERMATCHER_COLORS {
-	green:  0x46D246,
-	yellow: 0xFFD200,
-	red:    0xFF3C3C
+	green:  0x3DDC5A,
+	yellow: 0xFF8C00,
+	red:    0xE00000
 })
+
+# Pfad relativ zu gui/unbound2/PnFMods/ (wie PenetrationCalculator)
+(def constant OVERMATCHER_ICON_PATH 'url:../../../PnFMods/Overmatcher/')
 
 (def element OvermatcherRoot() layout=true
 	(scope
@@ -87,8 +91,8 @@
 		# Detailansicht solange Alt gedrueckt ist (wie PenetrationCalculator)
 		(var cameraEntity:gfx = "$datahub.getSingleEntity(CC.camera)")
 		(var altVision:bool = "cameraEntity.camera.altVision" (event "cameraEntity.camera.evAltVisionChanged"))
-		(var attackColor:number = "hasVerdict ? OVERMATCHER_COLORS[verdict[0]] : 0x808080")
-		(var defenseColor:number = "hasVerdict ? OVERMATCHER_COLORS[verdict[1]] : 0x808080")
+		(var attackIcon:str = "hasVerdict ? OVERMATCHER_ICON_PATH + 'shell_' + verdict[0] + '.png' : ''")
+		(var defenseIcon:str = "hasVerdict ? OVERMATCHER_ICON_PATH + 'shield_' + verdict[1] + '.png' : ''")
 	)
 
 	(controller $Repeat renderer='OvermatcherTargetTracker'
@@ -107,8 +111,8 @@
 			(bind left "OVERMATCHER_SETTINGS.offsetX")
 			(bind top "OVERMATCHER_SETTINGS.offsetY")
 		)
-		(element OvermatcherBadge _label="'Granate'" _color="attackColor")
-		(element OvermatcherBadge _label="'Schild'" _color="defenseColor")
+		(element OvermatcherIcon _url="attackIcon")
+		(element OvermatcherIcon _url="defenseIcon")
 	)
 
 	(block
@@ -168,24 +172,13 @@
 	)
 )
 
-(def element OvermatcherBadge(_label:str, _color:number) layout=true
+(def element OvermatcherIcon(_url:str) layout=true
 	(style
-		(flow = "Flow.HORIZONTAL")
+		(bind backgroundImage "_url")
+		(width = 19) (height = 19)
+		(backgroundSize = "fill")
+		(marginTop = 4)
 		(bind marginRight "OVERMATCHER_SETTINGS.gap")
-	)
-	(block
-		(style (width = 14) (height = 14) (marginTop = 4))
-		(controller $Sector
-			(arc = 360)
-			(bind radius "6")
-			(bind color "_color")
-			(offset = 0)
-		)
-	)
-	(tf
-		(class $OvermatcherText)
-		(bind text "_label")
-		(style (marginLeft = 4))
 	)
 )
 
