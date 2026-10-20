@@ -7,7 +7,8 @@ Grund-Icon: assets/detail_ship_source.png. Weisse Flaechen = Sektionen, getrennt
 den Umriss; Hintergrund und Umriss bleiben unveraendert. Zuordnung der weissen Bereiche
 (4er-Nachbarschaft): der Bereich, der die oberste Zeile beruehrt, ist das Deck; der
 Bereich mit dem Mittelpunkt naechst der Bildmitte ist die Mitte; die uebrigen sind Bug/Heck.
-Ausgabe: mod/res_mods/PnFMods/Overmatcher/detail_<bugheck>_<mitte>_<deck>.png, g/r,
+Ausgabe: mod/res_mods/PnFMods/Overmatcher/detail_<me|target>_<bugheck>_<mitte>_<deck>.png
+(g/r), je mit Beschriftung "Me" bzw. "Target" auf der tuerkisen Flaeche oben links,
 geglaettet gerendert in SCALE-facher Groesse: jede Flaeche (Hintergrund, Umriss, Sektionen)
 wird SUPERSAMPLE-fach vergroessert, die Treppenstufen per Weichzeichnen + Mehrheitsentscheid
 abgerundet und das Ergebnis mit Kantenglaettung auf die Zielgroesse verkleinert.
@@ -16,7 +17,7 @@ import itertools
 import os
 import sys
 
-from PIL import Image, ImageChops, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCE = os.path.join(ROOT, 'assets', 'detail_ship_source.png')
@@ -27,6 +28,15 @@ COLORS = {'g': (0x3D, 0xDC, 0x5A), 'r': (0xE0, 0x00, 0x00)}  # wie Granate/Schil
 SCALE = 2.5  # 50x30 -> 125x75, muss zu detailWidth/detailHeight in Overmatcher.unbound passen
 SUPERSAMPLE = 10  # Arbeitsaufloesung beim Glaetten, relativ zum Grund-Icon
 SMOOTH_RADIUS = 4  # Weichzeichner in Arbeitsaufloesung; groesser = rundere Kanten
+
+# Beschriftung (Dateiname-Teil -> Text). Freie tuerkise Flaeche oben links im 125x75-Bild:
+# etwa x 4..46, y 9..27 -> Text 10 px fett, linke Kante x 6, vertikal mittig um y 17.
+LABELS = {'me': 'Me', 'target': 'Target'}
+LABEL_FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'  # DejaVu-Lizenz, frei
+LABEL_SIZE = 10
+LABEL_LEFT = 6
+LABEL_CENTER_Y = 17
+LABEL_COLOR = (20, 32, 38, 255)
 
 
 def white_regions(im):
@@ -108,7 +118,7 @@ def _smooth_masks(layers, size):
     return masks
 
 
-def _render(masks, fills, size):
+def _render(masks, fills, size, label=None):
     big = masks[next(iter(masks))].size
     canvas = Image.new('RGBA', big, (0, 0, 0, 0))
     for name, mask in masks.items():
@@ -116,6 +126,13 @@ def _render(masks, fills, size):
         if fill is None:
             continue
         canvas.paste(Image.new('RGBA', big, fill), (0, 0), mask)
+    if label:
+        # in Arbeitsaufloesung zeichnen, damit die Schrift beim Verkleinern geglaettet wird
+        k = big[0] / float(size[0])
+        font = ImageFont.truetype(LABEL_FONT, int(round(LABEL_SIZE * k)))
+        box = font.getbbox(label)
+        top = LABEL_CENTER_Y * k - (box[1] + box[3]) / 2.0
+        ImageDraw.Draw(canvas).text((LABEL_LEFT * k - box[0], top), label, font=font, fill=LABEL_COLOR)
     return canvas.resize(size, Image.LANCZOS)
 
 
@@ -132,13 +149,14 @@ def main():
         if name.startswith('color:') and name != 'color:None':
             base_fills[name] = src.load()[next(iter(layers[name]))]
     written = []
-    for combo in itertools.product('gr', repeat=3):
-        fills = dict(base_fills)
-        for zone, letter in zip(('bowstern', 'mid', 'deck'), combo):
-            fills['zone:' + zone] = COLORS[letter] + (255,)
-        name = 'detail_%s.png' % '_'.join(combo)
-        _render(masks, fills, size).save(os.path.join(TARGET_DIR, name))
-        written.append(name)
+    for key, text in sorted(LABELS.items()):
+        for combo in itertools.product('gr', repeat=3):
+            fills = dict(base_fills)
+            for zone, letter in zip(('bowstern', 'mid', 'deck'), combo):
+                fills['zone:' + zone] = COLORS[letter] + (255,)
+            name = 'detail_%s_%s.png' % (key, '_'.join(combo))
+            _render(masks, fills, size, text).save(os.path.join(TARGET_DIR, name))
+            written.append(name)
     print('%d Dateien, %dx%d: %s' % (len(written), size[0], size[1], ' '.join(written)))
     return 0
 

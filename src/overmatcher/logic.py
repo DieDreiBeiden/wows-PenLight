@@ -60,12 +60,13 @@ def detail_icons(detail):
     Farbe = gut fuer mich: Granate g bei Overmatch, Schild r bei Overmatch.
     Fehlt eine Zone (-1), wird fuer diese Zeile kein Bild angezeigt ('').
     """
-    def name(values, overmatch_letter):
+    def name(prefix, values, overmatch_letter):
         if -1 in values:
             return ''
         other = 'r' if overmatch_letter == 'g' else 'g'
-        return 'detail_' + '_'.join(overmatch_letter if v else other for v in values)
-    return name(detail[:3], 'g'), name(detail[3:], 'r')
+        return prefix + '_'.join(overmatch_letter if v else other for v in values)
+    # Granate = Ziel ("Target"), Schild = eigenes Schiff ("Me"); Bilder sind beschriftet
+    return name('detail_target_', detail[:3], 'g'), name('detail_me_', detail[3:], 'r')
 
 
 def evaluate(me, enemy):

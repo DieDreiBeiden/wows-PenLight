@@ -35,8 +35,10 @@ der Beplankung, nicht Zitadellentreffer.
 
 Layout (rechts unter dem Fadenkreuz, linke obere Ecke Standard x +30, y +8):
 - ohne Alt: Granate | Schild (29×29) kompakt, 4 px Abstand
-- mit Alt: die Symbole werden ausgeblendet, an ihrer Stelle zwei beschriftete Schiffe
-  (125×75, 8 px Abstand): „Me“ = eigenes Schiff (Ziel → ich), „Target“ = Ziel (ich → Ziel);
+- mit Alt: die Symbole werden ausgeblendet, an ihrer Stelle zwei Schiffe (125×75, 8 px
+  Abstand) mit eingebauter Beschriftung oben links auf dem Türkis: „Me“ = eigenes Schiff
+  (Ziel → ich), „Target“ = Ziel (ich → Ziel); 16 Bilder `detail_<me|target>_<b>_<m>_<d>.png`,
+  Schrift DejaVu Sans Bold 10 px (freie Lizenz);
   Bug/Heck, Mitte, Deck grün/rot = gut/schlecht für mich. Die Schiffszeile liegt absolut an
   der Position der Symbole, damit nichts springt.
 PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
@@ -49,7 +51,7 @@ Abhängigkeit: ModForge + TTaroModUtils (Makros `TT_GET_PREF`, `TT_DRAGGABLE_POS
 `TT_DRAGGABLE`). Referenz-Repos: github.com/AndrewTaro (ohne Lizenzdatei → nur als Referenz,
 kein Code übernommen).
 
-- 8 Bilder `detail_<bugheck>_<mitte>_<deck>.png` (g/r), erzeugt mit
+- 16 Bilder `detail_<me|target>_<bugheck>_<mitte>_<deck>.png` (g/r), erzeugt mit
   `tools/make_detail_icons.py` aus `assets/detail_ship_source.png` (weiße Flächen = Sektionen,
   Hintergrund und Umriss bleiben).
 - Python wählt das Bild (`detail_icons`), fehlende Daten → Zeile ausgeblendet.

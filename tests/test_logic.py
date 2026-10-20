@@ -62,8 +62,8 @@ class Detail(unittest.TestCase):
 
     def test_icons(self):
         # ich overmatche Bug, nicht Mitte/Deck; Gegner overmatcht Bug+Mitte bei mir
-        self.assertEqual(detail_icons([1, 0, 0, 1, 1, 0]), ('detail_g_r_r', 'detail_r_r_g'))
-        self.assertEqual(detail_icons([0, -1, 0, 0, 0, 0]), ('', 'detail_g_g_g'))
+        self.assertEqual(detail_icons([1, 0, 0, 1, 1, 0]), ('detail_target_g_r_r', 'detail_me_r_r_g'))
+        self.assertEqual(detail_icons([0, -1, 0, 0, 0, 0]), ('', 'detail_me_g_g_g'))
 
     def test_unknown_zone(self):
         self.assertEqual(zone_detail(460, {'bow': 27.0, 'mid': None, 'deck': 36.0}), [1, -1, 0])

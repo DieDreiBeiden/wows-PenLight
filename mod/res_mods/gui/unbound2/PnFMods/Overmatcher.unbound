@@ -1,7 +1,8 @@
 # Overmatcher – Anzeige am Fadenkreuz fuer das aufgeschaltete Ziel.
 # Daten: CC.mods_DataComponent 'modOvermatcher' aus Main.py
 #   {byId: {'<avatarId>': [attack, defense, detail, attackImage, defenseImage]}, byName: {...}}
-#   attackImage/defenseImage = Detail-Bild ohne .png (detail_<bugheck>_<mitte>_<deck>), '' = keine Daten
+#   attackImage/defenseImage = Detail-Bild ohne .png (detail_<target|me>_<bugheck>_<mitte>_<deck>),
+#   '' = keine Daten. Die Beschriftung "Me"/"Target" ist Teil des Bildes.
 # Layout rechts neben dem Fadenkreuz: standardmaessig Granate | Schild kompakt nebeneinander;
 # solange Alt gedrueckt ist, ersetzen die beschrifteten Detail-Schiffe die Symbole:
 # "Me" (eigenes Schiff, Ziel -> ich) | "Target" (Ziel, ich -> Ziel).
@@ -25,8 +26,6 @@
 	iconSize: 29,
 	# Abstand zwischen den beiden Detail-Schiffen (Alt)
 	shipGap: 8,
-	# Abstand Beschriftung -> Detail-Schiff
-	labelGap: 1,
 	# Groesse der Detail-Schiffe (Bilder werden in dieser Groesse erzeugt, tools/make_detail_icons.py)
 	detailWidth: 125,
 	detailHeight: 75
@@ -148,42 +147,28 @@
 		(hblock
 			(bind visible "altVision")
 			(style (position = "absolute") (left = 0) (top = 0))
-			(element OvermatcherShip _label="'Me'" _url="defenseDetail")
-			(element OvermatcherShip _label="'Target'" _url="attackDetail")
+			(element OvermatcherShip _url="defenseDetail")
+			(element OvermatcherShip _url="attackDetail")
 		)
 	)
 )
 
-# Beschriftetes Detail-Schiff. Farbe immer "gut fuer mich" (Python waehlt das Bild):
+# Detail-Schiff mit eingebauter Beschriftung. Farbe immer "gut fuer mich" (Python waehlt das Bild):
 # Me = eigenes Schiff (gruen = Gegner overmatcht hier nicht), Target = Ziel (gruen = ich overmatche).
 # Leeres _url (keine Daten) -> Platz bleibt, damit das andere Schiff nicht verrutscht.
-(def element OvermatcherShip(_label:str, _url:str) layout=true
+(def element OvermatcherShip(_url:str) layout=true
 	(style
 		(bind width "OVERMATCHER_SETTINGS.detailWidth")
+		(bind height "OVERMATCHER_SETTINGS.detailHeight")
 		(bind marginRight "OVERMATCHER_SETTINGS.shipGap")
 	)
-	(tf
-		(class $OvermatcherText)
-		(bind text "_label")
-		(style
-			(bind width "OVERMATCHER_SETTINGS.detailWidth")
-			(textAlign = "center")
-		)
-	)
 	(block
+		(bind visible "_url != ''")
 		(style
-			(bind marginTop "OVERMATCHER_SETTINGS.labelGap")
+			(bind backgroundImage "_url")
 			(bind width "OVERMATCHER_SETTINGS.detailWidth")
 			(bind height "OVERMATCHER_SETTINGS.detailHeight")
-		)
-		(block
-			(bind visible "_url != ''")
-			(style
-				(bind backgroundImage "_url")
-				(bind width "OVERMATCHER_SETTINGS.detailWidth")
-				(bind height "OVERMATCHER_SETTINGS.detailHeight")
-				(backgroundSize = "fill")
-			)
+			(backgroundSize = "fill")
 		)
 	)
 )
@@ -219,9 +204,4 @@
 	(dispatch evTargetChanged args="{entity: trackedEntity}" dir="EventDirection.UP" on='addedToStage'
 		(bind enabled "isTargetLocked")
 	)
-)
-
-(def css $OvermatcherText()
-	(extends $TextDefaultBoldNM)
-	(extends $FontEnableReadability)
 )
