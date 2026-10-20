@@ -11,8 +11,8 @@
 # an der Stelle des Schilds).
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
-# Alt-Ansicht (Prototyp): Spiel-Silhouetten img://gui/ship_bars/<shortName>_h.png in drei Sektionen,
-# Deck als Balken darueber; Rueckfall auf detail_*.png (useSilhouettes in OVERMATCHER_SETTINGS).
+# Alt-Ansicht (Prototyp): Spiel-Silhouetten img://gui/ship_bars/<shortName>_h.png in vier Sektionen
+# (Aufbauten = Deck, Rumpf = Heck/Mitte/Bug); Rueckfall auf detail_*.png (useSilhouettes in OVERMATCHER_SETTINGS).
 # Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red,grey}.png, 29x29 (gezeichnet von tools/make_ampel_icons.py).
 # Position: per Ziehen ueber TTaroModUtils (Schema ModSchemas/diedreibeiden-overmatcher.schema.json,
 # Muster wie BuildViewer). Benoetigt TTaroModUtils (Makros TT_DRAGGABLE_POSITION/TT_DRAGGABLE/TT_GET_PREF).
@@ -46,15 +46,17 @@
 	# Farbe, die Blickrichtung der Silhouette spielt daher keine Rolle.
 	sternEnd: 0.22,
 	bowStart: 0.78,
-	# graue Fuge zwischen den Sektionen (Anteil der Breite)
+	# Decklinie als Anteil der Bildhoehe von oben: darueber (Aufbauten) = Deck, darunter
+	# (Rumpf) = Heck/Mitte/Bug. Gemessen an Rhode Island, Vermont, Trento im Spiel (Rumpf =
+	# unterste ~28 % des 48 px hohen Bildes); bei einzelnen Schiffen +-1-2 px moeglich.
+	deckLine: 0.71,
+	# dunkle Fuge zwischen den Sektionen (Anteil der Breite bzw. Hoehe)
 	zoneGap: 0.01,
-	# Deck als Balken ueber der Silhouette (Decklinie ist je Schiff verschieden hoch)
-	deckBarHeight: 3,
-	deckBarGap: 2,
-	deckBarLeft: 0.06,
-	deckBarRight: 0.94,
+	zoneGapY: 0.03,
 	labelWidth: 70,
-	labelHeight: 16
+	labelHeight: 16,
+	# die Bilder haben oben freien Raum; Beschriftung so weit in die Bildflaeche ziehen
+	labelOverlap: 6
 })
 
 # Einfaerbung der Silhouetten: Multiplikator 0 + Offset = Vollfarbe, Alpha bleibt (Form der Silhouette).
@@ -65,7 +67,6 @@
 	grey:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:128,greenOffset:132,blueOffset:136,alphaOffset:0 },
 	base:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:40,greenOffset:42,blueOffset:44,alphaOffset:0 }
 })
-(def constant OVERMATCHER_DECK_COLORS { green: 0xFF3DDC5A, red: 0xFFE84834, grey: 0xFF808488 })
 
 (def constant OVERMATCHER_COMPONENT_KEY 'modOvermatcher')
 
@@ -241,7 +242,8 @@
 	)
 )
 
-# Silhouetten-Ansicht (Prototyp): Beschriftung, Deck-Balken, Silhouette in drei Sektionen.
+# Silhouetten-Ansicht (Prototyp): Beschriftung, Silhouette in vier Sektionen (Deck oben,
+# Heck/Mitte/Bug unten).
 # Die Silhouette wird mehrfach uebereinander gelegt; jede Lage zeigt per Maske nur ihren
 # Bereich und wird per colorTransform eingefaerbt (Muster: OwnHealthBarValue im Spiel).
 (def element OvermatcherSilhouetteShip(_shortName:str, _label:str, _bow:str, _mid:str, _deck:str) layout=true
@@ -249,6 +251,7 @@
 		(var s:dict = "OVERMATCHER_SETTINGS")
 		(var url:str = "'img://gui/ship_bars/' + _shortName + '_h.png'")
 		(var gap:number = "s.zoneGap / 2")
+		(var gapY:number = "s.zoneGapY / 2")
 	)
 	(style
 		(bind width "s.silhouetteWidth")
@@ -258,16 +261,8 @@
 		(style
 			(bind backgroundImage "_label")
 			(bind width "s.labelWidth") (bind height "s.labelHeight")
+			(bind marginBottom "-s.labelOverlap")
 			(backgroundSize = "fill")
-		)
-	)
-	(block
-		(style
-			(bind marginLeft "s.silhouetteWidth * s.deckBarLeft")
-			(bind width "s.silhouetteWidth * (s.deckBarRight - s.deckBarLeft)")
-			(bind height "s.deckBarHeight")
-			(bind marginBottom "s.deckBarGap")
-			(bind backgroundColor "OVERMATCHER_DECK_COLORS[_deck]")
 		)
 	)
 	(block
@@ -275,15 +270,17 @@
 			(bind width "s.silhouetteWidth")
 			(bind height "s.silhouetteHeight")
 		)
-		(element OvermatcherZone _url="url" _from="0" _to="1" _ct="OVERMATCHER_CT.base")
-		(element OvermatcherZone _url="url" _from="0" _to="s.sternEnd - gap" _ct="OVERMATCHER_CT[_bow]")
-		(element OvermatcherZone _url="url" _from="s.sternEnd + gap" _to="s.bowStart - gap" _ct="OVERMATCHER_CT[_mid]")
-		(element OvermatcherZone _url="url" _from="s.bowStart + gap" _to="1" _ct="OVERMATCHER_CT[_bow]")
+		(element OvermatcherZone _url="url" _from="0" _to="1" _top="0" _bottom="1" _ct="OVERMATCHER_CT.base")
+		(element OvermatcherZone _url="url" _from="0" _to="1" _top="0" _bottom="s.deckLine - gapY" _ct="OVERMATCHER_CT[_deck]")
+		(element OvermatcherZone _url="url" _from="0" _to="s.sternEnd - gap" _top="s.deckLine + gapY" _bottom="1" _ct="OVERMATCHER_CT[_bow]")
+		(element OvermatcherZone _url="url" _from="s.sternEnd + gap" _to="s.bowStart - gap" _top="s.deckLine + gapY" _bottom="1" _ct="OVERMATCHER_CT[_mid]")
+		(element OvermatcherZone _url="url" _from="s.bowStart + gap" _to="1" _top="s.deckLine + gapY" _bottom="1" _ct="OVERMATCHER_CT[_bow]")
 	)
 )
 
-# Eine Lage der Silhouette: zentriert wie im Spiel-Lebensbalken, Maske von _from bis _to (Anteil der Breite).
-(def element OvermatcherZone(_url:str, _from:number, _to:number, _ct:dict) layout=true
+# Eine Lage der Silhouette: zentriert wie im Spiel-Lebensbalken, Maske x _from.._to, y _top.._bottom
+# (Anteile der Bildbreite bzw. -hoehe).
+(def element OvermatcherZone(_url:str, _from:number, _to:number, _top:number, _bottom:number, _ct:dict) layout=true
 	(style
 		(position = "absolute")
 		(left = 50%)
@@ -294,8 +291,8 @@
 	(block
 		(style
 			(position = "absolute")
-			(top = 0)
-			(height = 100%)
+			(bind top "100% * _top")
+			(bind height "100% * (_bottom - _top)")
 			(bind left "100% * _from")
 			(bind width "100% * (_to - _from)")
 			(backgroundColor = 0x11000000)
