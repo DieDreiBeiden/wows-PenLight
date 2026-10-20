@@ -2,7 +2,8 @@
 # Daten: CC.mods_DataComponent 'modOvermatcher' aus Main.py
 #   {byId: {'<avatarId>': [attack, defense, detail, attackImage, defenseImage]}, byName: {...}}
 #   attackImage/defenseImage = Detail-Bild ohne .png (detail_<bugheck>_<mitte>_<deck>), '' = keine Daten
-# Granate/Schild sind immer sichtbar; mit Alt erscheint die Detailansicht darunter.
+# Layout: zwei Spalten rechts neben dem Fadenkreuz, Granate | Schild; mit Alt erscheint
+# unter jedem Symbol das Detail-Schiff.
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
 # Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red}.png, 19x19 wie PenCalc.
@@ -10,12 +11,12 @@
 # Einstellungen
 (def constant OVERMATCHER_SETTINGS {
 	# Abstand zur Bildschirmmitte in Pixeln (x: + = rechts, y: + = unten)
-	offsetX: -70,
-	offsetY: 40,
-	# Abstand zwischen Granate und Schild
-	gap: 10,
-	# Abstand der Detailansicht unter den Icons
-	detailOffsetY: 28
+	offsetX: 30,
+	offsetY: 8,
+	# Abstand zwischen den Spalten Granate | Schild
+	gap: 6,
+	# Abstand zwischen Symbol und Detail-Schiff (Alt)
+	detailGap: 3
 })
 
 (def constant OVERMATCHER_COMPONENT_KEY 'modOvermatcher')
@@ -80,7 +81,6 @@
 		(var hasVerdict:bool = "verdict.length >= 2")
 		(var attackDetail:str = "verdict.length >= 5 && verdict[3] != '' ? OVERMATCHER_ICON_PATH + verdict[3] + '.png' : ''")
 		(var defenseDetail:str = "verdict.length >= 5 && verdict[4] != '' ? OVERMATCHER_ICON_PATH + verdict[4] + '.png' : ''")
-		(var hasDetail:bool = "attackDetail != '' || defenseDetail != ''")
 
 		# Detailansicht solange Alt gedrueckt ist (wie PenetrationCalculator)
 		(var cameraEntity:gfx = "$datahub.getSingleEntity(CC.camera)")
@@ -105,30 +105,24 @@
 			(bind left "OVERMATCHER_SETTINGS.offsetX")
 			(bind top "OVERMATCHER_SETTINGS.offsetY")
 		)
-		(element OvermatcherIcon _url="attackIcon")
-		(element OvermatcherIcon _url="defenseIcon")
-	)
-
-	(block
-		(bind visible "hasVerdict && altVision && hasDetail")
-		(style
-			(position = "absolute")
-			(bind left "OVERMATCHER_SETTINGS.offsetX")
-			(bind top "OVERMATCHER_SETTINGS.offsetY + OVERMATCHER_SETTINGS.detailOffsetY")
-		)
-		(element OvermatcherDetailRow _icon="attackIcon" _ship="attackDetail")
-		(element OvermatcherDetailRow _icon="defenseIcon" _ship="defenseDetail")
+		(element OvermatcherColumn _icon="attackIcon" _ship="attackDetail" _showDetail="altVision")
+		(element OvermatcherColumn _icon="defenseIcon" _ship="defenseDetail" _showDetail="altVision")
 	)
 )
 
-# Zeile der Detailansicht: Ampel-Icon (19x19) + ganzes Schiff (50x30) in der Farbkombination.
-# Farbe immer "gut fuer mich" (Python waehlt das Bild).
-(def element OvermatcherDetailRow(_icon:str, _ship:str) layout=true
-	(bind visible "_ship != ''")
-	(style (flow = "Flow.HORIZONTAL") (marginBottom = 2))
+# Spalte: Ampel-Symbol (19x19), darunter bei Alt das ganze Schiff (50x30) in der
+# Farbkombination. Farbe immer "gut fuer mich" (Python waehlt das Bild).
+# Feste Breite 50, damit die Symbole beim Druecken von Alt nicht verrutschen.
+(def element OvermatcherColumn(_icon:str, _ship:str, _showDetail:bool) layout=true
+	(style
+		(width = 50)
+		(bind marginRight "OVERMATCHER_SETTINGS.gap")
+	)
 	(element OvermatcherIcon _url="_icon")
 	(block
+		(bind visible "_showDetail && _ship != ''")
 		(style
+			(bind marginTop "OVERMATCHER_SETTINGS.detailGap")
 			(bind backgroundImage "_ship")
 			(width = 50) (height = 30)
 			(backgroundSize = "fill")
@@ -141,8 +135,6 @@
 		(bind backgroundImage "_url")
 		(width = 19) (height = 19)
 		(backgroundSize = "fill")
-		(marginTop = 4)
-		(bind marginRight "OVERMATCHER_SETTINGS.gap")
 	)
 )
 

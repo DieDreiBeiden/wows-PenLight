@@ -33,9 +33,10 @@ der Beplankung, nicht Zitadellentreffer.
 
 ## Detailansicht (Alt gedrückt)
 
-Zusätzlich zu Granate/Schild (die immer sichtbar bleiben) zwei Zeilen unter den Icons:
-Granate-Icon + Schiff (ich → Ziel), Schild-Icon + Schiff (Ziel → ich). Das Schiff
-(50×30) zeigt Bug/Heck, Mitte und Deck grün/rot = gut/schlecht für mich.
+Layout: zwei Spalten rechts knapp unter dem Fadenkreuz (Standard x +30, y +8 px),
+Granate | Schild, immer sichtbar. Mit Alt erscheint unter jedem Symbol das Schiff
+(50×30, ich → Ziel bzw. Ziel → ich) mit Bug/Heck, Mitte, Deck grün/rot = gut/schlecht für mich.
+PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
 
 - 8 Bilder `detail_<bugheck>_<mitte>_<deck>.png` (g/r), erzeugt mit
   `tools/make_detail_icons.py` aus `assets/detail_ship_source.png` (weiße Flächen = Sektionen,
