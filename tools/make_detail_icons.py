@@ -8,13 +8,15 @@ den Umriss; Hintergrund und Umriss bleiben unveraendert. Zuordnung der weissen B
 (4er-Nachbarschaft): der Bereich, der die oberste Zeile beruehrt, ist das Deck; der
 Bereich mit dem Mittelpunkt naechst der Bildmitte ist die Mitte; die uebrigen sind Bug/Heck.
 Ausgabe: mod/res_mods/PnFMods/Overmatcher/detail_<bugheck>_<mitte>_<deck>.png, g/r,
-skaliert um SCALE mit Nearest-Neighbor (scharfe Kanten statt Weichzeichnen im Spiel).
+geglaettet gerendert in SCALE-facher Groesse: jede Flaeche (Hintergrund, Umriss, Sektionen)
+wird SUPERSAMPLE-fach vergroessert, die Treppenstufen per Weichzeichnen + Mehrheitsentscheid
+abgerundet und das Ergebnis mit Kantenglaettung auf die Zielgroesse verkleinert.
 """
 import itertools
 import os
 import sys
 
-from PIL import Image
+from PIL import Image, ImageChops, ImageFilter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCE = os.path.join(ROOT, 'assets', 'detail_ship_source.png')
@@ -23,6 +25,8 @@ TARGET_DIR = os.path.join(ROOT, 'mod', 'res_mods', 'PnFMods', 'Overmatcher')
 WHITE = (255, 255, 255)
 COLORS = {'g': (0x3D, 0xDC, 0x5A), 'r': (0xE0, 0x00, 0x00)}  # wie Granate/Schild-Icons
 SCALE = 2.5  # 50x30 -> 125x75, muss zu detailWidth/detailHeight in Overmatcher.unbound passen
+SUPERSAMPLE = 10  # Arbeitsaufloesung beim Glaetten, relativ zum Grund-Icon
+SMOOTH_RADIUS = 4  # Weichzeichner in Arbeitsaufloesung; groesser = rundere Kanten
 
 
 def white_regions(im):
@@ -60,24 +64,82 @@ def classify(regions, size):
     return {'bowstern': hull[1] + hull[2], 'mid': hull[0], 'deck': deck[0]}
 
 
+def _labels(src, zones):
+    """Flaechen des Grund-Icons: {name: Menge von (x, y)}; 'background' ist transparent."""
+    px = src.load()
+    w, h = src.size
+    zone_pixels = set()
+    for pixels in zones.values():
+        zone_pixels.update(pixels)
+    colors = {}
+    for y in range(h):
+        for x in range(w):
+            if (x, y) in zone_pixels:
+                continue
+            colors.setdefault(px[x, y] if px[x, y][3] else None, set()).add((x, y))
+    layers = dict(('zone:' + k, set(v)) for k, v in zones.items())
+    for color, pixels in colors.items():
+        layers['color:%s' % (color,)] = pixels
+    return layers
+
+
+def _smooth_masks(layers, size):
+    """Je Flaeche eine geglaettete Maske in Arbeitsaufloesung; jede Stelle gehoert genau einer."""
+    big = (size[0] * SUPERSAMPLE, size[1] * SUPERSAMPLE)
+    soft = {}
+    for name, pixels in layers.items():
+        m = Image.new('L', size, 0)
+        mp = m.load()
+        for x, y in pixels:
+            mp[x, y] = 255
+        soft[name] = m.resize(big, Image.NEAREST).filter(ImageFilter.GaussianBlur(SMOOTH_RADIUS))
+    # Mehrheitsentscheid: Stelle gehoert der Flaeche mit dem hoechsten geglaetteten Wert
+    names = list(soft)
+    best = soft[names[0]]
+    for name in names[1:]:
+        best = ImageChops.lighter(best, soft[name])
+    masks = {}
+    taken = Image.new('L', big, 0)
+    for name in names:
+        is_max = ImageChops.difference(soft[name], best).point(lambda v: 255 if v == 0 else 0)
+        mask = ImageChops.subtract(is_max, taken)
+        taken = ImageChops.lighter(taken, mask)
+        masks[name] = mask
+    return masks
+
+
+def _render(masks, fills, size):
+    big = masks[next(iter(masks))].size
+    canvas = Image.new('RGBA', big, (0, 0, 0, 0))
+    for name, mask in masks.items():
+        fill = fills.get(name)
+        if fill is None:
+            continue
+        canvas.paste(Image.new('RGBA', big, fill), (0, 0), mask)
+    return canvas.resize(size, Image.LANCZOS)
+
+
 def main():
     src = Image.open(SOURCE).convert('RGBA')
     zones = classify(white_regions(src), src.size)
     for zone, pixels in sorted(zones.items()):
         print('%-8s %3d Pixel' % (zone, len(pixels)))
+    layers = _labels(src, zones)
+    masks = _smooth_masks(layers, src.size)
+    size = (int(round(src.size[0] * SCALE)), int(round(src.size[1] * SCALE)))
+    base_fills = {}
+    for name in layers:
+        if name.startswith('color:') and name != 'color:None':
+            base_fills[name] = src.load()[next(iter(layers[name]))]
     written = []
     for combo in itertools.product('gr', repeat=3):
-        im = src.copy()
-        px = im.load()
+        fills = dict(base_fills)
         for zone, letter in zip(('bowstern', 'mid', 'deck'), combo):
-            for x, y in zones[zone]:
-                px[x, y] = COLORS[letter] + (px[x, y][3],)
+            fills['zone:' + zone] = COLORS[letter] + (255,)
         name = 'detail_%s.png' % '_'.join(combo)
-        size = (int(round(src.size[0] * SCALE)), int(round(src.size[1] * SCALE)))
-        im.resize(size, Image.NEAREST).save(os.path.join(TARGET_DIR, name))
+        _render(masks, fills, size).save(os.path.join(TARGET_DIR, name))
         written.append(name)
-    print('%d Dateien, %dx%d: %s' % (len(written), int(round(src.size[0] * SCALE)),
-                                     int(round(src.size[1] * SCALE)), ' '.join(written)))
+    print('%d Dateien, %dx%d: %s' % (len(written), size[0], size[1], ' '.join(written)))
     return 0
 
 
