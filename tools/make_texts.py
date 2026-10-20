@@ -17,9 +17,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCE = os.path.join(ROOT, 'tools', 'data', 'texts.json')
 TARGET = os.path.join(ROOT, 'mod', 'res_mods', 'texts')
 DOMAIN = 'overmatcher'
-# Sprachordner wie in TTaroModUtils/texts
-LANGUAGES = ['cs', 'de', 'en', 'es', 'es_mx', 'fr', 'it', 'ja', 'ko', 'nl', 'pl', 'pt_br',
-             'ru', 'th', 'tr', 'uk', 'zh_sg', 'zh_tw']
+# Sprachordner wie in TTaroModUtils/texts, dazu pt und zh (PortInterface, AdditionalOptions)
+LANGUAGES = ['cs', 'de', 'en', 'es', 'es_mx', 'fr', 'it', 'ja', 'ko', 'nl', 'pl', 'pt', 'pt_br',
+             'ru', 'th', 'tr', 'uk', 'zh', 'zh_sg', 'zh_tw']
 
 
 def mo_bytes(catalog):
