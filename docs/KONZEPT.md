@@ -34,8 +34,8 @@ der Beplankung, nicht Zitadellentreffer.
 ## Detailansicht (Alt gedrückt)
 
 Layout: zwei Spalten rechts knapp unter dem Fadenkreuz (Standard x +30, y +8 px),
-Granate | Schild, immer sichtbar. Mit Alt erscheint unter jedem Symbol das Schiff
-(50×30, ich → Ziel bzw. Ziel → ich) mit Bug/Heck, Mitte, Deck grün/rot = gut/schlecht für mich.
+Granate | Schild, immer sichtbar. Mit Alt erscheint darunter eine zweite Zeile mit zwei Schiffen
+(125×75, ich → Ziel bzw. Ziel → ich) mit Bug/Heck, Mitte, Deck grün/rot = gut/schlecht für mich.
 PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
 
 Position: Strg+Alt+Pfeiltasten (5 px, mit Umschalt 1 px), Strg+Alt+Pos1 = Standard
