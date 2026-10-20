@@ -35,9 +35,9 @@ der Beplankung, nicht Zitadellentreffer.
 
 Layout (rechts unter dem Fadenkreuz, linke obere Ecke Standard x +30, y +8):
 - ohne Alt: Granate | Schild (29×29) kompakt, 4 px Abstand, immer sichtbar (solange das
-  Fadenkreuz sichtbar ist); Ampelfarben nur bei aufgeschaltetem, bewertetem Ziel, sonst grau
-  (kein Ziel, Zerstörer/Träger/U-Boot, keine Daten)
-- mit Alt (nur mit Bewertung, sonst bleiben die grauen Symbole): die Symbole werden ausgeblendet, an ihrer Stelle zwei Schiffe (125×75, 8 px
+  Fadenkreuz sichtbar ist); grau ohne aufgeschaltetes Ziel, Ampelfarben bei bewertetem
+  Ziel, ausgeblendet bei aufgeschaltetem nicht relevantem Ziel (Zerstörer/Träger/U-Boot, keine Daten)
+- mit Alt (nur mit Bewertung, ohne Ziel bleiben die grauen Symbole): die Symbole werden ausgeblendet, an ihrer Stelle zwei Schiffe (125×75, 8 px
   Abstand) mit eingebauter Beschriftung oben links auf dem Türkis: links „Target“ = Ziel
   (ich → Ziel, unter der Granate), rechts „Me“ = eigenes Schiff (Ziel → ich, unter dem Schild); 16 Bilder `detail_<me|target>_<b>_<m>_<d>.png`,
   Schrift DejaVu Sans Bold 10 px (freie Lizenz);

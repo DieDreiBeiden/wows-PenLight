@@ -4,8 +4,9 @@
 #   attackImage/defenseImage = Detail-Bild ohne .png (detail_<target|me>_<bugheck>_<mitte>_<deck>),
 #   '' = keine Daten. Die Beschriftung "Me"/"Target" ist Teil des Bildes.
 # Layout rechts neben dem Fadenkreuz: Granate | Schild kompakt nebeneinander, immer sichtbar
-# (solange das Fadenkreuz sichtbar ist). Ampelfarben nur mit aufgeschaltetem, bewertetem Ziel,
-# sonst grau (kein Ziel, Zerstoerer/Flugzeugtraeger/U-Boot, keine Daten).
+# (solange das Fadenkreuz sichtbar ist): grau ohne aufgeschaltetes Ziel, Ampelfarben mit bewertetem
+# Ziel; bei aufgeschaltetem, nicht bewertetem Ziel (Zerstoerer/Flugzeugtraeger/U-Boot, keine Daten)
+# ausgeblendet.
 # Solange Alt gedrueckt ist und eine Bewertung vorliegt, ersetzen die beschrifteten Detail-Schiffe die Symbole:
 # "Target" (Ziel, ich -> Ziel, an der Stelle der Granate) | "Me" (eigenes Schiff, Ziel -> ich,
 # an der Stelle des Schilds).
@@ -115,6 +116,8 @@
 		(var attackIcon:str = "OVERMATCHER_ICON_PATH + 'shell_' + (hasVerdict ? verdict[0] : 'grey') + '.png'")
 		(var defenseIcon:str = "OVERMATCHER_ICON_PATH + 'shield_' + (hasVerdict ? verdict[1] : 'grey') + '.png'")
 		(var showDetail:bool = "altVision && hasVerdict")
+		# aufgeschaltet, aber nicht relevant -> ausblenden; ohne Ziel grau anzeigen
+		(var showIcons:bool = "targetKey == '' || hasVerdict")
 	)
 
 	(controller $Repeat renderer='OvermatcherTargetTracker'
@@ -127,6 +130,7 @@
 	)
 
 	(block
+		(bind visible "showIcons")
 		(style
 			(position = "absolute")
 			(bind left "posX")
