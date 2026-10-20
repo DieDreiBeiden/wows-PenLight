@@ -2,12 +2,12 @@
 # Daten: CC.mods_DataComponent 'modOvermatcher' aus Main.py
 #   {byId: {'<avatarId>': [attack, defense, detail, attackImage, defenseImage]}, byName: {...}}
 #   attackImage/defenseImage = Detail-Bild ohne .png (detail_<target|me>_<bugheck>_<mitte>_<deck>),
-#   '' = keine Daten. Die Beschriftung "Me"/"Target" ist Teil des Bildes.
+#   '' = keine Daten. Beschriftung "ME"/"TARGET" samt Mini-Icon ist Teil des Bildes.
 # Layout rechts neben dem Fadenkreuz: Granate | Schild kompakt nebeneinander, immer sichtbar
 # (solange das Fadenkreuz sichtbar ist). Ampelfarben nur mit aufgeschaltetem, bewertetem Ziel,
 # sonst grau (kein Ziel, Zerstoerer/Flugzeugtraeger/U-Boot, keine Daten).
 # Solange Alt gedrueckt ist und eine Bewertung vorliegt, ersetzen die beschrifteten Detail-Schiffe die Symbole:
-# "Target" (Ziel, ich -> Ziel, an der Stelle der Granate) | "Me" (eigenes Schiff, Ziel -> ich,
+# "TARGET" (Ziel, ich -> Ziel, an der Stelle der Granate) | "ME" (eigenes Schiff, Ziel -> ich,
 # an der Stelle des Schilds).
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).

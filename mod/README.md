@@ -39,4 +39,4 @@ gebraucht und kann ebenfalls gelöscht werden.
 3. `python3 -I tools/build_mod.py`, Tests: `python3 -m unittest discover -s tests`
 
 Icons neu erzeugen (nur nach Änderung der Grafiken): `python3 -I tools/make_ampel_icons.py`
-(gezeichnet: AP-Granate / Wappenschild, Ampelfarbe auf Spitze bzw. Sparren) und `python3 -I tools/make_detail_icons.py` (Quelle `assets/detail_ship_source.png`).
+(gezeichnet: AP-Granate / Wappenschild, Ampelfarbe auf Spitze bzw. Sparren) und `python3 -I tools/make_detail_icons.py` (gezeichnet: Schiff mit Sektionen, Mini-Icon + Beschriftung).

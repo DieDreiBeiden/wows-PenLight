@@ -1,163 +1,137 @@
 # -*- coding: utf-8 -*-
-"""Erzeugt die 8 Detail-Icons (ganzes Schiff je Farbkombination) aus dem Grund-Icon.
+"""Zeichnet die 16 Detail-Bilder (Alt-Ansicht) im Stil der Granate/Schild-Icons.
 
     python3 -I tools/make_detail_icons.py
 
-Grund-Icon: assets/detail_ship_source.png. Weisse Flaechen = Sektionen, getrennt durch
-den Umriss; Hintergrund und Umriss bleiben unveraendert. Zuordnung der weissen Bereiche
-(4er-Nachbarschaft): der Bereich, der die oberste Zeile beruehrt, ist das Deck; der
-Bereich mit dem Mittelpunkt naechst der Bildmitte ist die Mitte; die uebrigen sind Bug/Heck.
-Ausgabe: mod/res_mods/PnFMods/Overmatcher/detail_<me|target>_<bugheck>_<mitte>_<deck>.png
-(g/r), je mit Beschriftung "Me" bzw. "Target" auf der tuerkisen Flaeche oben links,
-geglaettet gerendert in SCALE-facher Groesse: jede Flaeche (Hintergrund, Umriss, Sektionen)
-wird SUPERSAMPLE-fach vergroessert, die Treppenstufen per Weichzeichnen + Mehrheitsentscheid
-abgerundet und das Ergebnis mit Kantenglaettung auf die Zielgroesse verkleinert.
+Freistehendes Schiff (Seitenansicht, Bug rechts) ohne Hintergrund: Rumpf und Aufbauten
+metallisch grau wie die Granate, dunkle Kontur und weicher Schatten. Sektionen
+Bug/Heck, Mitte (unten mittig) und Deck (oberer Rumpfstreifen) in Gruen/Rot
+(= gut/schlecht fuer mich, Farben wie make_ampel_icons.AMPEL). Oben links die graue
+Mini-Granate (Target) bzw. der Mini-Schild (Me) mit Beschriftung "TARGET"/"ME".
+Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
+Das fruehere Grund-Icon assets/detail_ship_source.png wird nicht mehr verwendet.
+Ausgabe: mod/res_mods/PnFMods/Overmatcher/detail_<me|target>_<bugheck>_<mitte>_<deck>.png (g/r)
 """
 import itertools
 import os
 import sys
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
+import numpy as np
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SOURCE = os.path.join(ROOT, 'assets', 'detail_ship_source.png')
-TARGET_DIR = os.path.join(ROOT, 'mod', 'res_mods', 'PnFMods', 'Overmatcher')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import make_ampel_icons as icons  # noqa: E402
 
-WHITE = (255, 255, 255)
-COLORS = {'g': (0x3D, 0xDC, 0x5A), 'r': (0xE0, 0x00, 0x00)}  # wie Granate/Schild-Icons
-SCALE = 2.5  # 50x30 -> 125x75, muss zu detailWidth/detailHeight in Overmatcher.unbound passen
-SUPERSAMPLE = 10  # Arbeitsaufloesung beim Glaetten, relativ zum Grund-Icon
-SMOOTH_RADIUS = 4  # Weichzeichner in Arbeitsaufloesung; groesser = rundere Kanten
+TARGET_DIR = icons.TARGET_DIR
+SIZE = (125, 75)  # muss zu detailWidth/detailHeight in Overmatcher.unbound passen
+SUPERSAMPLE = 8
+W, H = SIZE[0] * SUPERSAMPLE, SIZE[1] * SUPERSAMPLE
+SHIP_DY = 6  # Schiff nach unten versetzt, oben ist Platz fuer die Beschriftung
 
-# Beschriftung (Dateiname-Teil -> Text). Freie tuerkise Flaeche oben links im 125x75-Bild:
-# etwa x 4..46, y 9..27 -> Text 10 px fett, linke Kante x 6, vertikal mittig um y 17.
-LABELS = {'me': 'Me', 'target': 'Target'}
+COLORS = {'g': icons.AMPEL['green'], 'r': icons.AMPEL['red']}
+LABELS = {'me': ('ME', 'shield'), 'target': ('TARGET', 'shell')}
 LABEL_FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'  # DejaVu-Lizenz, frei
-LABEL_SIZE = 10
-LABEL_LEFT = 6
-LABEL_CENTER_Y = 17
-LABEL_COLOR = (20, 32, 38, 255)
+LABEL_SIZE = 8.5
+LABEL_POS = (19, 8.5)  # linke Kante, vertikale Mitte
+LABEL_COLOR = (236, 238, 240)
+MINI_ICON = 15  # Kantenlaenge der Mini-Icons, linke obere Ecke bei (2, 1)
+
+# Seitenansicht im 125x75-Raster
+HULL = [(6, 38), (60, 38), (119, 35), (110, 61), (22, 61), (9, 50)]
+SUPERSTRUCTURE = [
+    [(46, 38), (47, 29), (52, 29), (53, 24), (60, 24), (61, 29), (72, 29), (73, 38)],  # Bruecke
+    [(63, 29), (64, 22), (69, 22), (70, 29)],                                          # Schornstein
+    [(55.5, 24), (56.5, 16), (57.5, 16), (58.5, 24)],                                  # Mast
+    [(80, 38), (81, 34), (90, 34), (91, 38)], [(89, 35), (101, 34.2), (101, 35.6), (89, 36.6)],  # Turm vorn
+    [(30, 38), (31, 34), (40, 34), (41, 38)], [(31, 35), (19, 34.2), (19, 35.6), (31, 36.6)],    # Turm achtern
+]
+RIM = 2.2        # grauer Rand zwischen Rumpfkante und Sektionen
+GAP = 1.1        # graue Fuge zwischen den Sektionen
+DECK_BOTTOM = 44.5
+STERN_END, BOW_START = 38, 86
 
 
-def white_regions(im):
-    w, h = im.size
-    px = im.load()
-    seen, regions = set(), []
-    for y in range(h):
-        for x in range(w):
-            if (x, y) in seen or px[x, y][:3] != WHITE or px[x, y][3] == 0:
-                continue
-            stack, region = [(x, y)], []
-            seen.add((x, y))
-            while stack:
-                cx, cy = stack.pop()
-                region.append((cx, cy))
-                for nx, ny in ((cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)):
-                    if 0 <= nx < w and 0 <= ny < h and (nx, ny) not in seen \
-                            and px[nx, ny][:3] == WHITE and px[nx, ny][3] > 0:
-                        seen.add((nx, ny))
-                        stack.append((nx, ny))
-            regions.append(region)
-    return regions
+def _mask(polys):
+    im = Image.new('L', (W, H), 0)
+    d = ImageDraw.Draw(im)
+    for poly in polys:
+        d.polygon([(x * SUPERSAMPLE, (y + SHIP_DY) * SUPERSAMPLE) for x, y in poly], fill=255)
+    return np.asarray(im, np.float32) / 255
 
 
-def classify(regions, size):
-    if len(regions) != 4:
-        raise SystemExit('erwartet 4 weisse Bereiche, gefunden: %d' % len(regions))
-    top = min(min(y for _, y in r) for r in regions)
-    deck = [r for r in regions if min(y for _, y in r) == top]
-    if len(deck) != 1:
-        raise SystemExit('Deck nicht eindeutig')
-    hull = [r for r in regions if r is not deck[0]]
-    cx = size[0] / 2.0
-    hull.sort(key=lambda r: abs(sum(x for x, _ in r) / float(len(r)) - cx))
-    return {'bowstern': hull[1] + hull[2], 'mid': hull[0], 'deck': deck[0]}
+def _filtered(mask, flt):
+    return np.asarray(Image.fromarray((mask * 255).astype(np.uint8)).filter(flt), np.float32) / 255
 
 
-def _labels(src, zones):
-    """Flaechen des Grund-Icons: {name: Menge von (x, y)}; 'background' ist transparent."""
-    px = src.load()
-    w, h = src.size
-    zone_pixels = set()
-    for pixels in zones.values():
-        zone_pixels.update(pixels)
-    colors = {}
-    for y in range(h):
-        for x in range(w):
-            if (x, y) in zone_pixels:
-                continue
-            colors.setdefault(px[x, y] if px[x, y][3] else None, set()).add((x, y))
-    layers = dict(('zone:' + k, set(v)) for k, v in zones.items())
-    for color, pixels in colors.items():
-        layers['color:%s' % (color,)] = pixels
-    return layers
+def _vshade(top, bottom):
+    y = np.linspace(0, 1, H, dtype=np.float32)[:, None, None]
+    return top + (bottom - top) * y
 
 
-def _smooth_masks(layers, size):
-    """Je Flaeche eine geglaettete Maske in Arbeitsaufloesung; jede Stelle gehoert genau einer."""
-    big = (size[0] * SUPERSAMPLE, size[1] * SUPERSAMPLE)
-    soft = {}
-    for name, pixels in layers.items():
-        m = Image.new('L', size, 0)
-        mp = m.load()
-        for x, y in pixels:
-            mp[x, y] = 255
-        soft[name] = m.resize(big, Image.NEAREST).filter(ImageFilter.GaussianBlur(SMOOTH_RADIUS))
-    # Mehrheitsentscheid: Stelle gehoert der Flaeche mit dem hoechsten geglaetteten Wert
-    names = list(soft)
-    best = soft[names[0]]
-    for name in names[1:]:
-        best = ImageChops.lighter(best, soft[name])
-    masks = {}
-    taken = Image.new('L', big, 0)
-    for name in names:
-        is_max = ImageChops.difference(soft[name], best).point(lambda v: 255 if v == 0 else 0)
-        mask = ImageChops.subtract(is_max, taken)
-        taken = ImageChops.lighter(taken, mask)
-        masks[name] = mask
-    return masks
+def _ship(bowstern, mid, deck):
+    hull = _mask([HULL])
+    sup = _mask(SUPERSTRUCTURE) * (1 - hull)
+    inner = _filtered(hull, ImageFilter.MinFilter(int(RIM * SUPERSAMPLE) | 1))
+    x = np.linspace(0, SIZE[0], W, dtype=np.float32)[None, :]
+    y = np.linspace(0, SIZE[1], H, dtype=np.float32)[:, None] - SHIP_DY
+    low = inner * (y > DECK_BOTTOM + GAP * 1.6)
+    zones = [(inner * (y < DECK_BOTTOM), deck),
+             (low * (x < STERN_END), bowstern),
+             (low * (x > BOW_START + GAP * 2), bowstern),
+             (low * (x > STERN_END + GAP * 2) * (x < BOW_START), mid)]
+    metal = np.array(icons.METAL, np.float32)
+    shade = _vshade(1.12, 0.78)
+    rgb = np.zeros((H, W, 3), np.float32)
+    alpha = np.zeros((H, W), np.float32)
+    for m, col in [(sup, metal * _vshade(1.15, 0.8)), (hull, metal * shade * 0.92)] + \
+            [(m, np.array(c, np.float32) * shade) for m, c in zones]:
+        rgb = rgb * (1 - m[..., None]) + col * m[..., None]
+        alpha = np.maximum(alpha, m)
+    # dunkle Kontur und Schatten wie bei den Icons
+    shape = np.maximum(hull, sup)
+    grown = _filtered(shape, ImageFilter.MaxFilter(int(1.1 * SUPERSAMPLE) | 1))
+    shadow = _filtered(shape, ImageFilter.GaussianBlur(SUPERSAMPLE * 1.4)) * 0.6
+    a = alpha[..., None]
+    rgb = np.array(icons.OUTLINE, np.float32) * (1 - a) + rgb * a
+    alpha = np.maximum(alpha, np.maximum(grown, shadow))
+    arr = np.dstack([np.clip(rgb, 0, 255), alpha[..., None] * 255]).astype(np.uint8)
+    return Image.fromarray(arr, 'RGBA')
 
 
-def _render(masks, fills, size, label=None):
-    big = masks[next(iter(masks))].size
-    canvas = Image.new('RGBA', big, (0, 0, 0, 0))
-    for name, mask in masks.items():
-        fill = fills.get(name)
-        if fill is None:
-            continue
-        canvas.paste(Image.new('RGBA', big, fill), (0, 0), mask)
-    if label:
-        # in Arbeitsaufloesung zeichnen, damit die Schrift beim Verkleinern geglaettet wird
-        k = big[0] / float(size[0])
-        font = ImageFont.truetype(LABEL_FONT, int(round(LABEL_SIZE * k)))
-        box = font.getbbox(label)
-        top = LABEL_CENTER_Y * k - (box[1] + box[3]) / 2.0
-        ImageDraw.Draw(canvas).text((LABEL_LEFT * k - box[0], top), label, font=font, fill=LABEL_COLOR)
-    return canvas.resize(size, Image.LANCZOS)
+def _label(text):
+    im = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    font = ImageFont.truetype(LABEL_FONT, int(LABEL_SIZE * SUPERSAMPLE))
+    x, y = LABEL_POS[0] * SUPERSAMPLE, LABEL_POS[1] * SUPERSAMPLE
+    off = 0.6 * SUPERSAMPLE
+    shadow = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(shadow).text((x + off, y + off), text, font=font, fill=(10, 12, 14, 230), anchor='lm')
+    im.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(off)))
+    ImageDraw.Draw(im).text((x, y), text, font=font, fill=LABEL_COLOR + (255,), anchor='lm')
+    return im
+
+
+def _mini_icon(kind):
+    draw = icons.shell if kind == 'shell' else icons.shield
+    px = MINI_ICON * SUPERSAMPLE
+    return draw(icons.NEUTRAL['grey']).resize((px, px), Image.LANCZOS)
+
+
+def render(key, combo):
+    text, kind = LABELS[key]
+    img = _ship(*(COLORS[c] for c in combo))
+    img.alpha_composite(_mini_icon(kind), (2 * SUPERSAMPLE, 1 * SUPERSAMPLE))
+    img.alpha_composite(_label(text))
+    return img.reduce(SUPERSAMPLE)
 
 
 def main():
-    src = Image.open(SOURCE).convert('RGBA')
-    zones = classify(white_regions(src), src.size)
-    for zone, pixels in sorted(zones.items()):
-        print('%-8s %3d Pixel' % (zone, len(pixels)))
-    layers = _labels(src, zones)
-    masks = _smooth_masks(layers, src.size)
-    size = (int(round(src.size[0] * SCALE)), int(round(src.size[1] * SCALE)))
-    base_fills = {}
-    for name in layers:
-        if name.startswith('color:') and name != 'color:None':
-            base_fills[name] = src.load()[next(iter(layers[name]))]
     written = []
-    for key, text in sorted(LABELS.items()):
+    for key in sorted(LABELS):
         for combo in itertools.product('gr', repeat=3):
-            fills = dict(base_fills)
-            for zone, letter in zip(('bowstern', 'mid', 'deck'), combo):
-                fills['zone:' + zone] = COLORS[letter] + (255,)
             name = 'detail_%s_%s.png' % (key, '_'.join(combo))
-            _render(masks, fills, size, text).save(os.path.join(TARGET_DIR, name))
+            render(key, combo).save(os.path.join(TARGET_DIR, name))
             written.append(name)
-    print('%d Dateien, %dx%d: %s' % (len(written), size[0], size[1], ' '.join(written)))
+    print('%d Dateien, %dx%d: %s' % (len(written), SIZE[0], SIZE[1], ' '.join(written)))
     return 0
 
 

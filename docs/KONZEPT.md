@@ -38,9 +38,10 @@ Layout (rechts unter dem Fadenkreuz, linke obere Ecke Standard x +30, y +8):
   Fadenkreuz sichtbar ist); Ampelfarben nur bei aufgeschaltetem, bewertetem Ziel, sonst grau
   (kein Ziel, Zerstörer/Träger/U-Boot, keine Daten)
 - mit Alt (nur mit Bewertung, sonst bleiben die grauen Symbole): die Symbole werden ausgeblendet, an ihrer Stelle zwei Schiffe (125×75, 8 px
-  Abstand) mit eingebauter Beschriftung oben links auf dem Türkis: links „Target“ = Ziel
-  (ich → Ziel, unter der Granate), rechts „Me“ = eigenes Schiff (Ziel → ich, unter dem Schild); 16 Bilder `detail_<me|target>_<b>_<m>_<d>.png`,
-  Schrift DejaVu Sans Bold 10 px (freie Lizenz);
+  Abstand), freistehend ohne Hintergrund, Rumpf metallisch grau mit dunkler Kontur wie die
+  Icons; oben links graue Mini-Granate + „TARGET“ = Ziel (ich → Ziel, unter der Granate) bzw.
+  Mini-Schild + „ME“ = eigenes Schiff (Ziel → ich, unter dem Schild); 16 Bilder
+  `detail_<me|target>_<b>_<m>_<d>.png`, Schrift DejaVu Sans Bold 8,5 px (freie Lizenz);
   Bug/Heck, Mitte, Deck grün/rot = gut/schlecht für mich. Die Schiffszeile liegt absolut an
   der Position der Symbole, damit nichts springt.
 PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
@@ -54,8 +55,8 @@ Abhängigkeit: ModForge + TTaroModUtils (Makros `TT_GET_PREF`, `TT_DRAGGABLE_POS
 kein Code übernommen).
 
 - 16 Bilder `detail_<me|target>_<bugheck>_<mitte>_<deck>.png` (g/r), erzeugt mit
-  `tools/make_detail_icons.py` aus `assets/detail_ship_source.png` (weiße Flächen = Sektionen,
-  Hintergrund und Umriss bleiben).
+  `tools/make_detail_icons.py` (gezeichnet; das frühere Grund-Icon
+  `assets/detail_ship_source.png` wird nicht mehr verwendet).
 - Python wählt das Bild (`detail_icons`), fehlende Daten → Zeile ausgeblendet.
 - „Mitte“ = dünnste Seitenplatte mittschiffs (`Cas_Belt`, `SSC_ConstrSide`), Teil der Ampel.
 

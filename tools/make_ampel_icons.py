@@ -18,8 +18,8 @@ import sys
 import numpy as np
 from PIL import Image, ImageFilter
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import make_detail_icons as detail  # noqa: E402
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TARGET_DIR = os.path.join(ROOT, 'mod', 'res_mods', 'PnFMods', 'Overmatcher')
 
 SIZE = 29  # muss zu iconSize in Overmatcher.unbound passen
 SUPERSAMPLE = 16
@@ -120,7 +120,7 @@ def main():
     for kind, draw in (('shell', shell), ('shield', shield)):
         for state, color in list(AMPEL.items()) + list(NEUTRAL.items()):
             name = '%s_%s.png' % (kind, state)
-            draw(color).reduce(SUPERSAMPLE).save(os.path.join(detail.TARGET_DIR, name))
+            draw(color).reduce(SUPERSAMPLE).save(os.path.join(TARGET_DIR, name))
             written.append(name)
     print('%d Icons, %dx%d: %s' % (len(written), SIZE, SIZE, ' '.join(written)))
     return 0
