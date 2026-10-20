@@ -2,8 +2,8 @@
 # Daten: CC.mods_DataComponent 'modOvermatcher' aus Main.py
 #   {byId: {'<avatarId>': [attack, defense, detail, attackImage, defenseImage]}, byName: {...}}
 #   attackImage/defenseImage = Detail-Bild ohne .png (detail_<bugheck>_<mitte>_<deck>), '' = keine Daten
-# Layout: zwei Spalten rechts neben dem Fadenkreuz, Granate | Schild; mit Alt erscheint
-# unter jedem Symbol das Detail-Schiff.
+# Layout rechts neben dem Fadenkreuz: Zeile 1 Granate | Schild (immer), Zeile 2 bei Alt die
+# beiden Detail-Schiffe (ich -> Ziel | Ziel -> ich).
 # Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
 # Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red}.png, 19x19 wie PenCalc.
@@ -19,8 +19,11 @@
 	offsetY: 8,
 	# Abstand zwischen den Spalten Granate | Schild
 	gap: 6,
-	# Abstand zwischen Symbol und Detail-Schiff (Alt)
-	detailGap: 3
+	# Abstand zwischen Symbolzeile und Detail-Schiffen (Alt)
+	detailGap: 3,
+	# Groesse der Detail-Schiffe (Bilder werden in dieser Groesse erzeugt, tools/make_detail_icons.py)
+	detailWidth: 125,
+	detailHeight: 75
 })
 
 (def constant OVERMATCHER_COMPONENT_KEY 'modOvermatcher')
@@ -114,7 +117,7 @@
 		)
 	)
 
-	(hblock
+	(block
 		(bind visible "hasVerdict")
 		(style
 			(position = "absolute")
@@ -130,26 +133,33 @@
 			)
 			(macro TT_DRAGGABLE _fullKey="OVERMATCHER_PREF_POSITION" _isDragEnabled="!isPositionLocked")
 		)
-		(element OvermatcherColumn _icon="attackIcon" _ship="attackDetail" _showDetail="altVision")
-		(element OvermatcherColumn _icon="defenseIcon" _ship="defenseDetail" _showDetail="altVision")
+		(hblock
+			(element OvermatcherIcon _url="attackIcon")
+			(element OvermatcherIcon _url="defenseIcon")
+		)
+		(hblock
+			(bind visible "altVision")
+			(style (bind marginTop "OVERMATCHER_SETTINGS.detailGap"))
+			(element OvermatcherShip _url="attackDetail")
+			(element OvermatcherShip _url="defenseDetail")
+		)
 	)
 )
 
-# Spalte: Ampel-Symbol (19x19), darunter bei Alt das ganze Schiff (50x30) in der
-# Farbkombination. Farbe immer "gut fuer mich" (Python waehlt das Bild).
-# Feste Breite 50, damit die Symbole beim Druecken von Alt nicht verrutschen.
-(def element OvermatcherColumn(_icon:str, _ship:str, _showDetail:bool) layout=true
+# Detail-Schiff in der Farbkombination; Farbe immer "gut fuer mich" (Python waehlt das Bild).
+# Leeres _url (keine Daten) -> Platz bleibt frei, damit die zweite Spalte nicht verrutscht.
+(def element OvermatcherShip(_url:str) layout=true
 	(style
-		(width = 50)
+		(bind width "OVERMATCHER_SETTINGS.detailWidth")
+		(bind height "OVERMATCHER_SETTINGS.detailHeight")
 		(bind marginRight "OVERMATCHER_SETTINGS.gap")
 	)
-	(element OvermatcherIcon _url="_icon")
 	(block
-		(bind visible "_showDetail && _ship != ''")
+		(bind visible "_url != ''")
 		(style
-			(bind marginTop "OVERMATCHER_SETTINGS.detailGap")
-			(bind backgroundImage "_ship")
-			(width = 50) (height = 30)
+			(bind backgroundImage "_url")
+			(bind width "OVERMATCHER_SETTINGS.detailWidth")
+			(bind height "OVERMATCHER_SETTINGS.detailHeight")
 			(backgroundSize = "fill")
 		)
 	)
@@ -160,6 +170,7 @@
 		(bind backgroundImage "_url")
 		(width = 19) (height = 19)
 		(backgroundSize = "fill")
+		(bind marginRight "OVERMATCHER_SETTINGS.gap")
 	)
 )
 

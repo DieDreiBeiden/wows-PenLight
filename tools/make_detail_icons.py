@@ -7,7 +7,8 @@ Grund-Icon: assets/detail_ship_source.png. Weisse Flaechen = Sektionen, getrennt
 den Umriss; Hintergrund und Umriss bleiben unveraendert. Zuordnung der weissen Bereiche
 (4er-Nachbarschaft): der Bereich, der die oberste Zeile beruehrt, ist das Deck; der
 Bereich mit dem Mittelpunkt naechst der Bildmitte ist die Mitte; die uebrigen sind Bug/Heck.
-Ausgabe: mod/res_mods/PnFMods/Overmatcher/detail_<bugheck>_<mitte>_<deck>.png, g/r.
+Ausgabe: mod/res_mods/PnFMods/Overmatcher/detail_<bugheck>_<mitte>_<deck>.png, g/r,
+skaliert um SCALE mit Nearest-Neighbor (scharfe Kanten statt Weichzeichnen im Spiel).
 """
 import itertools
 import os
@@ -21,6 +22,7 @@ TARGET_DIR = os.path.join(ROOT, 'mod', 'res_mods', 'PnFMods', 'Overmatcher')
 
 WHITE = (255, 255, 255)
 COLORS = {'g': (0x3D, 0xDC, 0x5A), 'r': (0xE0, 0x00, 0x00)}  # wie Granate/Schild-Icons
+SCALE = 2.5  # 50x30 -> 125x75, muss zu detailWidth/detailHeight in Overmatcher.unbound passen
 
 
 def white_regions(im):
@@ -71,9 +73,11 @@ def main():
             for x, y in zones[zone]:
                 px[x, y] = COLORS[letter] + (px[x, y][3],)
         name = 'detail_%s.png' % '_'.join(combo)
-        im.save(os.path.join(TARGET_DIR, name))
+        size = (int(round(src.size[0] * SCALE)), int(round(src.size[1] * SCALE)))
+        im.resize(size, Image.NEAREST).save(os.path.join(TARGET_DIR, name))
         written.append(name)
-    print('%d Dateien, %dx%d: %s' % (len(written), src.size[0], src.size[1], ' '.join(written)))
+    print('%d Dateien, %dx%d: %s' % (len(written), int(round(src.size[0] * SCALE)),
+                                     int(round(src.size[1] * SCALE)), ' '.join(written)))
     return 0
 
 
