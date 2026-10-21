@@ -80,12 +80,17 @@ The tip carries the traffic-light colour, as with AP. Instead of overmatch they 
 fixed penetration value of the shell against the target's plating (penetration ≥ plate counts;
 the IFHE commander skill is deliberately not taken into account):
 
+<p align="center">
+  <img src="docs/images/ammo.png" alt="Shell icons for AP, HE and SAP in every state, with ammo tag" width="600">
+</p>
+
 | Bow/stern | Deck | Shell |
 |---|---|---|
 | yes | yes | Green + star – tip, band and ring filled |
 | yes | no | Orange – tip and band (middle) filled |
 | no | yes | Orange – tip and rear ring filled |
 | no | no | Red – slash |
+| – | – | Grey – no target, or a destroyer/carrier/submarine |
 
 The shield always stays the enemy's AP overmatch. In the detail view the TARGET ship shows the
 penetration of the loaded HE/SAP.
@@ -97,7 +102,7 @@ penetration of the loaded HE/SAP.
 Holding **Alt** replaces shell and shield with two ships stacked on top of each other:
 
 - **TARGET** on top: where my loaded shell gets through the target (AP: overmatch, HE/SAP:
-  penetration of bow/stern and deck).
+  penetration of bow/stern, midship and deck).
 - **ME** below: where the target's AP overmatches me.
 - Here green always means **gets through** – for Target and Me alike. (Only the normal view
   colours by good/bad for you.)
