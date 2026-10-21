@@ -2,7 +2,7 @@
 
 **English** · [Deutsch](README.de.md)
 
-*PenLight = **pen**etration + traffic **light**. Formerly named Overmatcher.*
+*PenLight = **pen**etration + traffic **light**.*
 
 **Overmatch and penetration indicator for World of Warships.** When you lock onto a cruiser or
 a battleship, PenLight shows two traffic lights right next to your crosshair:

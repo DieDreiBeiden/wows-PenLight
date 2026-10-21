@@ -2,7 +2,7 @@
 
 [English](README.md) · **Deutsch**
 
-*PenLight = **Pen**etration (Durchschlag) + **Light** (Ampel). Früher Overmatcher.*
+*PenLight = **Pen**etration (Durchschlag) + **Light** (Ampel).*
 
 **Overmatch- und Durchschlags-Anzeige für World of Warships.** Schaltest du einen Kreuzer oder ein
 Schlachtschiff auf, zeigt PenLight direkt am Fadenkreuz zwei Ampeln:

@@ -35,8 +35,7 @@ Fehlt `penlight_log.txt` nach dem Spielstart ganz, wurde die Mod nicht geladen.
 
 Passt `ships.json` nicht zur Spielversion, deaktiviert sich die Mod und schreibt das ins Log.
 
-Entfernen: Ordner `PenLight` löschen. Die Probe-Mod `OvermatcherProbe` wird nicht mehr
-gebraucht und kann ebenfalls gelöscht werden.
+Entfernen: Ordner `PenLight` löschen.
 
 # Nach einem Patch
 
