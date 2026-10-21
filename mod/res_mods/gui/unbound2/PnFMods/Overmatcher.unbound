@@ -30,7 +30,7 @@
 	# Groesse von Granate/Schild (Icons werden so erzeugt, tools/make_ampel_icons.py)
 	iconSize: 29,
 	# senkrechter Abstand zwischen den beiden Detail-Schiffen (Alt, Target oben, Me unten)
-	shipGap: 4,
+	shipGap: 6,
 	# Groesse der Detail-Schiffe (Bilder werden in dieser Groesse erzeugt, tools/make_detail_icons.py)
 	detailWidth: 125,
 	detailHeight: 75,
@@ -59,7 +59,11 @@
 	# die Bilder haben oben freien Raum; Beschriftung so weit in die Bildflaeche ziehen
 	labelOverlap: 8,
 	# Abstand Silhouette -> Schiffsname
-	nameGap: 3
+	nameGap: 3,
+	# Abstand Schiffsname -> untere Rahmenlinie
+	nameBottom: 4,
+	# Kopfzeile unter der Rahmen-Haarlinie: Deckkraft der Trennlinie
+	headLineAlpha: 0.55
 })
 
 # Einfaerbung der Silhouetten: Multiplikator 0 + Offset = Vollfarbe, Alpha bleibt (Form der Silhouette).
@@ -79,6 +83,32 @@
 })
 
 (def constant OVERMATCHER_COMPONENT_KEY 'modOvermatcher')
+
+# Kontur + weicher Schatten der Silhouette wie bei Granate/Schild (Filter wie Spiel-Markierungen)
+(def css $OvermatcherSilhouetteFX ()
+	(filters
+		(dropShadow
+			(distance = 0)
+			(angle = 90)
+			(color = 0x0C0E10)
+			(alpha = 0.9)
+			(blurX = 2.0)
+			(blurY = 2.0)
+			(strength = 6.0)
+			(quality = 2)
+		)
+		(dropShadow
+			(distance = 1)
+			(angle = 90)
+			(color = 0x000000)
+			(alpha = 0.6)
+			(blurX = 6.0)
+			(blurY = 6.0)
+			(strength = 1.0)
+			(quality = 2)
+		)
+	)
+)
 
 # TTaroModUtils-Schluessel = author + '.' + key aus dem Schema
 (def constant OVERMATCHER_PREF_POSITION 'diedreibeiden.overmatcher.position')
@@ -301,6 +331,40 @@
 		(bind width "s.silhouetteWidth")
 		(bind marginBottom "s.shipGap")
 	)
+	# Rahmen B3: Band ueber die ganze Hoehe, Haarlinien oben/unten, aufgehellte Kopfzeile mit Trennlinie
+	(block
+		(class $FullsizeAbsolute)
+		(style (backgroundImage = "OVERMATCHER_ICON_PATH + 'frame_band.png'") (backgroundSize = "fill"))
+	)
+	(block
+		(style
+			(position = "absolute") (left = 0) (top = 1)
+			(bind width "s.silhouetteWidth") (bind height "s.labelHeight - 2")
+			(backgroundImage = "OVERMATCHER_ICON_PATH + 'frame_head.png'") (backgroundSize = "fill")
+		)
+	)
+	(block
+		(style
+			(position = "absolute") (left = 0) (bind top "s.labelHeight - 1")
+			(bind width "s.silhouetteWidth") (height = 1)
+			(bind alpha "s.headLineAlpha")
+			(backgroundImage = "OVERMATCHER_ICON_PATH + 'frame_line.png'") (backgroundSize = "fill")
+		)
+	)
+	(block
+		(style
+			(position = "absolute") (left = 0) (top = 0)
+			(bind width "s.silhouetteWidth") (height = 1)
+			(backgroundImage = "OVERMATCHER_ICON_PATH + 'frame_line.png'") (backgroundSize = "fill")
+		)
+	)
+	(block
+		(style
+			(position = "absolute") (left = 0) (bottom = 0)
+			(bind width "s.silhouetteWidth") (height = 1)
+			(backgroundImage = "OVERMATCHER_ICON_PATH + 'frame_line.png'") (backgroundSize = "fill")
+		)
+	)
 	(block
 		(style
 			(bind backgroundImage "_label")
@@ -310,6 +374,7 @@
 		)
 	)
 	(block
+		(class $OvermatcherSilhouetteFX)
 		(style
 			(bind width "s.silhouetteWidth")
 			(bind height "s.silhouetteHeight")
@@ -325,6 +390,7 @@
 		(style
 			(bind width "s.silhouetteWidth")
 			(bind marginTop "s.nameGap")
+			(bind marginBottom "s.nameBottom")
 			(align = "center")
 		)
 		(tf

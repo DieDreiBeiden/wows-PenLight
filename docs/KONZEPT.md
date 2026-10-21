@@ -56,6 +56,10 @@ Deck = alles oberhalb der Decklinie (`deckLine` 0,71 der Bildhöhe, gemessen an 
 Vermont, Trento; der erste Prototyp mit Balken über der Silhouette passte optisch nicht).
 Beschriftung `label_<target|me>_<farbe>.png` (186×24, Mini-Icon 14 px + Text 13 px mittig, Text in
 Zielgröße gezeichnet für Schärfe). Granate auf Schildhöhe skaliert (`SHELL_SCALE`).
+Rahmen (Variante B3, Nutzerwahl): je Schiff ein dunkles Band über die ganze Höhe, das zu den
+Seiten ausläuft, Haarlinien oben/unten, leicht aufgehellte Kopfzeile mit Trennlinie
+(`frame_band/line/head.png` aus `tools/make_detail_icons.py`); Silhouette mit Kontur und
+weichem Schatten per `dropShadow`-Filter (`$OvermatcherSilhouetteFX`).
 Unter jeder Silhouette der Schiffsname in der Spielschrift (`$TextDefaultBold13NM`,
 `toUpper(tr(ship.nameIDS))` wie im Spiel-Lebensbalken), mittig. Ohne Silhouetten-Namen gelten die `detail_*.png`.
 Die Silhouetten werden nicht mitgeliefert (Spieldateien), passen also nach jedem Patch.

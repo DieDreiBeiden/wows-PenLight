@@ -11,6 +11,7 @@ Mini-Granate (Target) bzw. der Mini-Schild (Me) mit Beschriftung "TARGET"/"ME".
 Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
 Das fruehere Grund-Icon assets/detail_ship_source.png wird nicht mehr verwendet.
 Ausgabe: mod/res_mods/PnFMods/Overmatcher/detail_<me|target>_<bugheck>_<mitte>_<deck>.png (g/r)
+frame_<band|line|head>.png (Rahmen der Silhouetten-Ansicht)
 und label_<me|target>_[cb_]<green|yellow|red|grey>.png (Mini-Icon in Ampelfarbe + Beschriftung,
 fuer die Silhouetten-Ansicht).
 """
@@ -156,8 +157,38 @@ def render_label(key, color):
     return img
 
 
+# Rahmen der Silhouetten-Ansicht (Variante B3): dunkles Band, das zu den Seiten auslaeuft,
+# Haarlinien oben/unten bzw. unter der Kopfzeile, leicht aufgehellte Kopfzeile. Breite wie die
+# Silhouette; in Overmatcher.unbound senkrecht gestreckt (nur waagerechter Verlauf).
+FRAME_WIDTH = LABEL_IMAGE[0]
+FRAME_PANEL = (14, 22, 28)
+FRAME_LINE = (200, 204, 208)
+
+
+def _fade(exponent, alpha):
+    x = np.abs(np.linspace(-1, 1, FRAME_WIDTH))
+    return (np.clip(1.0 - x ** exponent, 0, 1) * alpha * 255).astype(np.uint8)
+
+
+def render_frame(color, exponent, alpha, height):
+    arr = np.zeros((height, FRAME_WIDTH, 4), np.uint8)
+    arr[..., 0:3] = color
+    arr[..., 3] = _fade(exponent, alpha)[None, :]
+    return Image.fromarray(arr, 'RGBA')
+
+
+FRAMES = {
+    'frame_band.png': (FRAME_PANEL, 2.6, 0.55, 2),
+    'frame_line.png': (FRAME_LINE, 1.6, 0.45, 1),
+    'frame_head.png': ((255, 255, 255), 2.6, 0.07, 2),
+}
+
+
 def main():
     written = []
+    for name, args in sorted(FRAMES.items()):
+        render_frame(*args).save(os.path.join(TARGET_DIR, name))
+        written.append(name)
     for key in sorted(LABELS):
         # Mini-Icon in der Ampelfarbe der Granate (Target) bzw. des Schilds (Me)
         for prefix, palette in sorted(icons.PALETTES.items()):
