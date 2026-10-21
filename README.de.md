@@ -45,9 +45,9 @@ bewertet werden, hängt von der geladenen Munition ab:
 
 - **AP** und **Schild**: nur, wenn dein eigenes Schiff und das Ziel beide **Kreuzer oder
   Schlachtschiffe** sind.
-- **HE und SAP**: gegen jede Klasse – Zerstörer, Kreuzer, Schlachtschiffe, Träger und U-Boote –
-  und von jedem Schiff mit geladener HE/SAP. Ist die Paarung keine Kreuzer/Schlachtschiff-Paarung,
-  bleibt der Schild grau.
+- **HE und SAP**: gegen Zerstörer, Kreuzer, Schlachtschiffe und Träger sowie von jedem Schiff mit
+  geladener HE/SAP. Ist die Paarung keine Kreuzer/Schlachtschiff-Paarung, bleibt der Schild grau.
+  U-Boote werden nicht bewertet.
 
 Ohne Ziel oder bei einer nicht bewerteten Paarung bleiben die Symbole grau.
 
