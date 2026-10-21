@@ -41,7 +41,6 @@ See the [README](https://github.com/DieDreiBeiden/wows-PenLight#readme) for deta
 ## Known limitations
 
 - Pre-release: IFHE detection is implemented but not yet confirmed in game.
-- The aiming-view detection is new in 0.3.1 and not yet confirmed in game.
 - Standalone edition without TTaro: the invisible Flash drag area stays active in the third-person view (only with the mouse cursor shown).
 - Mouse drag is confirmed in game with TTaroModUtils; the standalone Flash drag without TTaro is not yet confirmed.
 - The citadel is not rated; green means the outer plating is penetrated.
