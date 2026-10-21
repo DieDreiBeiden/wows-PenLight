@@ -34,9 +34,12 @@ DEFAULTS = {'x': 30, 'y': 8, 'detailMode': 0, 'colorMode': 0, 'scale': 1.0}
 
 
 class ModTest(unittest.TestCase):
-    def run_mod(self, own_ship, enemies, data_version=VERSION):
+    def run_mod(self, own_ship, enemies, data_version=VERSION, ttaro=False):
         root = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, root)
+        if ttaro:
+            os.mkdir(os.path.join(root, 'TTaroModUtils'))
+            open(os.path.join(root, 'TTaroModUtils', 'Main.py'), 'w').close()
         mod_dir = os.path.join(root, 'Overmatcher')
         wrong_dir = os.path.join(root, 'OvermatcherProbe')  # getModDir-Befund im Client
         os.mkdir(mod_dir)
@@ -169,6 +172,14 @@ class ModTest(unittest.TestCase):
         self.assertAlmostEqual(args[2], 62 * 1.1)
         self.handlers['quit']()
         self.assertFalse(self.flash_calls[-1][1][4])
+
+    def test_ttaro_takes_over_settings(self):
+        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'], ttaro=True)
+        self.assertIn('settings via TTaroModUtils', self.log)
+        self.assertFalse(self.flash_calls[-1][1][4])   # Greifflaeche von Main.swf aus
+        count = len(self.ui_data)
+        self.key(205)                                   # Tastenkuerzel aus
+        self.assertEqual(len(self.ui_data), count)
 
     def test_missing_mid_is_unknown(self):
         self.run_mod('PASC720_Hawaii', ['PBSC110_Minotaur'])  # Minotaur ohne Mitte-Wert

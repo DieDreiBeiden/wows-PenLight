@@ -14,9 +14,9 @@
 # Alt-Ansicht (Prototyp): Spiel-Silhouetten img://gui/ship_bars/<shortName>_h.png in vier Sektionen
 # (Aufbauten = Deck, Rumpf = Heck/Mitte/Bug); Rueckfall auf detail_*.png (useSilhouettes in OVERMATCHER_SETTINGS).
 # Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red,grey}.png, 29x29 (gezeichnet von tools/make_ampel_icons.py).
-# Standalone (ohne TTaroModUtils): Position, Groesse, Detailmodus und Farbschema kommen aus Main.py
-# (omData.settings, Bedienung per Strg+Alt+Taste, gespeichert in ModPrefs/). Ohne diese Daten
-# gelten offsetX/offsetY relativ zur Bildschirmmitte und die Standardwerte.
+# Einstellungen: ohne TTaroModUtils aus Main.py (omData.settings; Strg+Alt+Taste, Ziehen per
+# Main.swf, gespeichert in ModPrefs/), mit TTaroModUtils aus dessen Optionsseite (_ext von
+# OvermatcherTTaroRoot). Ohne beides gelten offsetX/offsetY und die Standardwerte.
 
 # Einstellungen
 (def constant OVERMATCHER_SETTINGS {
@@ -114,7 +114,11 @@
 # Pfad relativ zu gui/unbound2/PnFMods/ (wie PenetrationCalculator)
 (def constant OVERMATCHER_ICON_PATH 'url:../../../PnFMods/Overmatcher/')
 
-(def element OvermatcherRoot() layout=true
+# Wurzel der Anzeige. Ohne TTaroModUtils haengt ModForge sie direkt ein (_ext = {}, Einstellungen
+# aus Main.py); mit TTaroModUtils haengt ModForge stattdessen OvermatcherTTaroRoot ein
+# (OvermatcherTTaro.unbound), die diese Wurzel mit den TTaro-Einstellungen in _ext aufruft:
+#   {posX, posY (Bildschirmkoordinaten), scale, colorMode, detailMode}
+(def element OvermatcherRoot(_ext:dict = {}) layout=true
 	(scope
 		(var stageComponent:gfx = "$datahub.getSingleComponent(CC.stage)")
 		(var stageWidth:number = "stageComponent.width" (event "stageComponent.evStageSizeChanged"))
@@ -138,16 +142,13 @@
 		(bind height "stageHeight")
 	)
 
-	(controller $Instance renderer='OvermatcherCrosshairItem'
-		(bind enabled "isAlive")
-		(exprs
-			(style (position = "absolute") (left = 0) (top = 0))
-			(bind visible "isCrosshairVisible")
-		)
+	(element OvermatcherCrosshairItem _ext="_ext"
+		(style (position = "absolute") (left = 0) (top = 0))
+		(bind visible "isCrosshairVisible")
 	)
 )
 
-(def element OvermatcherCrosshairItem() layout=true
+(def element OvermatcherCrosshairItem(_ext:dict = {}) layout=true
 	(scope
 		(macro STAGE_SIZE)
 
@@ -168,12 +169,15 @@
 		(var byName:dict = "'byName' in omData && null != omData.byName ? omData.byName : {}")
 
 		# Einstellungen aus Main.py (Strg+Alt+Pfeile/Pos1/D/F/+/-), Rueckfall auf OVERMATCHER_SETTINGS
+		# bzw. aus _ext (TTaro-Hülle), _ext hat Vorrang
 		(var om:dict = "'settings' in omData && null != omData.settings ? omData.settings : {}")
-		(var posX:number = "stageWidth / 2 + ('x' in om ? om.x : OVERMATCHER_SETTINGS.offsetX)")
-		(var posY:number = "stageHeight / 2 + ('y' in om ? om.y : OVERMATCHER_SETTINGS.offsetY)")
-		(var uiScale:number = "'scale' in om ? om.scale : 1")
-		(var isColorBlind:bool = "'colorMode' in om ? om.colorMode == 1 : false")
-		(var isDetailAlways:bool = "'detailMode' in om ? om.detailMode == 1 : false")
+		(var posX:number = "'posX' in _ext ? _ext.posX : stageWidth / 2 + ('x' in om ? om.x : OVERMATCHER_SETTINGS.offsetX)")
+		(var posY:number = "'posY' in _ext ? _ext.posY : stageHeight / 2 + ('y' in om ? om.y : OVERMATCHER_SETTINGS.offsetY)")
+		(var uiScale:number = "'scale' in _ext ? _ext.scale : ('scale' in om ? om.scale : 1)")
+		(var colorMode:number = "'colorMode' in _ext ? _ext.colorMode : ('colorMode' in om ? om.colorMode : 0)")
+		(var detailMode:number = "'detailMode' in _ext ? _ext.detailMode : ('detailMode' in om ? om.detailMode : 0)")
+		(var isColorBlind:bool = "colorMode == 1")
+		(var isDetailAlways:bool = "detailMode == 1")
 		# Farbschema: Dateipraefix der Icons und Einfaerbung der Silhouetten
 		(var palettePrefix:str = "isColorBlind ? 'cb_' : ''")
 		(var palette:dict = "isColorBlind ? OVERMATCHER_CT_CB : OVERMATCHER_CT")

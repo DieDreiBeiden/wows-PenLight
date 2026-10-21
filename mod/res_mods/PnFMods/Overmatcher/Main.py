@@ -128,6 +128,8 @@ LOG_KEEP = 300
 # Zusaetzlich mit der Maus ziehen (Mauszeiger z. B. per Strg): Main.swf legt eine unsichtbare
 # Greifflaeche ueber Granate | Schild (FlashAPI, Kanaele omSetHandle / omDragMove / omDragEnd).
 # Gespeichert im Spielverzeichnis unter ModPrefs/ (ueberlebt Patches), sonst im Mod-Ordner.
+# Ist TTaroModUtils installiert, gilt dessen Optionsseite (ModForge haengt dann die TTaro-Huelle
+# ein); Tastenkuerzel und Greifflaeche von Main.swf sind dann aus, damit nichts doppelt greift.
 DEFAULT_SETTINGS = {'x': 30, 'y': 8, 'detailMode': 0, 'colorMode': 0, 'scale': 1.0}
 POSITION_STEP = 5
 SCALE_STEP = 0.1
@@ -140,7 +142,7 @@ SETTINGS_DIRS = ('/../../../../../ModPrefs', '')
 HANDLE_SIZE = (62, 29)
 
 _state = {'data': None, 'disabled': False, 'results': None, 'log': [], 'ui_id': None,
-          'settings': None, 'in_battle': False}
+          'settings': None, 'in_battle': False, 'ttaro': None}
 
 # Client-Eigenheiten (python.log 15.9.0.13357625):
 # - open() verlangt immer (pfad, modus); Modus 'a' nur fuer bereits vorhandene Dateien.
@@ -281,6 +283,17 @@ def _report(results):
         _log('could not write %s: %r' % (RESULT_FILE, e))
 
 
+def ttaro_installed():
+    """TTaroModUtils liegt neben uns in PnFMods/ (gleiche Bedingung wie im ModForge-Manifest)."""
+    if _state['ttaro'] is None:
+        try:
+            with open(_mod_dir() + '/../TTaroModUtils/Main.py', 'r'):
+                _state['ttaro'] = True
+        except Exception:
+            _state['ttaro'] = False
+    return _state['ttaro']
+
+
 def _settings_paths():
     return [_mod_dir() + d + '/' + SETTINGS_NAME for d in SETTINGS_DIRS]
 
@@ -376,7 +389,7 @@ def apply_action(settings, action, fine=False):
 def on_key(event):
     """Strg+Alt+Taste aendert eine Einstellung (Tabelle oben)."""
     try:
-        if not (event.isKeyDown() and event.isCtrlDown() and event.isAltDown()):
+        if ttaro_installed() or not (event.isKeyDown() and event.isCtrlDown() and event.isAltDown()):
             return
         action = _key_actions().get(event.key)
         if action is None:
@@ -397,7 +410,8 @@ def _update_handle():
     s = _settings()
     try:
         flash.call('omSetHandle', [s['x'], s['y'], HANDLE_SIZE[0] * s['scale'],
-                                   HANDLE_SIZE[1] * s['scale'], bool(_state['in_battle'])])
+                                   HANDLE_SIZE[1] * s['scale'],
+                                   bool(_state['in_battle']) and not ttaro_installed()])
     except Exception as e:
         _log('flash handle update failed: %r' % (e,))
 
@@ -497,8 +511,9 @@ def _register_flash():
         return 'failed: %r' % (e,)
 
 
-_log('Main.py loaded, game version %s, getModDir %s -> %s, keys %d/11, flash %s'
-     % (utils.getGameVersion(), utils.getModDir(), _mod_dir(), len(_key_actions()), _register_flash()))
+_log('Main.py loaded, game version %s, getModDir %s -> %s, keys %d/11, flash %s, settings via %s'
+     % (utils.getGameVersion(), utils.getModDir(), _mod_dir(), len(_key_actions()), _register_flash(),
+        'TTaroModUtils' if ttaro_installed() else 'keys/Main.swf'))
 events.onBattleShown(_on_battle_shown)
 events.onPlayersListUpdated(_refresh)
 events.onBattleQuit(_on_battle_quit)

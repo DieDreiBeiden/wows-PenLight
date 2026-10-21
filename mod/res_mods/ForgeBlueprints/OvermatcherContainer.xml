@@ -1,10 +1,22 @@
-<mod name="OvermatcherContainer" version="0.2.0" priority="0">
+<mod name="OvermatcherContainer" version="0.3.0" priority="0">
   <requires installer="&gt;=1.0.0"/>
 
-  <!-- ModForge-Manifest nach Vorlage PenetrationCalculatorContainer.xml -->
+  <!-- ModForge-Manifest nach Vorlage PenetrationCalculatorContainer.xml.
+       Mit TTaroModUtils: Huelle mit Optionsseite, Zahnrad und Ziehen per TTaro
+       (OvermatcherTTaro.unbound, nimmt Mausereignisse an). Ohne: eigenstaendige Anzeige
+       (Overmatcher.unbound; Einstellungen per Strg+Alt+Taste, Ziehen per Main.swf). -->
+  <ubMountInBattle unbound="2"
+                   rootElementId="OvermatcherTTaroRoot"
+                   name="unbound2OvermatcherTTaro"
+                   hitTest="true"
+                   after="CrosshairContainer">
+    <requires mods="TTaroModUtils"/>
+  </ubMountInBattle>
   <ubMountInBattle unbound="2"
                    rootElementId="OvermatcherRoot"
                    name="unbound2Overmatcher"
                    hitTest="false"
-                   after="CrosshairContainer"/>
+                   after="CrosshairContainer">
+    <requires mods="not TTaroModUtils"/>
+  </ubMountInBattle>
 </mod>

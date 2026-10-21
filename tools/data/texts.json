@@ -1,0 +1,14 @@
+{
+  "en": {
+    "IDS_OM_HINT_DETAIL_MODE": "\"Visible on Alt-key\": shell and shield icons, detail view while Alt is held.\n\"Always ON\": the detail view replaces the icons whenever a target is locked.",
+    "IDS_OM_COLOR_MODE": "Colours",
+    "IDS_OM_COLOR_MODE_COLORBLIND": "Colour-blind (blue / yellow / orange)",
+    "IDS_OM_HINT_COLOR_MODE": "Standard: green = overmatch, yellow = bow/stern only, red = no overmatch.\nColour-blind: blue = overmatch, yellow = bow/stern only, orange = no overmatch."
+  },
+  "de": {
+    "IDS_OM_HINT_DETAIL_MODE": "\"Mit Alt-Taste sichtbar\": Granate und Schild, Detailansicht solange Alt gedrückt ist.\n\"Immer AN\": die Detailansicht ersetzt die Symbole, sobald ein Ziel aufgeschaltet ist.",
+    "IDS_OM_COLOR_MODE": "Farben",
+    "IDS_OM_COLOR_MODE_COLORBLIND": "Farbenblind (Blau / Gelb / Orange)",
+    "IDS_OM_HINT_COLOR_MODE": "Standard: Grün = Overmatch, Gelb = nur Bug/Heck, Rot = kein Overmatch.\nFarbenblind: Blau = Overmatch, Gelb = nur Bug/Heck, Orange = kein Overmatch."
+  }
+}

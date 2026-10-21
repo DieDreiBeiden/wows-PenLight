@@ -1,0 +1,84 @@
+# Overmatcher – Huelle fuer installiertes TTaroModUtils.
+# ModForge haengt diese Wurzel nur ein, wenn TTaroModUtils installiert ist
+# (ForgeBlueprints/OvermatcherContainer.xml, <requires mods="TTaroModUtils"/>), sonst
+# OvermatcherRoot aus Overmatcher.unbound. Diese Datei nutzt die veroeffentlichten Makros und
+# Elemente von TTaroModUtils (TT_GET_PREF, TT_DRAGGABLE_POSITION, TT_DRAGGABLE,
+# TT_ConfigButtonElement) und gibt die Einstellungen als _ext an OvermatcherRoot weiter.
+# Optionsseite: ModSchemas/diedreibeiden-overmatcher.schema.json, Texte texts/<sprache>/overmatcher.mo.
+
+# TTaroModUtils-Schluessel = author + '.' + key aus dem Schema
+(def constant OVERMATCHER_PREF_POSITION 'diedreibeiden.overmatcher.position')
+(def constant OVERMATCHER_PREF_LOCK 'diedreibeiden.overmatcher.disableDragDrop')
+(def constant OVERMATCHER_PREF_SCALE 'diedreibeiden.overmatcher.scale')
+(def constant OVERMATCHER_PREF_COLOR_MODE 'diedreibeiden.overmatcher.colorMode')
+(def constant OVERMATCHER_PREF_DETAIL_MODE 'diedreibeiden.overmatcher.detailMode')
+# Seite in TTaro Mod Config = author + '.' + slug aus dem Schema (fuer das eigene Zahnrad)
+(def constant OVERMATCHER_MOD_SLUG 'diedreibeiden.overmatcher')
+
+(def element OvermatcherTTaroRoot() layout=true
+	(scope
+		(macro STAGE_SIZE)
+
+		# Position: gespeicherte Drag-Position (Bildschirmkoordinaten) oder Rueckfall
+		(macro TT_GET_PREF _varName="'lockPref'" _key="OVERMATCHER_PREF_LOCK")
+		(var isPositionLocked:bool = "null != lockPref && null != lockPref.value ? lockPref.value : false")
+		(macro TT_DRAGGABLE_POSITION _fullKey="OVERMATCHER_PREF_POSITION")
+		(var hasDragPosition:bool = "null != __dragPos && null != __dragPos.value && isNumber(__dragPos.value.x)")
+		(var posX:number = "hasDragPosition ? dragX : stageWidth / 2 + OVERMATCHER_SETTINGS.offsetX")
+		(var posY:number = "hasDragPosition ? dragY : stageHeight / 2 + OVERMATCHER_SETTINGS.offsetY")
+
+		# Optionen aus TTaro Mod Config
+		(macro TT_GET_PREF _varName="'scalePref'" _key="OVERMATCHER_PREF_SCALE")
+		(var uiScale:number = "null != scalePref && null != scalePref.value ? scalePref.value : 1")
+		(macro TT_GET_PREF _varName="'colorModePref'" _key="OVERMATCHER_PREF_COLOR_MODE")
+		(var colorMode:number = "null != colorModePref && null != colorModePref.value ? colorModePref.value : 0")
+		(macro TT_GET_PREF _varName="'detailModePref'" _key="OVERMATCHER_PREF_DETAIL_MODE")
+		(var detailMode:number = "null != detailModePref && null != detailModePref.value ? detailModePref.value : 0")
+
+		(var ext:dict = "{posX: posX, posY: posY, scale: uiScale, colorMode: colorMode, detailMode: detailMode}")
+
+		# Zahnrad und Greifflaeche nur, solange man lebt (wie die Anzeige selbst)
+		(var avatar:gfx = "$datahub.getSingleEntity(CC.playerAvatar)")
+		(var healthComponent:gfx = "avatar ? avatar.health : null")
+		(var isAlive:bool = "healthComponent ? healthComponent.isAlive : false" (event "healthComponent.evIsAliveChanged"))
+	)
+
+	(style
+		(position = "absolute")
+		(bind width "stageWidth")
+		(bind height "stageHeight")
+	)
+
+	(element OvermatcherRoot _ext="ext"
+		(style (position = "absolute") (left = 0) (top = 0))
+	)
+
+	(block
+		(bind visible "isAlive")
+		(style
+			(position = "absolute")
+			(bind left "posX")
+			(bind top "posY")
+			(bind scaleX "uiScale")
+			(bind scaleY "uiScale")
+		)
+		# eigenes Zahnrad links neben der Anzeige, sichtbar bei aktivem Mauszeiger (Strg);
+		# oeffnet TTaro Mod Config direkt auf der Overmatcher-Seite (wie BuildViewer)
+		(element TT_ConfigButtonElement _modSlug="OVERMATCHER_MOD_SLUG" _tooltipAlign="outerTop|outerLeft"
+			(style
+				(left = -30px)
+				(top = 0px)
+			)
+		)
+		# Greifflaeche ueber Granate | Schild (2 x iconSize + iconGap), wie BuildViewer
+		(block
+			(style
+				(bind width "OVERMATCHER_SETTINGS.iconSize * 2 + OVERMATCHER_SETTINGS.iconGap")
+				(bind height "OVERMATCHER_SETTINGS.iconSize")
+				(backgroundColor = 0x00FFFFFF)
+				(bind hitTest "!isPositionLocked")
+			)
+			(macro TT_DRAGGABLE _fullKey="OVERMATCHER_PREF_POSITION" _isDragEnabled="!isPositionLocked")
+		)
+	)
+)

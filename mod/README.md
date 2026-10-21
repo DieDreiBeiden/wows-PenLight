@@ -13,15 +13,20 @@ Spiel beenden. Ordner mit der **höchsten Nummer** unter `World_of_Warships\bin\
 | `gui\unbound2\PnFMods\Overmatcher.unbound` | Anzeige am Fadenkreuz (ab 0.2, benötigt ModForge) |
 | `ForgeBlueprints\OvermatcherContainer.xml` | ModForge-Manifest für die Anzeige |
 
-Voraussetzung: **ModForge**. TTaroModUtils wird in dieser Standalone-Fassung nicht gebraucht.
-Wer vorher die TTaro-Fassung installiert hatte, löscht `ModSchemas\diedreibeiden-overmatcher.schema.json`
-und `texts\<Sprache>\overmatcher.mo`.
+Voraussetzung: **ModForge**. **TTaroModUtils** ist optional und wird automatisch erkannt:
 
-Verschieben mit der Maus: im Gefecht Mauszeiger einblenden (Strg halten), über Granate | Schild
+- **Mit TTaroModUtils:** Optionsseite in TTaro Mod Config, Zahnrad links neben der Anzeige,
+  Ziehen mit der Maus über TTaro (wie bei den übrigen TTaro-Mods). Tastenkürzel und `Main.swf` sind aus.
+- **Ohne TTaroModUtils:** Ziehen über `Main.swf`, Einstellungen per Tastenkürzel (unten).
+
+| `gui\unbound2\PnFMods\OvermatcherTTaro.unbound` | Hülle für TTaroModUtils (nur eingehängt, wenn installiert) |
+| `ModSchemas\diedreibeiden-overmatcher.schema.json`, `texts\<Sprache>\overmatcher.mo` | Optionsseite für TTaro Mod Config |
+
+Ohne TTaroModUtils – verschieben mit der Maus: im Gefecht Mauszeiger einblenden (Strg halten), über Granate | Schild
 fahren (feiner Rahmen erscheint) und ziehen. Die Position wird beim Loslassen gespeichert.
 Dafür sorgt `PnFMods\Overmatcher\Main.swf` (Flash-Teil, offizielle ModsAPI).
 
-Einstellungen im Gefecht mit **Strg+Alt** und:
+Ohne TTaroModUtils – Einstellungen im Gefecht mit **Strg+Alt** und:
 
 | Taste | Wirkung |
 |---|---|
@@ -52,6 +57,8 @@ gebraucht und kann ebenfalls gelöscht werden.
 2. `python3 -I tools/gameparams.py GameParams.data ships_full.json mod/res_mods/PnFMods/Overmatcher/ships.json <Version>`
    (`<Version>` wie im python.log, z. B. `15,9,0,13357625`)
 3. `python3 -I tools/build_mod.py`, Tests: `python3 -m unittest discover -s tests`
+
+Texte der Optionsseite: `python3 -I tools/make_texts.py` (Quelle `tools/data/texts.json`).
 
 Flash-Teil neu bauen (nur nach Änderung an `src/as3/Main.as`): siehe Kopf von `tools/build_flash.py`
 (Apache Flex SDK 4.16.1, Adobe `playerglobal32_0.swc`, `wows_library.swc` aus dem ModSDK).

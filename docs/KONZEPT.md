@@ -65,7 +65,18 @@ Unter jeder Silhouette der Schiffsname in der Spielschrift (`$TextDefaultBold13N
 Die Silhouetten werden nicht mitgeliefert (Spieldateien), passen also nach jedem Patch.
 PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
 
-Standalone (Branch `main-standalone`, ohne TTaroModUtils; ModForge bleibt für das Einhängen
+Branch `main-standalone` erkennt TTaroModUtils selbst (Nutzerwunsch): Das ModForge-Manifest hat
+zwei `<ubMountInBattle>` mit `<requires mods="TTaroModUtils"/>` bzw. `"not TTaroModUtils"`.
+Mit TTaro wird `OvermatcherTTaroRoot` (OvermatcherTTaro.unbound) eingehängt: TTaro-Optionsseite,
+Zahnrad und Ziehen wie auf `main`, Einstellungen als `_ext` an `OvermatcherRoot`. Ohne TTaro
+hängt `OvermatcherRoot` direkt (Einstellungen aus Main.py). Main.py prüft dieselbe Bedingung
+(`PnFMods/TTaroModUtils/Main.py` vorhanden) und schaltet dann Tasten und Main.swf-Greiffläche ab.
+TTaros interne Technik (Sandbox-Umgehung über `xml.sax.saxutils.os`, verschlüsselte Namen) wird
+bewusst nicht übernommen; genutzt werden nur dessen veröffentlichte Makros/Elemente.
+Offene Frage: Der Client liest alle Dateien in `gui/unbound2/PnFMods/`; ohne TTaro sind die
+TT_-Makros in OvermatcherTTaro.unbound unbekannt – ob das nur einen Logeintrag erzeugt, ist ungetestet.
+
+Ohne TTaro (ModForge bleibt für das Einhängen
 der Anzeige nötig – es ist laut README zum Mitliefern in Mod-Paketen gedacht):
 Einen offiziellen Rückkanal Unbound → Python gibt es in der ModsAPI nur über einen Flash-Teil
 (`flash.addExternalCallback`); TTaro nutzt dafür interne Client-Zugriffe. Deshalb kein

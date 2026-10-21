@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 5,
+  "id": "ombfa94db7db89439222ff66",
+  "author": "diedreibeiden",
+  "modName": "Overmatcher",
+  "slug": "overmatcher",
+  "order": 50,
+  "tree": [
+    {
+      "kind": "group",
+      "key": "overmatcher.general",
+      "display": "section",
+      "label": "IDS_TT_TITLE_GENERAL",
+      "collapse": "expanded",
+      "children": [
+        {
+          "kind": "setting",
+          "control": "dropdown",
+          "key": "overmatcher.detailMode",
+          "label": "IDS_TT_DISPLAY_MODE",
+          "hint": {
+            "text": "IDS_OM_HINT_DETAIL_MODE"
+          },
+          "default": 0,
+          "options": [
+            {
+              "value": 0,
+              "phrase": "IDS_TT_DISPLAY_ON_ALT"
+            },
+            {
+              "value": 1,
+              "phrase": "IDS_TT_ALWAYS_ON"
+            }
+          ]
+        },
+        {
+          "kind": "setting",
+          "control": "dropdown",
+          "key": "overmatcher.colorMode",
+          "label": "IDS_OM_COLOR_MODE",
+          "hint": {
+            "text": "IDS_OM_HINT_COLOR_MODE"
+          },
+          "default": 0,
+          "options": [
+            {
+              "value": 0,
+              "phrase": "IDS_TT_STYLE_STANDARD"
+            },
+            {
+              "value": 1,
+              "phrase": "IDS_OM_COLOR_MODE_COLORBLIND"
+            }
+          ]
+        },
+        {
+          "kind": "setting",
+          "control": "slider",
+          "key": "overmatcher.scale",
+          "label": "IDS_TT_UI_SCALE",
+          "default": 1,
+          "min": 0.5,
+          "max": 2,
+          "step": 0.05,
+          "decimals": 2
+        },
+        {
+          "kind": "setting",
+          "control": "toggle",
+          "key": "overmatcher.disableDragDrop",
+          "label": "IDS_TT_DISABLE_DRAG_DROP",
+          "hint": {
+            "text": "IDS_TT_HINT_DISABLE_DRAG_DROP"
+          },
+          "default": false
+        },
+        {
+          "kind": "setting",
+          "control": "position",
+          "key": "overmatcher.position",
+          "label": "IDS_TT_DRAGDROP_RESET",
+          "hint": {
+            "text": "IDS_TT_HINT_DRAGDROP_RESET"
+          },
+          "defaultPosition": {
+            "x": {
+              "anchor": "center",
+              "offset": 30
+            },
+            "y": {
+              "anchor": "middle",
+              "offset": 8
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
