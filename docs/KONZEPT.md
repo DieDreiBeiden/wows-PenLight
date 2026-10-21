@@ -210,6 +210,10 @@ Nur gegnerisches Team.
   nach dem Löschen korrekt. Vermutlich Präfix-Zuordnung des Mod-Namens – Mod-Ordner nie
   mit einem Präfix eines anderen Mod-Namens benennen. Die Mod korrigiert den Pfad selbst.
 - 0.1.2 im Client bestätigt: Hawaii gegen Minotaur ×2 und Yamato liefert die erwarteten Farben.
+- Die Sandbox kennt die Builtins `globals()` (und vermutlich `locals()`/`vars()`) nicht: ein
+  Aufruf beim Laden bricht die ganze Mod ab (`NameError: name 'globals' is not defined`, nur graue
+  Symbole, PenLight 2026-10-21). Vom Client gesetzte Namen per `try: name / except NameError:` prüfen.
+  Die Tests laufen deshalb mit Builtins ohne `globals`/`locals`/`vars`.
 
 ## Offene Punkte
 

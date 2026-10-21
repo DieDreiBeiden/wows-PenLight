@@ -153,10 +153,15 @@ try:
     import events, ui, utils, battle
 except Exception:
     pass
+# Client-Sandbox: die Builtin-Funktion globals fehlt dort (python.log: NameError: name 'globals' is not
+# defined). Darum erst den vom Client gesetzten Namen pruefen, dann importieren, sonst None.
 try:
-    import constants
-except Exception:
-    constants = globals().get('constants')
+    constants
+except NameError:
+    try:
+        import constants
+    except Exception:
+        constants = None
 
 MOD_NAME = 'PenLight'
 # Datenkomponente fuer PenLight.unbound (CC.mods_DataComponent mit dieser ID)

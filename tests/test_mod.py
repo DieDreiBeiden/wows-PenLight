@@ -82,6 +82,9 @@ class ModTest(unittest.TestCase):
                           onArtilleryAmmoChanged=lambda f: handlers.setdefault('ammo', f)),
         }
         self.handlers = handlers
+        # wie die Client-Sandbox: kein globals()/locals()/vars() (python.log 15.9)
+        env['__builtins__'] = dict((k, v) for k, v in vars(builtins).items()
+                                   if k not in ('globals', 'locals', 'vars'))
         exec(compile(open(build_mod.build()).read(), 'Main.py', 'exec'), env)
         handlers['shown']()
         self.log = open(os.path.join(mod_dir, 'penlight_log.txt')).read()
