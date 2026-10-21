@@ -4,15 +4,15 @@
 
 *PenLight = **Pen**etration (Durchschlag) + **Light** (Ampel).*
 
-**Overmatch- und Durchschlags-Anzeige für World of Warships.** Schaltest du einen Kreuzer oder ein
-Schlachtschiff auf, zeigt PenLight direkt am Fadenkreuz zwei Ampeln:
+**Overmatch- und Durchschlags-Anzeige für World of Warships.** Schaltest du ein Ziel auf, zeigt
+PenLight direkt neben dem Fadenkreuz zwei kleine Ampeln:
 
-- **Granate:** Kommt meine **geladene** Munition durch das Ziel? AP wird nach Overmatch bewertet,
-  HE und SAP nach ihrem Durchschlag gegen die Beplankung des Ziels.
-- **Schild:** Kann das Ziel mit seiner AP mich overmatchen?
+- **Granate:** Kommt meine **geladene** Munition durch die Panzerung des Ziels? AP wird nach
+  Overmatch bewertet, HE und SAP nach ihrem Durchschlagswert.
+- **Schild:** Können die AP-Granaten des Ziels meine Panzerung overmatchen?
 
-Mit gedrückter **Alt**-Taste erscheint eine Detailansicht: die Schiffs-Silhouetten des Spiels,
-aufgeteilt in **Bug/Heck**, **Mitte** und **Deck**, jeweils grün (kommt durch) oder rot (kommt nicht durch).
+Mit gedrückter **Alt**-Taste zeigt eine Detailansicht dasselbe für jede Zone beider Schiffe:
+Bug/Heck, Mitte und Deck.
 
 <p align="center">
   <img src="docs/images/ampel.png" alt="Granate und Schild in allen Zuständen, Standard- und Farbenblind-Farben" width="610">
@@ -38,7 +38,13 @@ aufgeteilt in **Bug/Heck**, **Mitte** und **Deck**, jeweils grün (kommt durch) 
 
 ## Was angezeigt wird
 
-### Die Overmatch-Regel
+### Bewertete Zonen
+
+Jedes Schiff ist in drei Zonen geteilt: **Bug/Heck**, **Mitte** und **Deck**. Bewertet werden nur
+Paarungen aus **Kreuzern und Schlachtschiffen**, also dein eigenes Schiff und das Ziel. Alles andere
+(Zerstörer, Träger, U-Boote oder kein Ziel aufgeschaltet) bleibt grau.
+
+### Overmatch (AP)
 
 Eine Granate overmatcht eine Panzerplatte, wenn
 
@@ -46,56 +52,63 @@ Eine Granate overmatcht eine Panzerplatte, wenn
 Kaliber > 14,3 × Plattendicke
 ```
 
-Dann durchschlägt sie die Platte unabhängig vom Auftreffwinkel, auch bei gewinkelten Schiffen.
-Gleichstand zählt nicht als Overmatch.
+Dann durchschlägt sie diese Platte bei jedem Auftreffwinkel; Anwinkeln hilft nicht. Gleichstand
+zählt nicht als Overmatch.
 
 ### Die Ampel
 
-Bug/Heck ist die Grundvoraussetzung; „überall“ heißt, dass zusätzlich Mitte **und** Deck
-overmatcht werden. Die Farben zeigen, ob die Lage **gut oder schlecht für dich** ist:
+Die Farben zeigen, ob die Lage **gut oder schlecht für dich** ist. Deshalb haben Granate und
+Schild beim gleichen Ergebnis entgegengesetzte Farben:
 
-| Bug/Heck | Mitte und Deck | Granate (ich → Ziel) | Schild (Ziel → ich) |
-|---|---|---|---|
-| ja | beide ja | **Grün + Stern** – ich komme überall durch, auch gewinkelt | **Rot + Warndreieck** – das Ziel kommt überall durch, ausweichen |
-| ja | nicht beide | Orange – auf Bug/Heck zielen | Orange – Bug/Heck schützen |
-| nein | – | Rot – nur die Breitseite lohnt | Grün – Anwinkeln wirkt |
-| – | – | Grau – kein Ziel, oder Zerstörer/Träger/U-Boot | Grau |
+| Overmatch auf … | Granate (meine AP → Ziel) | Schild (AP des Ziels → ich) |
+|---|---|---|
+| allen drei Zonen | **Grün + Stern** – ich komme überall durch, auch wenn das Ziel anwinkelt | **Rot + Warndreieck** – das Ziel kommt überall durch, seinen Geschützen ausweichen |
+| nur Bug/Heck | **Orange** – auf Bug/Heck zielen | **Orange** – Bug/Heck aus seinem Feuer halten |
+| nicht einmal Bug/Heck | **Rot** – nur die Breitseite lohnt | **Grün** – Anwinkeln schützt dich |
+| keine Bewertung | Grau | Grau |
 
-Die **Form** trägt dieselbe Aussage ohne Farbe. Granate: alle Segmente gefüllt = ich komme
-überall durch, nur die Spitze = nur Bug/Heck, Schrägstrich = ich komme nicht durch. Schild: voll
-und heil = das Ziel kommt nicht durch, teilweise gefüllt = nur Bug/Heck, **gebrochen** = das Ziel
-kommt überall durch. Stern und Warndreieck blinken beim Aufschalten kurz auf. So bleibt alles auch
-bei Farbsehschwäche lesbar.
+Die **Form** trägt dieselbe Aussage, damit alles auch bei Farbsehschwäche lesbar bleibt:
 
-Bewertet werden nur Paarungen aus **Kreuzern und Schlachtschiffen**; für alle anderen bleiben
-die Symbole grau. Für Rot-Grün-Schwäche gibt es ein Farbschema in Blau/Gelb/Orange
-(Okabe-Ito-Palette).
+- **Granate:** alle Segmente gefüllt = überall, nur die Spitze gefüllt = nur Bug/Heck,
+  Schrägstrich = nirgends.
+- **Schild:** voll und heil = das Ziel kommt nicht durch, unterer Teil gefüllt = nur Bug/Heck,
+  **gerissen** = das Ziel kommt überall durch.
+- Stern und Warndreieck blinken beim Aufschalten kurz auf.
+
+Für Rot-Grün-Schwäche gibt es ein Farbschema in Blau/Gelb/Orange (Okabe-Ito-Palette).
 
 ### HE und SAP
 
-Die Granate bewertet immer die **gerade geladene Munition**; eine kleine Plakette (AP / HE / SAP)
+Die Granate bewertet immer die **gerade geladene Munition**. Eine kleine Plakette (AP / HE / SAP)
 wie an den Munitions-Slots im HUD zeigt, welche. HE und SAP haben eigene Zeichnungen nach den
-Munitions-Symbolen des Spiels: HE schlägt auf eine Fläche auf und explodiert (Rauch und Blitz), SAP
-schlägt auf und splittert. Die Spitze trägt wie bei AP die Ampelfarbe. Statt
-Overmatch prüfen sie den Durchschlag der Granate gegen die Panzerung des Ziels. Der Durchschlag wird
-immer auf ganze Millimeter abgerundet, Durchschlag ≥ Platte zählt. Bei HE rechnet PenLight mit dem
-Modifikator des Spiels für dein Schiff, die Kapitänsfertigkeit **IFHE** ist also enthalten; ist sie
-aktiv, erscheint links unten an der HE-Granate eine kleine Plakette **IFHE**. SAP ist von IFHE nicht betroffen:
+Munitions-Symbolen des Spiels: HE explodiert auf einer Platte (Rauch und Blitz), SAP schlägt auf
+und splittert.
+
+HE und SAP overmatchen nicht; sie durchschlagen eine Platte, wenn ihr Durchschlagswert mindestens
+so groß ist wie die Plattendicke. PenLight prüft das für **Bug/Heck** und **Deck**, die beiden
+Zonen, auf die man mit HE/SAP meist zielt:
+
+- Durchschlagswerte werden immer auf ganze Millimeter abgerundet; Gleichstand zählt als Durchschlag.
+- Für HE nutzt PenLight den Durchschlags-Modifikator, den das Spiel für dein Schiff meldet; die
+  Kapitänsfertigkeit **IFHE** ist also enthalten. Ist IFHE aktiv, erscheint links unten an der
+  HE-Granate eine kleine Plakette **IFHE**. SAP ist von IFHE nicht betroffen.
 
 <p align="center">
   <img src="docs/images/ammo.png" alt="Granaten-Symbole für AP, HE (mit und ohne IFHE) und SAP in allen Zuständen, mit Munitions-Plakette" width="630">
 </p>
 
-| Bug/Heck | Deck | Granate |
+| Durchschlag Bug/Heck | Durchschlag Deck | Granate |
 |---|---|---|
-| ja | ja | Grün + Stern – Spitze, Band und Ring gefüllt |
-| ja | nein | Orange – Spitze und Band (Mitte) gefüllt |
-| nein | ja | Orange – Spitze und hinterer Ring gefüllt |
-| nein | nein | Rot – Schrägstrich |
-| – | – | Grau – kein Ziel oder Zerstörer/Träger/U-Boot |
+| ja | ja | **Grün + Stern** – Spitze, Band und hinterer Ring gefüllt |
+| ja | nein | **Orange** – Spitze und Band gefüllt |
+| nein | ja | **Orange** – Spitze und hinterer Ring gefüllt |
+| nein | nein | **Rot** – Schrägstrich |
+| – | – | Grau – keine Bewertung |
 
-Der Schild bleibt immer der AP-Overmatch des Gegners. In der Detailansicht zeigt das TARGET-Schiff
-den Durchschlag der geladenen HE/SAP.
+Das Band steht für Bug/Heck, der hintere Ring für das Deck. Die Spitze trägt immer die Ampelfarbe.
+
+Der Schild hängt nicht von deiner Munition ab: Er zeigt immer, ob die **AP des Ziels** dich
+overmatchen kann.
 
 ### Detailansicht (Alt)
 
@@ -103,24 +116,20 @@ den Durchschlag der geladenen HE/SAP.
 
 Mit gedrückter **Alt**-Taste ersetzen zwei untereinander stehende Schiffe Granate und Schild:
 
-- **TARGET** oben: wo meine geladene Granate durch das Ziel kommt (AP: Overmatch, HE/SAP:
-  Durchschlag von Bug/Heck, Mitte und Deck).
-- **ME** unten: wo die AP des Ziels mich overmatcht.
-- Hier heißt Grün immer **kommt durch**, für Target und Me gleich. (Nur die normale Ansicht färbt
-  nach gut/schlecht für dich.)
-- Jedes Schiff liegt in einem dunklen, seitlich auslaufenden Band mit Haarlinien und leicht
-  aufgehellter Kopfzeile. Das kleine Granaten-/Schild-Symbol in der Kopfzeile trägt die Farbe
-  des großen Symbols.
+- **TARGET** oben: durch welche Zonen des Ziels meine geladene Granate kommt (AP: Overmatch,
+  HE/SAP: Durchschlag, hier auch für die Mitte).
+- **ME** unten: welche meiner Zonen die AP des Ziels overmatcht.
+- In dieser Ansicht heißt Grün immer **kommt durch**, für TARGET und ME gleich. Nur die normale
+  Ansicht färbt nach gut/schlecht für dich.
 - Im Spiel werden die **Schiffs-Silhouetten aus dem Lebensbalken** eingefärbt: der Rumpf geteilt
-  in Heck, Mitte und Bug, alles oberhalb der Decklinie zählt als Deck. Die Silhouette hat eine
-  dunkle Kontur und einen weichen Schatten, darunter steht der Schiffsname in der Spielschrift.
-- Die Abbildung zeigt statt der Spiel-Silhouette ein gezeichnetes Schiff, weil keine
-  Spielgrafiken mitgeliefert werden. Dieselben gezeichneten Schiffe springen ein, wenn keine
-  Silhouette gefunden wird.
+  in Heck, Mitte und Bug, alles oberhalb der Decklinie zählt als Deck. Darunter steht der
+  Schiffsname.
+- Die Abbildung hier zeigt ein gezeichnetes Schiff, weil keine Spielgrafiken mitgeliefert werden.
+  Dieselben gezeichneten Schiffe springen im Spiel ein, wenn eine Silhouette fehlt.
 - Optional ersetzt die Detailansicht die Symbole dauerhaft; das Farbenblind-Schema gilt auch hier.
 
-Bewusste Vereinfachung: Der Zitadellengürtel wird nicht bewertet. Grün heißt Overmatch der
-Beplankung, nicht Zitadellentreffer.
+Bewusste Vereinfachung: Die Zitadelle wird nicht bewertet. Grün heißt, die äußere Beplankung wird
+durchschlagen, nicht, dass du die Zitadelle triffst.
 
 <br clear="right">
 
@@ -130,11 +139,11 @@ Beplankung, nicht Zitadellentreffer.
 
 | Branch | Benötigt | Einstellungen | Verschieben |
 |---|---|---|---|
-| `main` | ModForge **und** TTaroModUtils | Optionsseite in TTaro Mod Config, Zahnrad an der Anzeige | Maus (TTaro) |
-| `main-standalone` | ModForge; TTaroModUtils **optional** | mit TTaro wie `main`, sonst Tastenkürzel | mit TTaro per TTaro, sonst Maus über eigenen Flash-Teil |
+| `main` | ModForge **und** TTaroModUtils | Optionsseite in TTaro Mod Config (Zahnrad neben der Anzeige) | mit der Maus ziehen |
+| `main-standalone` | ModForge; TTaroModUtils **optional** | mit TTaro: wie `main`; ohne: Tastenkürzel | mit der Maus ziehen (mit oder ohne TTaro) |
 
-`main-standalone` erkennt TTaroModUtils automatisch: ModForge hängt je nach Installation eine
-von zwei Hüllen ein, und `Main.py` schaltet die eigenen Bedienelemente ab, sobald TTaro vorhanden ist.
+`main-standalone` erkennt TTaroModUtils automatisch und verhält sich dann wie `main`. Ohne TTaro
+nutzt es eigene Tastenkürzel und einen kleinen Flash-Teil zum Ziehen.
 
 ---
 
@@ -162,7 +171,8 @@ Ausführlichere Hinweise und Diagnose: [`mod/README.md`](mod/README.md).
 
 **Entfernen:** die PenLight-Dateien aus `res_mods` löschen (`PnFMods/PenLight/`,
 `gui/unbound2/PnFMods/PenLight*.unbound`, `ForgeBlueprints/PenLightContainer.xml`,
-`ModSchemas/diedreibeiden-penlight.schema.json`, `texts/*/penlight.mo`).
+`ModSchemas/diedreibeiden-penlight.schema.json`, `texts/*/penlight.mo`). `main-standalone` ohne
+TTaro speichert seine Einstellungen zusätzlich in `World of Warships/ModPrefs/diedreibeiden-penlight.json`.
 
 ---
 
@@ -220,7 +230,7 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 |---|---|
 | Tests | `python3 -m unittest discover -s tests` |
 | `Main.py` erzeugen (aus `src/penlight/`) | `python3 -I tools/build_mod.py` |
-| Granate/Schild-Icons zeichnen | `python3 -I tools/make_ampel_icons.py` |
+| Icons für Granate, Schild, HE/SAP, Plaketten und Zeichen zeichnen | `python3 -I tools/make_ampel_icons.py` |
 | Detail-Bilder, Beschriftungen, Rahmen | `python3 -I tools/make_detail_icons.py` |
 | Abbildungen der README | `python3 -I tools/make_readme_images.py` |
 | Texte der TTaro-Optionsseite | `python3 -I tools/make_texts.py` |
@@ -238,7 +248,7 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 ```
 mod/res_mods/                     Dateien so, wie sie in bin/<Build>/res_mods/ gehören
   PnFMods/PenLight/               Main.py (generiert), ships.json, Icons, (Main.swf)
-  gui/unbound2/PnFMods/           PenLight.unbound – die Anzeige (Unbound 2)
+  gui/unbound2/PnFMods/           PenLight*.unbound – die Anzeige (Unbound 2)
   ForgeBlueprints/                ModForge-Manifest
   ModSchemas/, texts/             Optionsseite für TTaro Mod Config
 src/penlight/                     logic.py (Ampel), mod_main.py (Anbindung an den Client)
