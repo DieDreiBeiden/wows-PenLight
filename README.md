@@ -1,216 +1,217 @@
 # Overmatcher
 
-**Overmatch-Anzeige für World of Warships.** Schaltest du einen Kreuzer oder ein
-Schlachtschiff auf, zeigt Overmatcher direkt am Fadenkreuz zwei Ampeln:
+**English** · [Deutsch](README.de.md)
 
-- **Granate:** Kann meine Panzerbrechende (AP) das Ziel überwiegend durchschlagen (overmatchen)?
-- **Schild:** Kann das Ziel mit seiner AP mich overmatchen?
+**Overmatch indicator for World of Warships.** When you lock onto a cruiser or a battleship,
+Overmatcher shows two traffic lights right next to your crosshair:
 
-Mit gedrückter **Alt**-Taste erscheint eine Detailansicht: die Schiffs-Silhouetten des Spiels,
-aufgeteilt in **Bug/Heck**, **Mitte** und **Deck**, jeweils grün (Overmatch) oder rot (kein Overmatch).
+- **Shell:** can my armour-piercing (AP) shells overmatch the target?
+- **Shield:** can the target's AP overmatch me?
+
+Hold **Alt** for a detail view: the game's own ship silhouettes, split into **bow/stern**,
+**midship** and **deck**, each green (overmatch) or red (no overmatch).
 
 <p align="center">
-  <img src="docs/images/ampel.png" alt="Granate und Schild in allen Zuständen, Standard- und Farbenblind-Farben" width="610">
+  <img src="docs/images/ampel.png" alt="Shell and shield in every state, standard and colour-blind palettes" width="610">
 </p>
 
-> Interface-Mod über die offizielle ModsAPI des Spiels. Getestet mit dem EU-Client,
-> Build 15.9.0.13357625 (Linux/Steam).
+> Interface mod built on the game's official ModsAPI. Tested with the EU client,
+> build 15.9.0.13357625 (Linux/Steam).
 
 ---
 
-## Inhalt
+## Contents
 
-- [Was angezeigt wird](#was-angezeigt-wird)
-- [Fassungen und Branches](#fassungen-und-branches)
+- [What it shows](#what-it-shows)
+- [Editions and branches](#editions-and-branches)
 - [Installation](#installation)
-- [Bedienung](#bedienung)
-- [Nach einem Spiel-Patch](#nach-einem-spiel-patch)
-- [Entwicklung](#entwicklung)
-- [Projektstruktur](#projektstruktur)
-- [Datenquellen und Danksagungen](#datenquellen-und-danksagungen)
+- [Usage](#usage)
+- [After a game patch](#after-a-game-patch)
+- [Development](#development)
+- [Repository layout](#repository-layout)
+- [Data sources and credits](#data-sources-and-credits)
 
 ---
 
-## Was angezeigt wird
+## What it shows
 
-### Die Overmatch-Regel
+### The overmatch rule
 
-Eine Granate overmatcht eine Panzerplatte, wenn
+A shell overmatches an armour plate when
 
 ```
-Kaliber > 14,3 × Plattendicke
+calibre > 14.3 × plate thickness
 ```
 
-Dann durchschlägt sie die Platte unabhängig vom Auftreffwinkel, auch bei gewinkelten Schiffen.
-Gleichstand zählt nicht als Overmatch.
+It then penetrates the plate regardless of impact angle, even against an angled ship.
+A tie does not count as overmatch.
 
-### Die Ampel
+### The traffic light
 
-Bug/Heck ist die Grundvoraussetzung; Grün gibt es erst, wenn zusätzlich Mitte **und** Deck
-overmatcht werden. Granate (ich → Ziel) und Schild (Ziel → ich) verwenden dieselben Farben:
+Bow/stern is the precondition; green requires midship **and** deck to be overmatched as well.
+Shell (me → target) and shield (target → me) use the same colours:
 
-| Bug/Heck | Mitte und Deck | Farbe | Granate | Schild |
+| Bow/stern | Midship and deck | Colour | Shell | Shield |
 |---|---|---|---|---|
-| ja | beide ja | Grün | überall durch, auch gewinkelt | der Gegner kommt überall durch – ausweichen |
-| ja | nicht beide | Orange | gezielt auf Bug/Heck | Bug/Heck schützen |
-| nein | – | Rot | nur Breitseite lohnt | anwinkeln geht |
-| – | – | Grau | kein Ziel, oder Ziel ist Zerstörer/Träger/U-Boot | |
+| yes | both yes | Green | penetrates everywhere, even angled | the enemy gets through everywhere – dodge |
+| yes | not both | Orange | aim at bow/stern | protect your bow/stern |
+| no | – | Red | only a broadside is worth it | angling works |
+| – | – | Grey | no target, or the target is a destroyer/carrier/submarine | |
 
-Bewertet werden nur Paarungen aus **Kreuzern und Schlachtschiffen**; für alle anderen bleiben
-die Symbole grau. Für Rot-Grün-Schwäche gibt es ein Farbschema in Blau/Gelb/Orange
-(Okabe-Ito-Palette).
+Only pairings of **cruisers and battleships** are rated; everything else stays grey.
+A colour-blind scheme in blue/yellow/orange (Okabe-Ito palette) is available for red-green
+colour vision deficiency.
 
-### Detailansicht (Alt)
+### Detail view (Alt)
 
-<img src="docs/images/detail.png" alt="Detailansicht mit Target oben und Me unten" align="right" width="200">
+<img src="docs/images/detail.png" alt="Detail view with Target on top and Me below" align="right" width="200">
 
-- **TARGET** oben: wo meine AP das Ziel overmatcht.
-- **ME** unten: wo die AP des Ziels mich overmatcht.
-- Im Spiel werden die **echten Schiffs-Silhouetten** aus dem Lebensbalken verwendet und
-  eingefärbt, darunter steht der Schiffsname. Die Abbildung rechts zeigt die gezeichneten
-  Ersatzschiffe, die nur einspringen, wenn keine Silhouette gefunden wird.
-- Optional kann die Detailansicht dauerhaft statt der Symbole angezeigt werden.
+- **TARGET** on top: where my AP overmatches the target.
+- **ME** below: where the target's AP overmatches me.
+- In game, the **real ship silhouettes** from the health bar are coloured in, with the ship
+  name underneath. The image on the right shows the drawn fallback ships that only appear when
+  no silhouette is found.
+- Optionally the detail view can replace the icons permanently.
 
-Bewusste Vereinfachung: Der Zitadellengürtel wird nicht bewertet. Grün heißt Overmatch der
-Beplankung, nicht Zitadellentreffer.
+Deliberate simplification: the citadel belt is not rated. Green means the plating is
+overmatched, not a citadel hit.
 
 <br clear="right">
 
 ---
 
-## Fassungen und Branches
+## Editions and branches
 
-| Branch | Benötigt | Einstellungen | Verschieben |
+| Branch | Requires | Settings | Moving the display |
 |---|---|---|---|
-| `main` | ModForge **und** TTaroModUtils | Optionsseite in TTaro Mod Config, Zahnrad an der Anzeige | Maus (TTaro) |
-| `main-standalone` | ModForge; TTaroModUtils **optional** | mit TTaro wie `main`, sonst Tastenkürzel | mit TTaro per TTaro, sonst Maus über eigenen Flash-Teil |
+| `main` | ModForge **and** TTaroModUtils | options page in TTaro Mod Config, gear button on the display | mouse (TTaro) |
+| `main-standalone` | ModForge; TTaroModUtils **optional** | with TTaro as on `main`, otherwise hotkeys | with TTaro via TTaro, otherwise mouse via its own Flash part |
 
-`main-standalone` erkennt TTaroModUtils automatisch: ModForge hängt je nach Installation eine
-von zwei Hüllen ein, und `Main.py` schaltet die eigenen Bedienelemente ab, sobald TTaro vorhanden ist.
+`main-standalone` detects TTaroModUtils automatically: ModForge mounts one of two wrappers
+depending on what is installed, and `Main.py` switches its own controls off as soon as TTaro is present.
 
 ---
 
 ## Installation
 
-**Voraussetzungen**
+**Requirements**
 
-- [ModForge](https://github.com/AndrewTaro/ModForge) – hängt die Anzeige ins Gefecht ein.
-- Für `main` zusätzlich [TTaroModUtils](https://github.com/AndrewTaro/TTaroModUtils);
-  für `main-standalone` optional.
+- [ModForge](https://github.com/AndrewTaro/ModForge) – mounts the display in battle.
+- For `main` additionally [TTaroModUtils](https://github.com/AndrewTaro/TTaroModUtils);
+  optional for `main-standalone`.
 
-**Schritte**
+**Steps**
 
-1. Spiel beenden.
-2. Im Spielordner unter `bin/` den Ordner mit der **höchsten Nummer** suchen,
-   z. B. `bin/13357625/`.
-   - Steam unter Linux: `~/.local/share/Steam/steamapps/common/World of Warships/`
-   - Windows: meist `C:\Games\World_of_Warships\`
-3. Den Inhalt von [`mod/res_mods/`](mod/res_mods) nach `bin/<Nummer>/res_mods/` kopieren
-   und vorhandene Overmatcher-Dateien überschreiben.
-4. Spiel starten. Liegt danach `res_mods/PnFMods/Overmatcher/overmatcher_log.txt` vor,
-   wurde die Mod geladen.
+1. Close the game.
+2. In the game folder, find the folder with the **highest number** under `bin/`,
+   e.g. `bin/13357625/`.
+   - Steam on Linux: `~/.local/share/Steam/steamapps/common/World of Warships/`
+   - Windows: usually `C:\Games\World_of_Warships\`
+3. Copy the contents of [`mod/res_mods/`](mod/res_mods) into `bin/<number>/res_mods/` and
+   overwrite existing Overmatcher files.
+4. Start the game. If `res_mods/PnFMods/Overmatcher/overmatcher_log.txt` exists afterwards,
+   the mod was loaded.
 
-Ausführlichere Hinweise und Diagnose: [`mod/README.md`](mod/README.md).
+More detailed notes and diagnostics (German): [`mod/README.md`](mod/README.md).
 
-**Entfernen:** die Overmatcher-Dateien aus `res_mods` löschen (`PnFMods/Overmatcher/`,
+**Uninstall:** delete the Overmatcher files from `res_mods` (`PnFMods/Overmatcher/`,
 `gui/unbound2/PnFMods/Overmatcher*.unbound`, `ForgeBlueprints/OvermatcherContainer.xml`,
 `ModSchemas/diedreibeiden-overmatcher.schema.json`, `texts/*/overmatcher.mo`).
 
 ---
 
-## Bedienung
+## Usage
 
-### Mit TTaroModUtils
+### With TTaroModUtils
 
-Im Gefecht **Strg** halten, damit der Mauszeiger erscheint:
+In battle, hold **Ctrl** to show the mouse cursor:
 
-- Symbole greifen und **ziehen**, um die Anzeige zu verschieben.
-- **Zahnrad** links neben der Anzeige öffnet die Overmatcher-Seite in TTaro Mod Config:
-  Darstellungsmodus (Detail mit Alt / immer), Farben (Standard / Farbenblind),
-  Größenskalierung, Verschieben sperren, Position zurücksetzen.
+- Grab the icons and **drag** to move the display.
+- The **gear** to the left of the display opens the Overmatcher page in TTaro Mod Config:
+  display mode (detail on Alt / always), colours (standard / colour-blind),
+  size scale, lock dragging, reset position.
 
-### Ohne TTaroModUtils (`main-standalone`)
+### Without TTaroModUtils (`main-standalone`)
 
-- **Ziehen** mit der Maus: Strg halten, über Granate | Schild fahren (feiner Rahmen erscheint), ziehen.
-- **Tastenkürzel** mit **Strg+Alt**:
+- **Drag** with the mouse: hold Ctrl, hover over shell | shield (a thin frame appears), drag.
+- **Hotkeys** with **Ctrl+Alt**:
 
-| Taste | Wirkung |
+| Key | Effect |
 |---|---|
-| Pfeiltasten | verschieben, 5 px (mit Umschalt 1 px) |
-| Pos1 | Position zurücksetzen |
-| D | Detailansicht: mit Alt ↔ immer |
-| F | Farben: Standard ↔ Farbenblind |
-| + / − | Größe 0,5–2,0 |
+| Arrow keys | move, 5 px (1 px with Shift) |
+| Home | reset position |
+| D | detail view: on Alt ↔ always |
+| F | colours: standard ↔ colour-blind |
+| + / − | size 0.5–2.0 |
 
-Gespeichert wird in `World of Warships/ModPrefs/` – Einstellungen überleben Spiel-Patches.
+Settings are stored in `World of Warships/ModPrefs/` and survive game patches.
 
 ---
 
-## Nach einem Spiel-Patch
+## After a game patch
 
-Panzerung und Kaliber stammen aus der Spieldatei `content/GameParams.data` und gelten für genau
-eine Spielversion. Passt `ships.json` nicht zur laufenden Version, schaltet sich die Mod ab
-(lieber nichts anzeigen als falsche Farben) und schreibt das ins Log.
+Armour and calibres come from the game file `content/GameParams.data` and apply to exactly one
+game version. If `ships.json` does not match the running version, the mod switches itself off
+(better nothing than wrong colours) and says so in its log.
 
 ```bash
-# 1. GameParams.data mit dem WoWs Unpack Tool aus dem Client extrahieren
-# 2. Tabelle erzeugen (Version so, wie sie im python.log steht)
+# 1. Extract GameParams.data from the client with the WoWs Unpack Tool
+# 2. Build the table (version as written in python.log)
 python3 -I tools/gameparams.py GameParams.data ships_full.json \
     mod/res_mods/PnFMods/Overmatcher/ships.json 15,9,0,13357625
-# 3. Mod bauen und testen
+# 3. Build and test the mod
 python3 -I tools/build_mod.py
 python3 -m unittest discover -s tests
 ```
 
-Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch automatisch an.
+The ship silhouettes come from the game itself and follow every patch automatically.
 
 ---
 
-## Entwicklung
+## Development
 
-| Aufgabe | Befehl |
+| Task | Command |
 |---|---|
 | Tests | `python3 -m unittest discover -s tests` |
-| `Main.py` erzeugen (aus `src/overmatcher/`) | `python3 -I tools/build_mod.py` |
-| Granate/Schild-Icons zeichnen | `python3 -I tools/make_ampel_icons.py` |
-| Detail-Bilder, Beschriftungen, Rahmen | `python3 -I tools/make_detail_icons.py` |
-| Texte der TTaro-Optionsseite | `python3 -I tools/make_texts.py` |
-| Flash-Teil `Main.swf` (`main-standalone`) | `tools/build_flash.py`, Voraussetzungen siehe Dateikopf |
+| Generate `Main.py` (from `src/overmatcher/`) | `python3 -I tools/build_mod.py` |
+| Draw shell/shield icons | `python3 -I tools/make_ampel_icons.py` |
+| Detail images, labels, frames | `python3 -I tools/make_detail_icons.py` |
+| Texts of the TTaro options page | `python3 -I tools/make_texts.py` |
+| Flash part `Main.swf` (`main-standalone`) | `tools/build_flash.py`, requirements in the file header |
 
-- Die Spiel-Logik (`src/overmatcher/logic.py`) läuft unter Python 2.7 (Client) und 3.x (Tests).
-- `mod/res_mods/PnFMods/Overmatcher/Main.py` ist generiert – Änderungen in `src/overmatcher/`.
-- Alle Grafiken werden per Skript gezeichnet; es werden keine Spielgrafiken mitgeliefert.
-- Konzept, Ampel-Logik und gesammelte Befunde zum Client: [`docs/KONZEPT.md`](docs/KONZEPT.md).
-
----
-
-## Projektstruktur
-
-```
-mod/res_mods/                     Dateien so, wie sie in bin/<Build>/res_mods/ gehören
-  PnFMods/Overmatcher/            Main.py (generiert), ships.json, Icons, (Main.swf)
-  gui/unbound2/PnFMods/           Overmatcher.unbound – die Anzeige (Unbound 2)
-  ForgeBlueprints/                ModForge-Manifest
-  ModSchemas/, texts/             Optionsseite für TTaro Mod Config
-src/overmatcher/                  logic.py (Ampel), mod_main.py (Anbindung an den Client)
-src/as3/                          Flash-Teil zum Verschieben ohne TTaro (main-standalone)
-tools/                            GameParams-Auswertung, Build, Icon-Generatoren
-tests/                            Unit-Tests inkl. nachgebautem Client
-docs/                             Konzept, Abbildungen
-```
+- The game logic (`src/overmatcher/logic.py`) runs on Python 2.7 (client) and 3.x (tests).
+- `mod/res_mods/PnFMods/Overmatcher/Main.py` is generated – edit `src/overmatcher/` instead.
+- All graphics are drawn by scripts; no game assets are shipped.
+- Concept, traffic-light logic and notes on the client (German): [`docs/KONZEPT.md`](docs/KONZEPT.md).
 
 ---
 
-## Datenquellen und Danksagungen
+## Repository layout
 
-- **Panzerung und Kaliber:** `GameParams.data` des Spielclients, ausgewertet mit
-  [`tools/gameparams.py`](tools/gameparams.py); Namen der Panzerungsmaterialien aus
+```
+mod/res_mods/                     files as they belong in bin/<build>/res_mods/
+  PnFMods/Overmatcher/            Main.py (generated), ships.json, icons, (Main.swf)
+  gui/unbound2/PnFMods/           Overmatcher*.unbound – the display (Unbound 2)
+  ForgeBlueprints/                ModForge manifest
+  ModSchemas/, texts/             options page for TTaro Mod Config
+src/overmatcher/                  logic.py (traffic light), mod_main.py (client binding)
+src/as3/                          Flash part for dragging without TTaro (main-standalone)
+tools/                            GameParams parsing, build, icon generators
+tests/                            unit tests incl. a mocked client
+docs/                             concept, images
+```
+
+---
+
+## Data sources and credits
+
+- **Armour and calibres:** the client's `GameParams.data`, parsed with
+  [`tools/gameparams.py`](tools/gameparams.py); armour material names from
   [wowsunpack](https://github.com/landaire/wowsunpack) (MIT).
-- **ModsAPI und ModSDK** von Wargaming/Lesta (offizielle Dokumentation und `wows_library.swc`).
-- **ModForge** und **TTaroModUtils** von [AndrewTaro](https://github.com/AndrewTaro): werden als
-  Abhängigkeiten genutzt, aber nicht mitgeliefert. Ihr Code dient nur als Referenz; übernommen
-  wurde nichts.
-- Ziel-Erkennung nach dem Muster von XTargetTracker (Battle Expert).
+- **ModsAPI and ModSDK** by Wargaming/Lesta (official documentation and `wows_library.swc`).
+- **ModForge** and **TTaroModUtils** by [AndrewTaro](https://github.com/AndrewTaro): used as
+  dependencies, not shipped. Their code served as reference only; nothing was copied.
+- Target detection follows the pattern of XTargetTracker (Battle Expert).
 
-Overmatcher nutzt ausschließlich die offizielle ModsAPI bzw. die veröffentlichten Schnittstellen
-der genannten Mods. Eine Lizenz für dieses Repository ist noch nicht festgelegt.
+Overmatcher only uses the official ModsAPI and the published interfaces of the mods above.
+A licence for this repository has not been chosen yet.
