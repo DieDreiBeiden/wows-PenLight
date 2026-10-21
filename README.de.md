@@ -72,16 +72,16 @@ die Symbole grau. Für Rot-Grün-Schwäche gibt es ein Farbschema in Blau/Gelb/O
 
 Die Granate bewertet immer die **gerade geladene Munition**; eine kleine Plakette (AP / HE / SAP)
 wie an den Munitions-Slots im HUD zeigt, welche. HE und SAP haben eigene Zeichnungen nach den
-Munitions-Symbolen des Spiels: HE mit gelber Spitze, die auf eine Fläche aufschlägt und explodiert
-(Rauch und Blitz), SAP mit schwarzer Spitze, orangem Ring und Splittern beim Aufschlag. Statt
+Munitions-Symbolen des Spiels: HE schlägt auf eine Fläche auf und explodiert (Rauch und Blitz), SAP
+schlägt auf und splittert. Die Spitze trägt wie bei AP die Ampelfarbe. Statt
 Overmatch prüfen sie den festen Durchschlag der Granate gegen die Panzerung des Ziels
 (Durchschlag ≥ Platte zählt; die Kapitänsfertigkeit IFHE wird bewusst nicht berücksichtigt):
 
 | Bug/Heck | Deck | Granate |
 |---|---|---|
-| ja | ja | Grün + Stern – Band und Ring gefüllt |
-| ja | nein | Orange – nur das Band (Mitte) gefüllt |
-| nein | ja | Orange – nur der hintere Ring gefüllt |
+| ja | ja | Grün + Stern – Spitze, Band und Ring gefüllt |
+| ja | nein | Orange – Spitze und Band (Mitte) gefüllt |
+| nein | ja | Orange – Spitze und hinterer Ring gefüllt |
 | nein | nein | Rot – Schrägstrich |
 
 Der Schild bleibt immer der AP-Overmatch des Gegners. In der Detailansicht zeigt das TARGET-Schiff

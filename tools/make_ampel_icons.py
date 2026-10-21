@@ -17,9 +17,9 @@ Schild (Ziel -> ich), Form = Schutz:
   rot    Ziel kommt ueberall durch -> voll, aber gebrochen (Spalt)
 grey (kein Ziel / keine Bewertung) -> alle Segmente leer
 Dazu mark_star.png / mark_warning.png fuer die Extremfaelle (P3).
-Geladene HE/SAP: eigene Granaten he_*.png / sap_*.png nach dem Spiel-HUD (HE gelbe Spitze,
-Aufschlag mit Rauch und Blitz; SAP schwarze Spitze mit orangem Ring, Splitter), Zustaende green,
-bow, deck, red, grey (Band = Bug/Heck, Ring = Deck), Plaketten tag_ap/he/sap.png.
+Geladene HE/SAP: eigene Granaten he_*.png / sap_*.png nach dem Spiel-HUD (HE: Aufschlag mit Rauch
+und Blitz; SAP: Aufschlag mit Splittern), Zustaende green, bow, deck, red, grey (Spitze in
+Ampelfarbe, dazu Band = Bug/Heck, Ring = Deck), Plaketten tag_ap/he/sap.png.
 Granate: Spitze, Band, Heckring. Schild: Fuss, unterer Sparren, oberer Sparren.
 Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
 Ausgabe: mod/res_mods/PnFMods/Overmatcher/{shell,shield}_[cb_]{green,yellow,red,grey}.png
@@ -118,26 +118,23 @@ def _slash(x, y, color):
 
 
 # Granatenformen (Koordinaten entlang der Achse u, quer v; Spitze bei +u). Vorbild sind die
-# Munitions-Symbole im Spiel-HUD: AP rote Spitze; HE gelbe Spitze, schlaegt auf eine Flaeche und
-# explodiert (Rauch); SAP schwarze Spitze mit orangem Ring, Splitter beim Aufschlag.
+# Munitions-Symbole im Spiel-HUD: HE schlaegt auf eine Flaeche und explodiert (Rauch, Blitz),
+# SAP schlaegt auf und splittert. Die Spitzen tragen die Ampelfarbe, nicht die Spiel-Typfarbe.
 SHELL_FORMS = {
     'ap': dict(scale=SHELL_SCALE, shift=SHELL_SHIFT),
     'he': dict(scale=0.86, shift=-0.10),
     'sap': dict(scale=0.86, shift=-0.10),
 }
 SHELL_R, SHELL_TAIL, SHELL_OGIVE, SHELL_TIP = 0.15, -0.40, 0.12, 0.43
-# Typfarben der Spitze (Spiel-HUD); bei AP traegt die Spitze die Ampelfarbe
-HE_TIP = (226, 172, 40)
-SAP_TIP = (36, 38, 40)
-SAP_RING = (204, 96, 24)
 PLATE = (186, 190, 194)
 SMOKE = (150, 154, 158)
 FLASH = (255, 238, 160)
-# gefuellte Segmente je Zustand. AP: Spitze/Band/Ring = Overmatch-Umfang.
-# HE/SAP: Spitze = Typfarbe, Band = Bug/Heck, Ring = Deck.
+# gefuellte Segmente je Zustand; die Spitze traegt bei allen Typen die Ampelfarbe (Nutzerwunsch:
+# Typfarben wie im Spiel-HUD wirkten neben der Ampel verwirrend, der Typ steht auf Plakette und Szene).
+# AP: Spitze/Band/Ring = Overmatch-Umfang. HE/SAP: Spitze immer, dazu Band = Bug/Heck, Ring = Deck.
 SHELL_FILL = {
     'ap': {'green': ('tip', 'band', 'ring'), 'yellow': ('tip',), 'red': (), 'grey': ()},
-    'he': {'green': ('band', 'ring'), 'bow': ('band',), 'deck': ('ring',), 'red': (), 'grey': ()},
+    'he': {'green': ('tip', 'band', 'ring'), 'bow': ('tip', 'band'), 'deck': ('tip', 'ring'), 'red': (), 'grey': ()},
 }
 SHELL_FILL['sap'] = SHELL_FILL['he']
 # HE/SAP-Zustaende 'bow'/'deck' nutzen die Ampelfarbe 'yellow'
@@ -214,16 +211,9 @@ def shell(state, palette=None, ammo='ap'):
     filled = SHELL_FILL[ammo].get(state, ())
     empty = SEGMENT_EMPTY if filled or state == 'grey' else _mix(SEGMENT_GROUND, color, SLASH_TINT)
     for name, (segment, separator) in segments.items():
-        if name == 'tip' and ammo != 'ap':
-            fill = HE_TIP if ammo == 'he' else SAP_TIP
-        else:
-            fill = color if name in filled else empty
+        fill = color if name in filled else empty
         layers.append((segment, np.array(fill, np.float32) * lit))
         layers.append((separator, np.array(SEPARATOR, np.float32)))
-    if ammo == 'sap':      # oranger Ring hinter der schwarzen Spitze
-        ring = body * ((u > ogive + 0.065) & (u < ogive + 0.115))
-        layers.append((ring, np.array(SAP_RING, np.float32) * lit))
-        layers.append((body * (np.abs(u - (ogive + 0.115)) < edge), np.array(SEPARATOR, np.float32)))
     if state == 'red':
         layers += _slash(x, y, color)
     im = _outlined(*_compose(layers))
