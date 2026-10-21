@@ -42,6 +42,11 @@
 	# Zusatzplakette IFHE (tag_ifhe.png) links unten an der HE-Granate, wenn IFHE erkannt ist
 	badgeOffsetX: -3,
 	badgeOffsetY: 22,
+	# Rand der Greifflaeche um Granate | Schild (px bei Skalierung 1); links schmal wegen Zahnrad
+	dragPadLeft: 4,
+	dragPadTop: 12,
+	dragPadRight: 12,
+	dragPadBottom: 10,
 	# senkrechter Abstand zwischen den beiden Detail-Schiffen (Alt, Target oben, Me unten)
 	shipGap: 6,
 	# Groesse der Detail-Schiffe (Bilder werden in dieser Groesse erzeugt, tools/make_detail_icons.py)
@@ -283,15 +288,6 @@
 				(top = 0px)
 			)
 		)
-		# Greifflaeche zum Verschieben (Mauszeiger im Gefecht z. B. per Strg), wie BuildViewer
-		(block
-			(class $FullsizeAbsolute)
-			(style
-				(backgroundColor = 0x00FFFFFF)
-				(bind hitTest "!isPositionLocked")
-			)
-			(macro TT_DRAGGABLE _fullKey="PENLIGHT_PREF_POSITION" _isDragEnabled="!isPositionLocked")
-		)
 		(hblock
 			(bind visible "!showDetail")
 			(element PenLightIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey" _tag="attackTag" _badge="attackBadge")
@@ -313,6 +309,21 @@
 				_bow="tBow" _mid="tMid" _deck="tDeck" _palette="palette")
 			(element PenLightSilhouetteShip _shortName="ownShortName" _label="ownLabel" _nameIDS="ownNameIDS"
 				_bow="mBow" _mid="mMid" _deck="mDeck" _palette="palette")
+		)
+		# Greifflaeche zum Verschieben (Mauszeiger im Gefecht z. B. per Strg), wie BuildViewer.
+		# Als letztes Kind ueber den Symbolen, sonst fangen diese die Maus ab; mit Rand um
+		# Granate | Schild (dragPad*), damit sie leicht zu treffen ist.
+		(block
+			(style
+				(position = "absolute")
+				(bind left "0 - PENLIGHT_SETTINGS.dragPadLeft")
+				(bind top "0 - PENLIGHT_SETTINGS.dragPadTop")
+				(bind width "PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap + PENLIGHT_SETTINGS.dragPadLeft + PENLIGHT_SETTINGS.dragPadRight")
+				(bind height "PENLIGHT_SETTINGS.iconSize + PENLIGHT_SETTINGS.dragPadTop + PENLIGHT_SETTINGS.dragPadBottom")
+				(backgroundColor = 0x00FFFFFF)
+				(bind hitTest "!isPositionLocked")
+			)
+			(macro TT_DRAGGABLE _fullKey="PENLIGHT_PREF_POSITION" _isDragEnabled="!isPositionLocked")
 		)
 	)
 )
