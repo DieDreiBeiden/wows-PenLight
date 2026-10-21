@@ -18,14 +18,16 @@ Bug/Heck, Mitte und Deck.
   <img src="docs/images/ampel.png" alt="Granate und Schild in allen Zuständen, Standard- und Farbenblind-Farben" width="610">
 </p>
 
-> Interface-Mod über die offizielle ModsAPI des Spiels. Getestet mit dem EU-Client,
-> Build 15.9.0.13357625 (Linux/Steam).
+> Informationsanzeige über die offizielle ModsAPI des Spiels. Sie vergleicht nur statische
+> Panzerungs- und Kaliberwerte, wie die Panzerungsansicht im Hafen – siehe [Fair Play](#fair-play).
+> Getestet mit dem EU-Client, Build 15.9.0.13357625 (Linux/Steam).
 
 ---
 
 ## Inhalt
 
 - [Was angezeigt wird](#was-angezeigt-wird)
+- [Fair Play](#fair-play)
 - [Fassungen und Branches](#fassungen-und-branches)
 - [Installation](#installation)
 - [Bedienung](#bedienung)
@@ -139,6 +141,33 @@ Bewusste Vereinfachung: Die Zitadelle wird nicht bewertet. Grün heißt, die äu
 durchschlagen, nicht, dass du die Zitadelle triffst.
 
 <br clear="right">
+
+---
+
+## Fair Play
+
+PenLight ist eine Informationsanzeige. Sie beantwortet dieselbe Frage wie die Panzerungsansicht
+im Hafen – „ist diese Platte dünner als das, was meine Granate durchschlägt?“ – für das
+aufgeschaltete Schiff.
+
+**Was sie im Gefecht liest** (offizielle ModsAPI und Oberflächendaten des Spiels):
+
+- den Schiffstyp jedes Spielers, wie er ohnehin in den Teamlisten steht;
+- welches Schiff du aufgeschaltet hast;
+- deine **eigene** geladene Munition der Hauptbewaffnung mit ihren festen Werten und deinen
+  **eigenen** HE-Durchschlags-Modifikator (z. B. die Kapitänsfertigkeit IFHE).
+
+**Was sie nicht tut:**
+
+- Über andere Spieler liest sie nichts außer dem Schiffstyp: keine Positionen, Aufklärung,
+  Lebenspunkte, Nachladezeiten, Munition, Verbrauchsgüter oder Ausrüstung.
+- Keine Zielhilfe, keine Vorhalte- oder Flugbahnberechnung, keine automatischen Eingaben.
+- Keine Änderung an Spieldateien, Schiffswerten oder Spielregeln. Keine ausführbaren Dateien oder
+  DLLs; alles liegt in `res_mods`, Einstellungen in `ModPrefs`.
+
+Panzerung und Kaliber sind statische Schiffsdaten. Sie werden offline aus der Client-Datei
+`GameParams.data` ausgelesen und als Tabelle (`ships.json`) für genau eine Spielversion
+mitgeliefert.
 
 ---
 
@@ -274,9 +303,10 @@ docs/                             Konzept, Abbildungen
   [wowsunpack](https://github.com/landaire/wowsunpack) (MIT).
 - **ModsAPI und ModSDK** von Wargaming/Lesta (offizielle Dokumentation und `wows_library.swc`).
 - **ModForge** und **TTaroModUtils** von [AndrewTaro](https://github.com/AndrewTaro): werden als
-  Abhängigkeiten genutzt, aber nicht mitgeliefert. Ihr Code dient nur als Referenz; übernommen
-  wurde nichts.
-- Ziel-Erkennung nach dem Muster von XTargetTracker (Battle Expert).
+  Abhängigkeiten genutzt, aber nicht mitgeliefert. Ihr Code und der seines PenetrationCalculator
+  (für die Munitions-API) diente nur als Referenz; übernommen wurde nichts.
+- Die Erkennung des aufgeschalteten Ziels in Unbound folgt dem Muster von XTargetTracker
+  (Battle Expert); übernommen wurde kein Code.
 
 PenLight nutzt ausschließlich die offizielle ModsAPI bzw. die veröffentlichten Schnittstellen
 der genannten Mods. Eine Lizenz für dieses Repository ist noch nicht festgelegt.
