@@ -64,14 +64,21 @@ colour vision deficiency.
 
 ### Detail view (Alt)
 
-<img src="docs/images/detail.png" alt="Detail view with Target on top and Me below" align="right" width="200">
+<img src="docs/images/detail.png" alt="Detail view: Target on top, Me below, each in a frame with label and ship name" align="right" width="210">
+
+Holding **Alt** replaces shell and shield with two ships stacked on top of each other:
 
 - **TARGET** on top: where my AP overmatches the target.
 - **ME** below: where the target's AP overmatches me.
-- In game, the **real ship silhouettes** from the health bar are coloured in, with the ship
-  name underneath. The image on the right shows the drawn fallback ships that only appear when
-  no silhouette is found.
-- Optionally the detail view can replace the icons permanently.
+- Each ship sits in a dark band that fades out to the sides, with hairlines and a slightly
+  lighter header. The small shell/shield icon in the header carries the colour of the big icon.
+- In game the **ship silhouettes from the health bar** are coloured in: the hull is split into
+  stern, midship and bow, everything above the deck line counts as deck. The silhouette gets a
+  dark outline and a soft shadow, the ship name (in the game font) sits underneath.
+- The image uses a drawn ship instead of the game silhouette, since no game assets are shipped.
+  The same drawn ships also stand in when no silhouette is found.
+- Optionally the detail view can replace the icons permanently, and it follows the
+  colour-blind scheme as well.
 
 Deliberate simplification: the citadel belt is not rated. Green means the plating is
 overmatched, not a citadel hit.
@@ -176,6 +183,7 @@ The ship silhouettes come from the game itself and follow every patch automatica
 | Generate `Main.py` (from `src/overmatcher/`) | `python3 -I tools/build_mod.py` |
 | Draw shell/shield icons | `python3 -I tools/make_ampel_icons.py` |
 | Detail images, labels, frames | `python3 -I tools/make_detail_icons.py` |
+| README images | `python3 -I tools/make_readme_images.py` |
 | Texts of the TTaro options page | `python3 -I tools/make_texts.py` |
 | Flash part `Main.swf` (`main-standalone`) | `tools/build_flash.py`, requirements in the file header |
 
