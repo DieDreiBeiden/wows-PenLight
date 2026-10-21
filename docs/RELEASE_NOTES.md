@@ -29,11 +29,15 @@ If you used an earlier "Overmatcher" build, delete its files first (`PnFMods/Ove
 
 See the [README](https://github.com/DieDreiBeiden/wows-PenLight#readme) for details and the **Fair play** section: PenLight only compares static armour and calibre data with your own loaded ammunition; it reads nothing about other players beyond their ship type.
 
+## Known issues
+
+- **Nebraska, Delaware, Louisiana:** their deck is read as 6 mm from the game data, which is almost certainly wrong. As a target, their deck is shown as penetrated by any HE/SAP and overmatched by AP from 86 mm calibre; treat the deck rating of these three ships as unreliable.
+
 ## Known limitations
 
-- Pre-release: the following are implemented but not yet confirmed in game – IFHE detection, mouse drag via the Flash part (standalone without TTaro).
+- Pre-release: IFHE detection is implemented but not yet confirmed in game.
+- Mouse drag is confirmed in game with TTaroModUtils; the standalone Flash drag without TTaro is not yet confirmed.
 - The citadel is not rated; green means the outer plating is penetrated.
-- The deck value of a few US battleships (Nebraska, Delaware, Louisiana: 6 mm) is probably read incorrectly from the game data and will be checked.
 - The ModForge manifest of the TTaro edition still reports version 0.2.0.
 
 ---
