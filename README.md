@@ -4,15 +4,15 @@
 
 *PenLight = **pen**etration + traffic **light**.*
 
-**Overmatch and penetration indicator for World of Warships.** When you lock onto a cruiser or
-a battleship, PenLight shows two traffic lights right next to your crosshair:
+**Overmatch and penetration indicator for World of Warships.** When you lock onto a target,
+PenLight shows two small traffic lights right next to your crosshair:
 
-- **Shell:** does my **loaded** ammunition get through the target? AP is rated by overmatch,
-  HE and SAP by their penetration against the target's plating.
-- **Shield:** can the target's AP overmatch me?
+- **Shell:** does my **loaded** ammunition get through the target's armour? AP is rated by
+  overmatch, HE and SAP by their penetration value.
+- **Shield:** can the target's AP shells overmatch my armour?
 
-Hold **Alt** for a detail view: the game's own ship silhouettes, split into **bow/stern**,
-**midship** and **deck**, each green (gets through) or red (does not).
+Hold **Alt** for a detail view that shows the same for each zone of both ships: bow/stern,
+midship and deck.
 
 <p align="center">
   <img src="docs/images/ampel.png" alt="Shell and shield in every state, standard and colour-blind palettes" width="610">
@@ -38,7 +38,13 @@ Hold **Alt** for a detail view: the game's own ship silhouettes, split into **bo
 
 ## What it shows
 
-### The overmatch rule
+### Rated zones
+
+Each ship is split into three zones: **bow/stern**, **midship** and **deck**. Only pairings of
+**cruisers and battleships** are rated – your own ship and the target. Anything else (destroyers,
+carriers, submarines, or no target locked) stays grey.
+
+### Overmatch (AP)
 
 A shell overmatches an armour plate when
 
@@ -46,80 +52,85 @@ A shell overmatches an armour plate when
 calibre > 14.3 × plate thickness
 ```
 
-It then penetrates the plate regardless of impact angle, even against an angled ship.
-A tie does not count as overmatch.
+It then penetrates that plate at any impact angle, so angling does not help. A tie does not
+count as overmatch.
 
 ### The traffic light
 
-Bow/stern is the precondition; "everywhere" requires midship **and** deck to be overmatched as
-well. The colours tell you whether the situation is **good or bad for you**:
+The colours show whether the situation is **good or bad for you**. That is why shell and shield
+use opposite colours for the same result:
 
-| Bow/stern | Midship and deck | Shell (me → target) | Shield (target → me) |
-|---|---|---|---|
-| yes | both yes | **Green + star** – I get through everywhere, even angled | **Red + warning triangle** – the target gets through everywhere, dodge |
-| yes | not both | Orange – aim at bow/stern | Orange – protect your bow/stern |
-| no | – | Red – only a broadside is worth it | Green – angling works |
-| – | – | Grey – no target, or a destroyer/carrier/submarine | Grey |
+| Overmatch on… | Shell (my AP → target) | Shield (target's AP → me) |
+|---|---|---|
+| all three zones | **Green + star** – I get through everywhere, even if the target angles | **Red + warning triangle** – the target gets through everywhere, avoid its guns |
+| bow/stern only | **Orange** – aim at bow/stern | **Orange** – keep your bow/stern out of its fire |
+| not even bow/stern | **Red** – only a broadside is worth it | **Green** – angling protects you |
+| no rating | Grey | Grey |
 
-The **shape** carries the same message without colour. Shell: all segments filled = I get
-through everywhere, only the tip = bow/stern only, slash = I don't get through. Shield: full and
-intact = the target doesn't get through, partly filled = bow/stern only, **broken** = the target
-gets through everywhere. Star and warning triangle flash briefly when you lock a target.
-Together this stays readable with colour vision deficiency.
+The **shape** carries the same message, so it stays readable with colour vision deficiency:
 
-Only pairings of **cruisers and battleships** are rated; everything else stays grey.
+- **Shell:** all segments filled = everywhere, only the tip filled = bow/stern only, slash = nowhere.
+- **Shield:** full and intact = the target does not get through, lower part filled = bow/stern
+  only, **cracked** = the target gets through everywhere.
+- Star and warning triangle flash briefly when you lock a target.
+
 A colour-blind scheme in blue/yellow/orange (Okabe-Ito palette) is available for red-green
 colour vision deficiency.
 
 ### HE and SAP
 
-The shell always rates the **ammunition currently loaded**; a small tag (AP / HE / SAP) like on
-the ammo slots in the HUD shows which. HE and SAP have their own drawings modelled on the game's ammo
-icons: HE hitting a surface and exploding (smoke and flash), SAP hitting a surface with splinters.
-The tip carries the traffic-light colour, as with AP. Instead of overmatch they check the
-penetration value of the shell against the target's plating. Penetration is always rounded down to
-whole millimetres, and penetration ≥ plate counts. For HE the game's own modifier for your ship is
-applied, so the **IFHE** commander skill is included; when it is active, a small **IFHE** tag
-appears at the bottom left of the HE shell. SAP is not affected by IFHE:
+The shell always rates the **ammunition currently loaded**. A small tag (AP / HE / SAP), like on
+the ammo slots in the HUD, shows which one. HE and SAP have their own drawings based on the game's
+ammo icons: HE explodes on a plate (smoke and flash), SAP hits a plate and splinters.
+
+HE and SAP do not overmatch; they penetrate a plate when their penetration value is at least as
+thick as the plate. PenLight checks this for **bow/stern** and **deck** – the two zones you
+usually aim HE/SAP at:
+
+- Penetration values are always rounded down to whole millimetres; a tie counts as penetration.
+- For HE, PenLight uses the penetration modifier the game reports for your ship, so the **IFHE**
+  commander skill is included. When IFHE is active, a small **IFHE** tag appears at the bottom
+  left of the HE shell. SAP is not affected by IFHE.
 
 <p align="center">
   <img src="docs/images/ammo.png" alt="Shell icons for AP, HE (with and without IFHE) and SAP in every state, with ammo tag" width="630">
 </p>
 
-| Bow/stern | Deck | Shell |
+| Penetrates bow/stern | Penetrates deck | Shell |
 |---|---|---|
-| yes | yes | Green + star – tip, band and ring filled |
-| yes | no | Orange – tip and band (middle) filled |
-| no | yes | Orange – tip and rear ring filled |
-| no | no | Red – slash |
-| – | – | Grey – no target, or a destroyer/carrier/submarine |
+| yes | yes | **Green + star** – tip, band and rear ring filled |
+| yes | no | **Orange** – tip and band filled |
+| no | yes | **Orange** – tip and rear ring filled |
+| no | no | **Red** – slash |
+| – | – | Grey – no rating |
 
-The shield always stays the enemy's AP overmatch. In the detail view the TARGET ship shows the
-penetration of the loaded HE/SAP.
+The band stands for bow/stern, the rear ring for the deck. The tip always carries the
+traffic-light colour.
+
+The shield does not depend on your ammunition: it always shows whether the **target's AP** can
+overmatch you.
 
 ### Detail view (Alt)
 
 <img src="docs/images/detail.png" alt="Detail view: Target on top, Me below, each in a frame with label and ship name" align="right" width="210">
 
-Holding **Alt** replaces shell and shield with two ships stacked on top of each other:
+Holding **Alt** replaces shell and shield with two ships, one above the other:
 
-- **TARGET** on top: where my loaded shell gets through the target (AP: overmatch, HE/SAP:
-  penetration of bow/stern, midship and deck).
-- **ME** below: where the target's AP overmatches me.
-- Here green always means **gets through** – for Target and Me alike. (Only the normal view
-  colours by good/bad for you.)
-- Each ship sits in a dark band that fades out to the sides, with hairlines and a slightly
-  lighter header. The small shell/shield icon in the header carries the colour of the big icon.
-- In game the **ship silhouettes from the health bar** are coloured in: the hull is split into
-  stern, midship and bow, everything above the deck line counts as deck. The silhouette gets a
-  dark outline and a soft shadow, the ship name (in the game font) sits underneath.
-- The image uses a drawn ship instead of the game silhouette, since no game assets are shipped.
-  The same drawn ships also stand in when no silhouette is found.
-- Optionally the detail view can replace the icons permanently, and it follows the
-  colour-blind scheme as well.
+- **TARGET** on top: which zones of the target my loaded shell gets through (AP: overmatch,
+  HE/SAP: penetration, here including midship).
+- **ME** below: which of my zones the target's AP overmatches.
+- In this view green always means **gets through**, for TARGET and ME alike. Only the normal
+  view colours by good/bad for you.
+- In game, the **ship silhouettes from the health bar** are coloured in: the hull is split into
+  stern, midship and bow, everything above the deck line counts as deck. The ship name is shown
+  underneath.
+- The picture here uses a drawn ship, because no game graphics are shipped with the mod. The
+  same drawn ships are used in game if a silhouette is missing.
+- Optionally the detail view can be shown permanently instead of the icons. It also follows the
+  colour-blind scheme.
 
-Deliberate simplification: the citadel belt is not rated. Green means the plating is
-overmatched, not a citadel hit.
+Deliberate simplification: the citadel is not rated. Green means the outer plating is
+penetrated, not that you hit the citadel.
 
 <br clear="right">
 
@@ -129,11 +140,11 @@ overmatched, not a citadel hit.
 
 | Branch | Requires | Settings | Moving the display |
 |---|---|---|---|
-| `main` | ModForge **and** TTaroModUtils | options page in TTaro Mod Config, gear button on the display | mouse (TTaro) |
-| `main-standalone` | ModForge; TTaroModUtils **optional** | with TTaro as on `main`, otherwise hotkeys | with TTaro via TTaro, otherwise mouse via its own Flash part |
+| `main` | ModForge **and** TTaroModUtils | options page in TTaro Mod Config (gear button next to the display) | drag with the mouse |
+| `main-standalone` | ModForge; TTaroModUtils **optional** | with TTaro: as on `main`; without: hotkeys | drag with the mouse (with or without TTaro) |
 
-`main-standalone` detects TTaroModUtils automatically: ModForge mounts one of two wrappers
-depending on what is installed, and `Main.py` switches its own controls off as soon as TTaro is present.
+`main-standalone` detects TTaroModUtils automatically and then behaves like `main`. Without
+TTaro it uses its own hotkeys and a small Flash part for dragging.
 
 ---
 
@@ -161,7 +172,8 @@ More detailed notes and diagnostics (German): [`mod/README.md`](mod/README.md).
 
 **Uninstall:** delete the PenLight files from `res_mods` (`PnFMods/PenLight/`,
 `gui/unbound2/PnFMods/PenLight*.unbound`, `ForgeBlueprints/PenLightContainer.xml`,
-`ModSchemas/diedreibeiden-penlight.schema.json`, `texts/*/penlight.mo`).
+`ModSchemas/diedreibeiden-penlight.schema.json`, `texts/*/penlight.mo`). `main-standalone` without
+TTaro also keeps its settings in `World of Warships/ModPrefs/diedreibeiden-penlight.json`.
 
 ---
 
@@ -219,7 +231,7 @@ The ship silhouettes come from the game itself and follow every patch automatica
 |---|---|
 | Tests | `python3 -m unittest discover -s tests` |
 | Generate `Main.py` (from `src/penlight/`) | `python3 -I tools/build_mod.py` |
-| Draw shell/shield icons | `python3 -I tools/make_ampel_icons.py` |
+| Draw shell, shield, HE/SAP icons, tags and marks | `python3 -I tools/make_ampel_icons.py` |
 | Detail images, labels, frames | `python3 -I tools/make_detail_icons.py` |
 | README images | `python3 -I tools/make_readme_images.py` |
 | Texts of the TTaro options page | `python3 -I tools/make_texts.py` |
