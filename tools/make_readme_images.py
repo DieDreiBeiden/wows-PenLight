@@ -4,6 +4,7 @@
     python3 -I tools/make_readme_images.py
 
 - ampel.png:  Granate | Schild je Bedeutung (Spalten), Standard- und Farbenblind-Farben, mit Zeichen
+- ammo.png:   Granate je Munition (AP / HE / SAP) mit Plakette und Zeichen, je Zustand (Spalten)
 - detail.png: Detailansicht wie im Spiel (Rahmen, farbige Mini-Icons, Schiffsname,
   Target oben, Me unten). Statt der Spiel-Silhouette steht das gezeichnete Schiff aus
   make_detail_icons, damit keine Spielgrafik ins Repository kommt.
@@ -75,6 +76,47 @@ def ampel():
     im.save(os.path.join(OUT, 'ampel.png'))
 
 
+def _with_tag(icon, tag, mark):
+    """Granate mit Plakette links oben (tagOffset) und Zeichen rechts oben (markOffset)."""
+    ox, oy = 4, 10
+    out = Image.new('RGBA', (icon.width + 12, icon.height + oy), (0, 0, 0, 0))
+    out.alpha_composite(icon, (ox, oy))
+    if mark:
+        m = _icon(mark)
+        out.alpha_composite(m, (ox + icon.width - m.width + 6, oy - 7))
+    out.alpha_composite(_icon(tag), (ox - 2, oy - 9))
+    return out
+
+
+def ammo():
+    """Zeilen je Munition, Spalten je Zustand; AP kennt kein 'nur Deck'."""
+    f = ImageFont.truetype(FONT, 13)
+    fs = ImageFont.truetype(FONT_REGULAR, 12)
+    columns = [('everywhere', 'green', 'green'), ('bow/stern\nonly', 'yellow', 'bow'),
+               ('deck only\n(HE/SAP)', None, 'deck'), ('nowhere', 'red', 'red'),
+               ('no target /\nnot relevant', 'grey', 'grey')]
+    rows = [('AP', 'shell_', 0), ('HE', 'he_', 1), ('SAP', 'sap_', 1)]
+    cw, rh = 104, 88
+    im = Image.new('RGBA', (80 + len(columns) * cw, 44 + len(rows) * rh + 22), BACKGROUND)
+    d = ImageDraw.Draw(im)
+    for i, (label, _, _) in enumerate(columns):
+        d.multiline_text((80 + i * cw, 6), label, font=fs, fill=(220, 222, 224), spacing=1)
+    for r, (name, prefix, idx) in enumerate(rows):
+        y = 44 + r * rh
+        d.text((14, y + 30), name, font=f, fill=(236, 238, 240))
+        for i, col in enumerate(columns):
+            state = col[1 + idx]
+            if state is None:
+                continue
+            icon = _with_tag(_icon('%s%s.png' % (prefix, state)), 'tag_%s.png' % name.lower(),
+                             'mark_star.png' if state == 'green' else None)
+            big = icon.resize((icon.width * ZOOM, icon.height * ZOOM), Image.LANCZOS)
+            im.alpha_composite(big, (80 + i * cw, y))
+    d.text((14, im.height - 20), 'AP: overmatch  -  HE/SAP: penetration >= plate (IFHE not counted)',
+           font=fs, fill=(170, 172, 174))
+    im.save(os.path.join(OUT, 'ammo.png'))
+
+
 def _silhouette(combo):
     """Gezeichnetes Schiff, auf die Silhouettenflaeche 186 x 48 zugeschnitten (unten buendig)."""
     ship = detail._ship(*(detail.COLORS[c] for c in combo)).reduce(detail.SUPERSAMPLE)
@@ -127,8 +169,9 @@ def detail_view():
 def main():
     os.makedirs(OUT, exist_ok=True)
     ampel()
+    ammo()
     detail_view()
-    print('docs/images/ampel.png, docs/images/detail.png')
+    print('docs/images/ampel.png, docs/images/ammo.png, docs/images/detail.png')
     return 0
 
 

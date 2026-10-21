@@ -80,12 +80,17 @@ schlägt auf und splittert. Die Spitze trägt wie bei AP die Ampelfarbe. Statt
 Overmatch prüfen sie den festen Durchschlag der Granate gegen die Panzerung des Ziels
 (Durchschlag ≥ Platte zählt; die Kapitänsfertigkeit IFHE wird bewusst nicht berücksichtigt):
 
+<p align="center">
+  <img src="docs/images/ammo.png" alt="Granaten-Symbole für AP, HE und SAP in allen Zuständen, mit Munitions-Plakette" width="600">
+</p>
+
 | Bug/Heck | Deck | Granate |
 |---|---|---|
 | ja | ja | Grün + Stern – Spitze, Band und Ring gefüllt |
 | ja | nein | Orange – Spitze und Band (Mitte) gefüllt |
 | nein | ja | Orange – Spitze und hinterer Ring gefüllt |
 | nein | nein | Rot – Schrägstrich |
+| – | – | Grau – kein Ziel oder Zerstörer/Träger/U-Boot |
 
 Der Schild bleibt immer der AP-Overmatch des Gegners. In der Detailansicht zeigt das TARGET-Schiff
 den Durchschlag der geladenen HE/SAP.
@@ -97,7 +102,7 @@ den Durchschlag der geladenen HE/SAP.
 Mit gedrückter **Alt**-Taste ersetzen zwei untereinander stehende Schiffe Granate und Schild:
 
 - **TARGET** oben: wo meine geladene Granate durch das Ziel kommt (AP: Overmatch, HE/SAP:
-  Durchschlag von Bug/Heck und Deck).
+  Durchschlag von Bug/Heck, Mitte und Deck).
 - **ME** unten: wo die AP des Ziels mich overmatcht.
 - Hier heißt Grün immer **kommt durch**, für Target und Me gleich. (Nur die normale Ansicht färbt
   nach gut/schlecht für dich.)
