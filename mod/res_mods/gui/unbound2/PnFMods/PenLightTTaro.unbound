@@ -41,6 +41,9 @@
 		(var avatar:gfx = "$datahub.getSingleEntity(CC.playerAvatar)")
 		(var healthComponent:gfx = "avatar ? avatar.health : null")
 		(var isAlive:bool = "healthComponent ? healthComponent.isAlive : false" (event "healthComponent.evIsAliveChanged"))
+		# wie die Anzeige nur in der Zielansicht (Fernglas / Zielfernrohr)
+		(var cameraEntity:gfx = "$datahub.getSingleEntity(CC.camera)")
+		(var isBinocular:bool = "cameraEntity.camera.isBinocular" (event "cameraEntity.camera.evIsBinocularChanged"))
 	)
 
 	(style
@@ -54,7 +57,7 @@
 	)
 
 	(block
-		(bind visible "isAlive")
+		(bind visible "isAlive && isBinocular")
 		(style
 			(position = "absolute")
 			(bind left "posX")

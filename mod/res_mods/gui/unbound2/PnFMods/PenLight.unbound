@@ -147,12 +147,14 @@
 		(var cameraMode:number = "cameraEntity.camera.mode" (event "cameraEntity.camera.evModeChanged"))
 		(var isCameraTrackingShell:bool = "cameraMode == CameraMode.SHELLTRACKER")
 		(var isTactical:bool = "cameraEntity.camera.isTactical" (event "cameraEntity.camera.evTacticalStateChanged"))
+		# nur in der Zielansicht (Fernglas / Zielfernrohr), nicht in der normalen Aussenperspektive
+		(var isBinocular:bool = "cameraEntity.camera.isBinocular" (event "cameraEntity.camera.evIsBinocularChanged"))
 
 		(var avatar:gfx = "$datahub.getSingleEntity(CC.playerAvatar)")
 		(var healthComponent:gfx = "avatar ? avatar.health : null")
 		(var isAlive:bool = "healthComponent ? healthComponent.isAlive : false" (event "healthComponent.evIsAliveChanged"))
 
-		(var isCrosshairVisible:bool = "isAlive && !isCameraTrackingShell && !isTactical")
+		(var isCrosshairVisible:bool = "isAlive && isBinocular && !isCameraTrackingShell && !isTactical")
 	)
 
 	(style

@@ -14,6 +14,9 @@ PenLight shows two small traffic lights right next to your crosshair:
 Hold **Alt** for a detail view that shows the same for each zone of both ships: bow/stern,
 midship and deck.
 
+The display appears only in the **zoomed aiming view** (binoculars / scope). In the normal
+third-person view it is hidden.
+
 <p align="center">
   <img src="docs/images/ampel.png" alt="Shell and shield in every state, standard and colour-blind palettes" width="610">
 </p>
@@ -215,7 +218,7 @@ TTaro also keeps its settings in `World of Warships/ModPrefs/diedreibeiden-penli
 
 ### With TTaroModUtils
 
-In battle, hold **Ctrl** to show the mouse cursor:
+In battle, switch to the aiming view and hold **Ctrl** to show the mouse cursor:
 
 - Grab the icons and **drag** to move the display.
 - The **gear** to the left of the display opens the PenLight page in TTaro Mod Config:
@@ -224,7 +227,7 @@ In battle, hold **Ctrl** to show the mouse cursor:
 
 ### Without TTaroModUtils (`main-standalone`)
 
-- **Drag** with the mouse: hold Ctrl, hover over shell | shield (a thin frame appears), drag.
+- **Drag** with the mouse in the aiming view: hold Ctrl, hover over shell | shield (a thin frame appears), drag.
 - **Hotkeys** with **Ctrl+Alt**:
 
 | Key | Effect |
