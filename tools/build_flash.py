@@ -10,7 +10,7 @@ Benoetigt:
 - wows_library.swc aus dem offiziellen ModSDK (as3_library/), nur zum Kompilieren gegen
   lesta.api.ModBase; die Klassen liefert der Client, sie werden nicht eingebunden
 Quelle: src/as3/Main.as (nicht src/flash: das wuerde in den Tests das Modul 'flash' verdecken).
-Ausgabe: mod/res_mods/PnFMods/Overmatcher/Main.swf
+Ausgabe: mod/res_mods/PnFMods/PenLight/Main.swf
 """
 import os
 import subprocess
@@ -18,7 +18,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCE = os.path.join(ROOT, 'src', 'as3', 'Main.as')
-TARGET = os.path.join(ROOT, 'mod', 'res_mods', 'PnFMods', 'Overmatcher', 'Main.swf')
+TARGET = os.path.join(ROOT, 'mod', 'res_mods', 'PnFMods', 'PenLight', 'Main.swf')
 
 
 def main():

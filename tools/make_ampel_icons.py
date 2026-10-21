@@ -22,7 +22,7 @@ und Blitz; SAP: Aufschlag mit Splittern), Zustaende green, bow, deck, red, grey 
 Ampelfarbe, dazu Band = Bug/Heck, Ring = Deck), Plaketten tag_ap/he/sap.png.
 Granate: Spitze, Band, Heckring. Schild: Fuss, unterer Sparren, oberer Sparren.
 Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
-Ausgabe: mod/res_mods/PnFMods/Overmatcher/{shell,shield}_[cb_]{green,yellow,red,grey}.png
+Ausgabe: mod/res_mods/PnFMods/PenLight/{shell,shield}_[cb_]{green,yellow,red,grey}.png
 (cb_ = Farbenblind-Schema AMPEL_CB)
 """
 import os
@@ -32,9 +32,9 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TARGET_DIR = os.path.join(ROOT, 'mod', 'res_mods', 'PnFMods', 'Overmatcher')
+TARGET_DIR = os.path.join(ROOT, 'mod', 'res_mods', 'PnFMods', 'PenLight')
 
-SIZE = 29  # muss zu iconSize in Overmatcher.unbound passen
+SIZE = 29  # muss zu iconSize in PenLight.unbound passen
 SUPERSAMPLE = 16
 W = SIZE * SUPERSAMPLE
 
@@ -304,7 +304,7 @@ def mark_warning():
 
 
 # Plakette wie die Munitions-Slots im HUD: weisse Versalien auf dunklem Grund, in Zielgroesse
-# gezeichnet (scharf). Sitzt in Overmatcher.unbound links oben an der Granate.
+# gezeichnet (scharf). Sitzt in PenLight.unbound links oben an der Granate.
 TAG_FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'  # DejaVu-Lizenz, frei
 TAG_SIZE = 8
 TAG_HEIGHT = 10

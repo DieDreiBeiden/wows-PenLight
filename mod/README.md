@@ -6,12 +6,12 @@ Spiel beenden. Ordner mit der **höchsten Nummer** unter `World_of_Warships\bin\
 | Datei | Zweck |
 |---|---|
 | `PnFModsLoader.py` | leere Datei, aktiviert Python-Mods (bei dir schon vorhanden) |
-| `PnFMods\Overmatcher\Main.py` | die Mod (generiert, siehe unten) |
-| `PnFMods\Overmatcher\Main.swf` | Greiffläche zum Verschieben per Maus (gebaut mit `tools/build_flash.py`) |
-| `PnFMods\Overmatcher\ships.json` | Panzerungs-/Kaliberdaten für genau eine Spielversion |
-| `PnFMods\Overmatcher\shell_*.png`, `shield_*.png` | Icons Granate/Schild (29×29) |
-| `gui\unbound2\PnFMods\Overmatcher.unbound` | Anzeige am Fadenkreuz (ab 0.2, benötigt ModForge) |
-| `ForgeBlueprints\OvermatcherContainer.xml` | ModForge-Manifest für die Anzeige |
+| `PnFMods\PenLight\Main.py` | die Mod (generiert, siehe unten) |
+| `PnFMods\PenLight\Main.swf` | Greiffläche zum Verschieben per Maus (gebaut mit `tools/build_flash.py`) |
+| `PnFMods\PenLight\ships.json` | Panzerungs-/Kaliberdaten für genau eine Spielversion |
+| `PnFMods\PenLight\shell_*.png`, `shield_*.png` | Icons Granate/Schild (29×29) |
+| `gui\unbound2\PnFMods\PenLight.unbound` | Anzeige am Fadenkreuz (ab 0.2, benötigt ModForge) |
+| `ForgeBlueprints\PenLightContainer.xml` | ModForge-Manifest für die Anzeige |
 
 Voraussetzung: **ModForge**. **TTaroModUtils** ist optional und wird automatisch erkannt:
 
@@ -19,12 +19,12 @@ Voraussetzung: **ModForge**. **TTaroModUtils** ist optional und wird automatisch
   Ziehen mit der Maus über TTaro (wie bei den übrigen TTaro-Mods). Tastenkürzel und `Main.swf` sind aus.
 - **Ohne TTaroModUtils:** Ziehen über `Main.swf`, Einstellungen per Tastenkürzel (unten).
 
-| `gui\unbound2\PnFMods\OvermatcherTTaro.unbound` | Hülle für TTaroModUtils (nur eingehängt, wenn installiert) |
-| `ModSchemas\diedreibeiden-overmatcher.schema.json`, `texts\<Sprache>\overmatcher.mo` | Optionsseite für TTaro Mod Config |
+| `gui\unbound2\PnFMods\PenLightTTaro.unbound` | Hülle für TTaroModUtils (nur eingehängt, wenn installiert) |
+| `ModSchemas\diedreibeiden-penlight.schema.json`, `texts\<Sprache>\penlight.mo` | Optionsseite für TTaro Mod Config |
 
 Ohne TTaroModUtils – verschieben mit der Maus: im Gefecht Mauszeiger einblenden (Strg halten), über Granate | Schild
 fahren (feiner Rahmen erscheint) und ziehen. Die Position wird beim Loslassen gespeichert.
-Dafür sorgt `PnFMods\Overmatcher\Main.swf` (Flash-Teil, offizielle ModsAPI).
+Dafür sorgt `PnFMods\PenLight\Main.swf` (Flash-Teil, offizielle ModsAPI).
 
 Ohne TTaroModUtils – Einstellungen im Gefecht mit **Strg+Alt** und:
 
@@ -36,25 +36,25 @@ Ohne TTaroModUtils – Einstellungen im Gefecht mit **Strg+Alt** und:
 | F | Farben: Standard (Grün/Orange/Rot) oder Farbenblind (Blau/Gelb/Orange) |
 | + / − | Größe 0,5–2,0 |
 
-Gespeichert wird in `(wows)/ModPrefs/diedreibeiden-overmatcher.json`.
+Gespeichert wird in `(wows)/ModPrefs/diedreibeiden-penlight.json`.
 
 Ablageorte wie bei PenetrationCalculator (vom Nutzer bestätigt).
 
 Die Mod zeigt Granate und Schild immer als Icons am Fadenkreuz: grau ohne Ziel, in Ampelfarben
 bei aufgeschaltetem Kreuzer/Schlachtschiff, mit gedrückter Alt-Taste die Detailansicht (Bug/Heck, Mitte, Deck). Zusätzlich steht das Ergebnis in
-`PnFMods\Overmatcher\overmatcher_last.txt`. Diagnose (wird fortlaufend angehängt):
-`PnFMods\Overmatcher\overmatcher_log.txt` und `profile\python.log` (Zeilen mit `[Overmatcher]`).
-Fehlt `overmatcher_log.txt` nach dem Spielstart ganz, wurde die Mod nicht geladen.
+`PnFMods\PenLight\penlight_last.txt`. Diagnose (wird fortlaufend angehängt):
+`PnFMods\PenLight\penlight_log.txt` und `profile\python.log` (Zeilen mit `[PenLight]`).
+Fehlt `penlight_log.txt` nach dem Spielstart ganz, wurde die Mod nicht geladen.
 
 Passt `ships.json` nicht zur Spielversion, deaktiviert sich die Mod und schreibt das ins Log.
 
-Entfernen: Ordner `Overmatcher` löschen. Die Probe-Mod `OvermatcherProbe` wird nicht mehr
+Entfernen: Ordner `PenLight` löschen. Die Probe-Mod `OvermatcherProbe` wird nicht mehr
 gebraucht und kann ebenfalls gelöscht werden.
 
 # Nach einem Patch
 
 1. `content/GameParams.data` mit dem WoWs Unpack Tool extrahieren.
-2. `python3 -I tools/gameparams.py GameParams.data ships_full.json mod/res_mods/PnFMods/Overmatcher/ships.json <Version>`
+2. `python3 -I tools/gameparams.py GameParams.data ships_full.json mod/res_mods/PnFMods/PenLight/ships.json <Version>`
    (`<Version>` wie im python.log, z. B. `15,9,0,13357625`)
 3. `python3 -I tools/build_mod.py`, Tests: `python3 -m unittest discover -s tests`
 

@@ -1,5 +1,5 @@
-# Overmatcher – Anzeige am Fadenkreuz fuer das aufgeschaltete Ziel.
-# Daten: CC.mods_DataComponent 'modOvermatcher' aus Main.py
+# PenLight – Anzeige am Fadenkreuz fuer das aufgeschaltete Ziel.
+# Daten: CC.mods_DataComponent 'modPenLight' aus Main.py
 #   {byId: {'<avatarId>': [attack, defense, detail, attackImage, defenseImage]}, byName: {...}}
 #   attackImage/defenseImage = Detail-Bild ohne .png (detail_<target|me>_<bugheck>_<mitte>_<deck>),
 #   '' = keine Daten. Beschriftung "ME"/"TARGET" samt Mini-Icon ist Teil des Bildes.
@@ -12,14 +12,14 @@
 # Muster: Einbindung per ModForge wie PenetrationCalculator, Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
 # Alt-Ansicht (Prototyp): Spiel-Silhouetten img://gui/ship_bars/<shortName>_h.png in vier Sektionen
-# (Aufbauten = Deck, Rumpf = Heck/Mitte/Bug); Rueckfall auf detail_*.png (useSilhouettes in OVERMATCHER_SETTINGS).
-# Icons: res_mods/PnFMods/Overmatcher/{shell,shield}_{green,yellow,red,grey}.png, 29x29 (gezeichnet von tools/make_ampel_icons.py).
+# (Aufbauten = Deck, Rumpf = Heck/Mitte/Bug); Rueckfall auf detail_*.png (useSilhouettes in PENLIGHT_SETTINGS).
+# Icons: res_mods/PnFMods/PenLight/{shell,shield}_{green,yellow,red,grey}.png, 29x29 (gezeichnet von tools/make_ampel_icons.py).
 # Einstellungen: ohne TTaroModUtils aus Main.py (omData.settings; Strg+Alt+Taste, Ziehen per
 # Main.swf, gespeichert in ModPrefs/), mit TTaroModUtils aus dessen Optionsseite (_ext von
-# OvermatcherTTaroRoot). Ohne beides gelten offsetX/offsetY und die Standardwerte.
+# PenLightTTaroRoot). Ohne beides gelten offsetX/offsetY und die Standardwerte.
 
 # Einstellungen
-(def constant OVERMATCHER_SETTINGS {
+(def constant PENLIGHT_SETTINGS {
 	# Rueckfall-Position (linke obere Ecke der Anzeige), solange Main.py keine liefert:
 	# Abstand zur Bildschirmmitte in Pixeln (x: + = rechts, y: + = unten). x >= 30 haelt die
 	# Detail-Schiffe (Alt) von der senkrechten Fadenkreuzlinie fern.
@@ -78,24 +78,24 @@
 
 # Einfaerbung der Silhouetten: Multiplikator 0 + Offset = Vollfarbe, Alpha bleibt (Form der Silhouette).
 # Farben wie tools/make_ampel_icons.py (gruen #3DDC5A, rot, grau) bzw. dunkle Fuge.
-(def constant OVERMATCHER_CT {
+(def constant PENLIGHT_CT {
 	green: { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:61,greenOffset:220,blueOffset:90,alphaOffset:0 },
 	red:   { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:232,greenOffset:72,blueOffset:52,alphaOffset:0 },
 	grey:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:128,greenOffset:132,blueOffset:136,alphaOffset:0 },
 	base:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:40,greenOffset:42,blueOffset:44,alphaOffset:0 }
 })
 # Farbenblind-Schema (AMPEL_CB in tools/make_ampel_icons.py): blau = Overmatch, orange = kein Overmatch
-(def constant OVERMATCHER_CT_CB {
+(def constant PENLIGHT_CT_CB {
 	green: { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:43,greenOffset:140,blueOffset:232,alphaOffset:0 },
 	red:   { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:213,greenOffset:94,blueOffset:0,alphaOffset:0 },
 	grey:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:128,greenOffset:132,blueOffset:136,alphaOffset:0 },
 	base:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:40,greenOffset:42,blueOffset:44,alphaOffset:0 }
 })
 
-(def constant OVERMATCHER_COMPONENT_KEY 'modOvermatcher')
+(def constant PENLIGHT_COMPONENT_KEY 'modPenLight')
 
 # Kontur + weicher Schatten der Silhouette wie bei Granate/Schild (Filter wie Spiel-Markierungen)
-(def css $OvermatcherSilhouetteFX ()
+(def css $PenLightSilhouetteFX ()
 	(filters
 		(dropShadow
 			(distance = 0)
@@ -122,13 +122,13 @@
 
 
 # Pfad relativ zu gui/unbound2/PnFMods/ (wie PenetrationCalculator)
-(def constant OVERMATCHER_ICON_PATH 'url:../../../PnFMods/Overmatcher/')
+(def constant PENLIGHT_ICON_PATH 'url:../../../PnFMods/PenLight/')
 
 # Wurzel der Anzeige. Ohne TTaroModUtils haengt ModForge sie direkt ein (_ext = {}, Einstellungen
-# aus Main.py); mit TTaroModUtils haengt ModForge stattdessen OvermatcherTTaroRoot ein
-# (OvermatcherTTaro.unbound), die diese Wurzel mit den TTaro-Einstellungen in _ext aufruft:
+# aus Main.py); mit TTaroModUtils haengt ModForge stattdessen PenLightTTaroRoot ein
+# (PenLightTTaro.unbound), die diese Wurzel mit den TTaro-Einstellungen in _ext aufruft:
 #   {posX, posY (Bildschirmkoordinaten), scale, colorMode, detailMode}
-(def element OvermatcherRoot(_ext:dict = {}) layout=true
+(def element PenLightRoot(_ext:dict = {}) layout=true
 	(scope
 		(var stageComponent:gfx = "$datahub.getSingleComponent(CC.stage)")
 		(var stageWidth:number = "stageComponent.width" (event "stageComponent.evStageSizeChanged"))
@@ -152,13 +152,13 @@
 		(bind height "stageHeight")
 	)
 
-	(element OvermatcherCrosshairItem _ext="_ext"
+	(element PenLightCrosshairItem _ext="_ext"
 		(style (position = "absolute") (left = 0) (top = 0))
 		(bind visible "isCrosshairVisible")
 	)
 )
 
-(def element OvermatcherCrosshairItem(_ext:dict = {}) layout=true
+(def element PenLightCrosshairItem(_ext:dict = {}) layout=true
 	(scope
 		(macro STAGE_SIZE)
 
@@ -171,18 +171,18 @@
 		(var targetName:str = "targetAvatar ? targetAvatar.name : ''" (event "evTargetChanged"))
 
 		# Daten aus Main.py
-		(var omWatcher:gfx = "$datahub.getPrimWatcher(CC.mods_DataComponent, OVERMATCHER_COMPONENT_KEY)")
+		(var omWatcher:gfx = "$datahub.getPrimWatcher(CC.mods_DataComponent, PENLIGHT_COMPONENT_KEY)")
 		(var omEntity:gfx = "omWatcher.entity" (event "omWatcher.event"))
 		(var omComponent:gfx = "omEntity ? omEntity.mods_DataComponent : null")
 		(var omData:dict = "omComponent ? omComponent.data : {}" (event "omComponent.evDataChanged"))
 		(var byId:dict = "'byId' in omData && null != omData.byId ? omData.byId : {}")
 		(var byName:dict = "'byName' in omData && null != omData.byName ? omData.byName : {}")
 
-		# Einstellungen aus Main.py (Strg+Alt+Pfeile/Pos1/D/F/+/-), Rueckfall auf OVERMATCHER_SETTINGS
+		# Einstellungen aus Main.py (Strg+Alt+Pfeile/Pos1/D/F/+/-), Rueckfall auf PENLIGHT_SETTINGS
 		# bzw. aus _ext (TTaro-Hülle), _ext hat Vorrang
 		(var om:dict = "'settings' in omData && null != omData.settings ? omData.settings : {}")
-		(var posX:number = "'posX' in _ext ? _ext.posX : stageWidth / 2 + ('x' in om ? om.x : OVERMATCHER_SETTINGS.offsetX)")
-		(var posY:number = "'posY' in _ext ? _ext.posY : stageHeight / 2 + ('y' in om ? om.y : OVERMATCHER_SETTINGS.offsetY)")
+		(var posX:number = "'posX' in _ext ? _ext.posX : stageWidth / 2 + ('x' in om ? om.x : PENLIGHT_SETTINGS.offsetX)")
+		(var posY:number = "'posY' in _ext ? _ext.posY : stageHeight / 2 + ('y' in om ? om.y : PENLIGHT_SETTINGS.offsetY)")
 		(var uiScale:number = "'scale' in _ext ? _ext.scale : ('scale' in om ? om.scale : 1)")
 		(var colorMode:number = "'colorMode' in _ext ? _ext.colorMode : ('colorMode' in om ? om.colorMode : 0)")
 		(var detailMode:number = "'detailMode' in _ext ? _ext.detailMode : ('detailMode' in om ? om.detailMode : 0)")
@@ -190,25 +190,25 @@
 		(var isDetailAlways:bool = "detailMode == 1")
 		# Farbschema: Dateipraefix der Icons und Einfaerbung der Silhouetten
 		(var palettePrefix:str = "isColorBlind ? 'cb_' : ''")
-		(var palette:dict = "isColorBlind ? OVERMATCHER_CT_CB : OVERMATCHER_CT")
+		(var palette:dict = "isColorBlind ? PENLIGHT_CT_CB : PENLIGHT_CT")
 
 		(var verdict:array = "(targetKey != '' && targetKey in byId) ? byId[targetKey]
 								: ((targetName != '' && targetName in byName) ? byName[targetName] : [])")
 		(var hasVerdict:bool = "verdict.length >= 2")
-		(var attackDetail:str = "verdict.length >= 5 && verdict[3] != '' ? OVERMATCHER_ICON_PATH + verdict[3] + '.png' : ''")
-		(var defenseDetail:str = "verdict.length >= 5 && verdict[4] != '' ? OVERMATCHER_ICON_PATH + verdict[4] + '.png' : ''")
+		(var attackDetail:str = "verdict.length >= 5 && verdict[3] != '' ? PENLIGHT_ICON_PATH + verdict[3] + '.png' : ''")
+		(var defenseDetail:str = "verdict.length >= 5 && verdict[4] != '' ? PENLIGHT_ICON_PATH + verdict[4] + '.png' : ''")
 
 		# Detailansicht solange Alt gedrueckt ist (wie PenetrationCalculator)
 		(var cameraEntity:gfx = "$datahub.getSingleEntity(CC.camera)")
 		(var altVision:bool = "cameraEntity.camera.altVision" (event "cameraEntity.camera.evAltVisionChanged"))
 		# geladene Munition aus Main.py: ap (Overmatch), he / sap (Durchschlag Bug/Heck und Deck)
 		(var ammo:str = "'ammo' in omData && null != omData.ammo ? omData.ammo : 'ap'")
-		(var attackIcon:str = "OVERMATCHER_ICON_PATH + (ammo == 'ap' ? 'shell_' : ammo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
-		(var attackTag:str = "OVERMATCHER_ICON_PATH + 'tag_' + ammo + '.png'")
-		(var defenseIcon:str = "OVERMATCHER_ICON_PATH + 'shield_' + palettePrefix + (hasVerdict ? verdict[1] : 'grey') + '.png'")
+		(var attackIcon:str = "PENLIGHT_ICON_PATH + (ammo == 'ap' ? 'shell_' : ammo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
+		(var attackTag:str = "PENLIGHT_ICON_PATH + 'tag_' + ammo + '.png'")
+		(var defenseIcon:str = "PENLIGHT_ICON_PATH + 'shield_' + palettePrefix + (hasVerdict ? verdict[1] : 'grey') + '.png'")
 		# Extremfaelle: ich komme ueberall durch (Granate gruen) / Ziel kommt ueberall durch (Schild rot)
-		(var attackMark:str = "hasVerdict && verdict[0] == 'green' ? OVERMATCHER_ICON_PATH + 'mark_star.png' : ''")
-		(var defenseMark:str = "hasVerdict && verdict[1] == 'red' ? OVERMATCHER_ICON_PATH + 'mark_warning.png' : ''")
+		(var attackMark:str = "hasVerdict && verdict[0] == 'green' ? PENLIGHT_ICON_PATH + 'mark_star.png' : ''")
+		(var defenseMark:str = "hasVerdict && verdict[1] == 'red' ? PENLIGHT_ICON_PATH + 'mark_warning.png' : ''")
 		# Option "Immer AN": Detailansicht auch ohne Alt (nur mit Bewertung, sonst graue Symbole)
 		(var showDetail:bool = "(altVision || isDetailAlways) && hasVerdict")
 
@@ -224,7 +224,7 @@
 		(var ownShipInfo:gfx = "ownShipInfoId ? $datahub.getEntity(ownShipInfoId) : null")
 		(var ownShortName:str = "ownShipInfo ? ownShipInfo.ship.shortName : ''")
 		(var ownNameIDS:str = "ownShipInfo ? ownShipInfo.ship.nameIDS : ''")
-		(var showSilhouettes:bool = "showDetail && OVERMATCHER_SETTINGS.useSilhouettes && targetShortName != '' && ownShortName != ''")
+		(var showSilhouettes:bool = "showDetail && PENLIGHT_SETTINGS.useSilhouettes && targetShortName != '' && ownShortName != ''")
 
 		# Sektionsfarben: detail = [ich->Ziel Bug, Mitte, Deck, Ziel->ich Bug, Mitte, Deck], 1/0/-1
 		# fuer Target und Me gleich: gruen = Overmatch, rot = kein Overmatch, grau = keine Daten.
@@ -236,11 +236,11 @@
 		(var mMid:str = "detail[4] == 1 ? 'green' : (detail[4] == 0 ? 'red' : 'grey')")
 		(var mDeck:str = "detail[5] == 1 ? 'green' : (detail[5] == 0 ? 'red' : 'grey')")
 		# Mini-Icons der Beschriftung in der Ampelfarbe von Granate bzw. Schild
-		(var targetLabel:str = "OVERMATCHER_ICON_PATH + 'label_target_' + (ammo == 'ap' ? '' : ammo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
-		(var ownLabel:str = "OVERMATCHER_ICON_PATH + 'label_me_' + palettePrefix + (hasVerdict ? verdict[1] : 'grey') + '.png'")
+		(var targetLabel:str = "PENLIGHT_ICON_PATH + 'label_target_' + (ammo == 'ap' ? '' : ammo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
+		(var ownLabel:str = "PENLIGHT_ICON_PATH + 'label_me_' + palettePrefix + (hasVerdict ? verdict[1] : 'grey') + '.png'")
 	)
 
-	(controller $Repeat renderer='OvermatcherTargetTracker'
+	(controller $Repeat renderer='PenLightTargetTracker'
 		(bind count "enemies.items.length" (event "enemies.evAdded") (event "enemies.evRemoved"))
 		(exprs
 			(scope
@@ -260,24 +260,24 @@
 		)
 		(hblock
 			(bind visible "!showDetail")
-			(element OvermatcherIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey" _tag="attackTag")
-			(element OvermatcherIcon _url="defenseIcon" _mark="defenseMark" _pulseKey="targetKey")
+			(element PenLightIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey" _tag="attackTag")
+			(element PenLightIcon _url="defenseIcon" _mark="defenseMark" _pulseKey="targetKey")
 		)
 		# absolut an derselben Stelle wie die Symbole, damit nichts springt
 		(block
 			(bind visible "showDetail && !showSilhouettes")
 			(style (position = "absolute") (left = 0) (top = 0))
 			# untereinander: oben Target (gehoert zur Granate), unten Me (gehoert zum Schild)
-			(element OvermatcherShip _url="attackDetail")
-			(element OvermatcherShip _url="defenseDetail")
+			(element PenLightShip _url="attackDetail")
+			(element PenLightShip _url="defenseDetail")
 		)
 		# Prototyp: dieselbe Stelle, Spiel-Silhouetten statt gezeichneter Schiffe
 		(block
 			(bind visible "showSilhouettes")
 			(style (position = "absolute") (left = 0) (top = 0))
-			(element OvermatcherSilhouetteShip _shortName="targetShortName" _label="targetLabel" _nameIDS="targetNameIDS"
+			(element PenLightSilhouetteShip _shortName="targetShortName" _label="targetLabel" _nameIDS="targetNameIDS"
 				_bow="tBow" _mid="tMid" _deck="tDeck" _palette="palette")
-			(element OvermatcherSilhouetteShip _shortName="ownShortName" _label="ownLabel" _nameIDS="ownNameIDS"
+			(element PenLightSilhouetteShip _shortName="ownShortName" _label="ownLabel" _nameIDS="ownNameIDS"
 				_bow="mBow" _mid="mMid" _deck="mDeck" _palette="palette")
 		)
 	)
@@ -286,18 +286,18 @@
 # Detail-Schiff mit eingebauter Beschriftung (Python waehlt das Bild). Gruen = Overmatch:
 # Target = Ziel (ich overmatche hier), Me = eigenes Schiff (Gegner overmatcht hier).
 # Leeres _url (keine Daten) -> Platz bleibt, damit das andere Schiff nicht verrutscht.
-(def element OvermatcherShip(_url:str) layout=true
+(def element PenLightShip(_url:str) layout=true
 	(style
-		(bind width "OVERMATCHER_SETTINGS.detailWidth")
-		(bind height "OVERMATCHER_SETTINGS.detailHeight")
-		(bind marginBottom "OVERMATCHER_SETTINGS.shipGap")
+		(bind width "PENLIGHT_SETTINGS.detailWidth")
+		(bind height "PENLIGHT_SETTINGS.detailHeight")
+		(bind marginBottom "PENLIGHT_SETTINGS.shipGap")
 	)
 	(block
 		(bind visible "_url != ''")
 		(style
 			(bind backgroundImage "_url")
-			(bind width "OVERMATCHER_SETTINGS.detailWidth")
-			(bind height "OVERMATCHER_SETTINGS.detailHeight")
+			(bind width "PENLIGHT_SETTINGS.detailWidth")
+			(bind height "PENLIGHT_SETTINGS.detailHeight")
 			(backgroundSize = "fill")
 		)
 	)
@@ -308,9 +308,9 @@
 # Spiel-Lebensbalken: toUpper(tr(ship.nameIDS))), mittig.
 # Die Silhouette wird mehrfach uebereinander gelegt; jede Lage zeigt per Maske nur ihren
 # Bereich und wird per colorTransform eingefaerbt (Muster: OwnHealthBarValue im Spiel).
-(def element OvermatcherSilhouetteShip(_shortName:str, _label:str, _nameIDS:str, _bow:str, _mid:str, _deck:str, _palette:dict) layout=true
+(def element PenLightSilhouetteShip(_shortName:str, _label:str, _nameIDS:str, _bow:str, _mid:str, _deck:str, _palette:dict) layout=true
 	(scope
-		(var s:dict = "OVERMATCHER_SETTINGS")
+		(var s:dict = "PENLIGHT_SETTINGS")
 		(var url:str = "'img://gui/ship_bars/' + _shortName + '_h.png'")
 		(var gap:number = "s.zoneGap / 2")
 		(var gapY:number = "s.zoneGapY / 2")
@@ -322,13 +322,13 @@
 	# Rahmen B3: Band ueber die ganze Hoehe, Haarlinien oben/unten, aufgehellte Kopfzeile mit Trennlinie
 	(block
 		(class $FullsizeAbsolute)
-		(style (backgroundImage = "OVERMATCHER_ICON_PATH + 'frame_band.png'") (backgroundSize = "fill"))
+		(style (backgroundImage = "PENLIGHT_ICON_PATH + 'frame_band.png'") (backgroundSize = "fill"))
 	)
 	(block
 		(style
 			(position = "absolute") (left = 0) (top = 1)
 			(bind width "s.silhouetteWidth") (bind height "s.labelHeight - 2")
-			(backgroundImage = "OVERMATCHER_ICON_PATH + 'frame_head.png'") (backgroundSize = "fill")
+			(backgroundImage = "PENLIGHT_ICON_PATH + 'frame_head.png'") (backgroundSize = "fill")
 		)
 	)
 	(block
@@ -336,21 +336,21 @@
 			(position = "absolute") (left = 0) (bind top "s.labelHeight - 1")
 			(bind width "s.silhouetteWidth") (height = 1)
 			(bind alpha "s.headLineAlpha")
-			(backgroundImage = "OVERMATCHER_ICON_PATH + 'frame_line.png'") (backgroundSize = "fill")
+			(backgroundImage = "PENLIGHT_ICON_PATH + 'frame_line.png'") (backgroundSize = "fill")
 		)
 	)
 	(block
 		(style
 			(position = "absolute") (left = 0) (top = 0)
 			(bind width "s.silhouetteWidth") (height = 1)
-			(backgroundImage = "OVERMATCHER_ICON_PATH + 'frame_line.png'") (backgroundSize = "fill")
+			(backgroundImage = "PENLIGHT_ICON_PATH + 'frame_line.png'") (backgroundSize = "fill")
 		)
 	)
 	(block
 		(style
 			(position = "absolute") (left = 0) (bottom = 0)
 			(bind width "s.silhouetteWidth") (height = 1)
-			(backgroundImage = "OVERMATCHER_ICON_PATH + 'frame_line.png'") (backgroundSize = "fill")
+			(backgroundImage = "PENLIGHT_ICON_PATH + 'frame_line.png'") (backgroundSize = "fill")
 		)
 	)
 	(block
@@ -362,16 +362,16 @@
 		)
 	)
 	(block
-		(class $OvermatcherSilhouetteFX)
+		(class $PenLightSilhouetteFX)
 		(style
 			(bind width "s.silhouetteWidth")
 			(bind height "s.silhouetteHeight")
 		)
-		(element OvermatcherZone _url="url" _from="0" _to="1" _top="0" _bottom="1" _ct="_palette.base")
-		(element OvermatcherZone _url="url" _from="0" _to="1" _top="0" _bottom="s.deckLine - gapY" _ct="_palette[_deck]")
-		(element OvermatcherZone _url="url" _from="0" _to="s.sternEnd - gap" _top="s.deckLine + gapY" _bottom="1" _ct="_palette[_bow]")
-		(element OvermatcherZone _url="url" _from="s.sternEnd + gap" _to="s.bowStart - gap" _top="s.deckLine + gapY" _bottom="1" _ct="_palette[_mid]")
-		(element OvermatcherZone _url="url" _from="s.bowStart + gap" _to="1" _top="s.deckLine + gapY" _bottom="1" _ct="_palette[_bow]")
+		(element PenLightZone _url="url" _from="0" _to="1" _top="0" _bottom="1" _ct="_palette.base")
+		(element PenLightZone _url="url" _from="0" _to="1" _top="0" _bottom="s.deckLine - gapY" _ct="_palette[_deck]")
+		(element PenLightZone _url="url" _from="0" _to="s.sternEnd - gap" _top="s.deckLine + gapY" _bottom="1" _ct="_palette[_bow]")
+		(element PenLightZone _url="url" _from="s.sternEnd + gap" _to="s.bowStart - gap" _top="s.deckLine + gapY" _bottom="1" _ct="_palette[_mid]")
+		(element PenLightZone _url="url" _from="s.bowStart + gap" _to="1" _top="s.deckLine + gapY" _bottom="1" _ct="_palette[_bow]")
 	)
 	(block
 		(bind visible "_nameIDS != ''")
@@ -391,7 +391,7 @@
 
 # Eine Lage der Silhouette: zentriert wie im Spiel-Lebensbalken, Maske x _from.._to, y _top.._bottom
 # (Anteile der Bildbreite bzw. -hoehe).
-(def element OvermatcherZone(_url:str, _from:number, _to:number, _top:number, _bottom:number, _ct:dict) layout=true
+(def element PenLightZone(_url:str, _from:number, _to:number, _top:number, _bottom:number, _ct:dict) layout=true
 	(style
 		(position = "absolute")
 		(left = 50%)
@@ -415,20 +415,20 @@
 
 # Symbol mit optionalem Zeichen rechts oben (Stern / Warndreieck fuer die Extremfaelle).
 # Das Zeichen blinkt beim Erscheinen und bei jedem neuen Ziel kurz auf (_pulseKey).
-(def element OvermatcherIcon(_url:str, _mark:str = '', _pulseKey:str = '', _tag:str = '') layout=true
+(def element PenLightIcon(_url:str, _mark:str = '', _pulseKey:str = '', _tag:str = '') layout=true
 	(style
 		(bind backgroundImage "_url")
-		(bind width "OVERMATCHER_SETTINGS.iconSize") (bind height "OVERMATCHER_SETTINGS.iconSize")
+		(bind width "PENLIGHT_SETTINGS.iconSize") (bind height "PENLIGHT_SETTINGS.iconSize")
 		(backgroundSize = "fill")
-		(bind marginRight "OVERMATCHER_SETTINGS.iconGap")
+		(bind marginRight "PENLIGHT_SETTINGS.iconGap")
 	)
 	# Plakette der geladenen Munition (AP / HE / SAP) links oben, wie die Munitions-Slots im HUD
 	(block
 		(bind visible "_tag != ''")
 		(style
 			(position = "absolute")
-			(bind left "OVERMATCHER_SETTINGS.tagOffsetX")
-			(bind top "OVERMATCHER_SETTINGS.tagOffsetY")
+			(bind left "PENLIGHT_SETTINGS.tagOffsetX")
+			(bind top "PENLIGHT_SETTINGS.tagOffsetY")
 			(backgroundSize = "autosize")
 			(bind backgroundImage "_tag")
 		)
@@ -437,22 +437,22 @@
 		(bind visible "_mark != ''")
 		(style
 			(position = "absolute")
-			(bind left "OVERMATCHER_SETTINGS.iconSize - OVERMATCHER_SETTINGS.markSize + OVERMATCHER_SETTINGS.markOffsetX")
-			(bind top "OVERMATCHER_SETTINGS.markOffsetY")
-			(bind width "OVERMATCHER_SETTINGS.markSize") (bind height "OVERMATCHER_SETTINGS.markSize")
+			(bind left "PENLIGHT_SETTINGS.iconSize - PENLIGHT_SETTINGS.markSize + PENLIGHT_SETTINGS.markOffsetX")
+			(bind top "PENLIGHT_SETTINGS.markOffsetY")
+			(bind width "PENLIGHT_SETTINGS.markSize") (bind height "PENLIGHT_SETTINGS.markSize")
 			(bind backgroundImage "_mark")
 			(backgroundSize = "fill")
 		)
 		(controller $Animation
-			(bindcall play duration="OVERMATCHER_SETTINGS.markPulse" from="{alpha: 0.2}" to="{alpha: 1}"
-				repeatCount="OVERMATCHER_SETTINGS.markPulseCount" action="killAll" easing="Easing.quad_out"
+			(bindcall play duration="PENLIGHT_SETTINGS.markPulse" from="{alpha: 0.2}" to="{alpha: 1}"
+				repeatCount="PENLIGHT_SETTINGS.markPulseCount" action="killAll" easing="Easing.quad_out"
 				init=false (bind trigger "_pulseKey + _mark"))
 		)
 	)
 )
 
 # Kopie von XTargetTracker unter eigenem Namen (ModForge meldet doppelte Namen als Konflikt)
-(def element OvermatcherTargetTracker() layout=false
+(def element PenLightTargetTracker() layout=false
 	(scope
 		(var _currentTargetId:number = 0)
 		(var avatars:gfx = "$datahub.getCollection(CC.avatar)")

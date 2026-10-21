@@ -1,9 +1,11 @@
-# Overmatcher
+# PenLight
 
 [English](README.md) · **Deutsch**
 
+*PenLight = **Pen**etration (Durchschlag) + **Light** (Ampel). Früher Overmatcher.*
+
 **Overmatch- und Durchschlags-Anzeige für World of Warships.** Schaltest du einen Kreuzer oder ein
-Schlachtschiff auf, zeigt Overmatcher direkt am Fadenkreuz zwei Ampeln:
+Schlachtschiff auf, zeigt PenLight direkt am Fadenkreuz zwei Ampeln:
 
 - **Granate:** Kommt meine **geladene** Munition durch das Ziel? AP wird nach Overmatch bewertet,
   HE und SAP nach ihrem Durchschlag gegen die Beplankung des Ziels.
@@ -145,15 +147,15 @@ von zwei Hüllen ein, und `Main.py` schaltet die eigenen Bedienelemente ab, soba
    - Steam unter Linux: `~/.local/share/Steam/steamapps/common/World of Warships/`
    - Windows: meist `C:\Games\World_of_Warships\`
 3. Den Inhalt von [`mod/res_mods/`](mod/res_mods) nach `bin/<Nummer>/res_mods/` kopieren
-   und vorhandene Overmatcher-Dateien überschreiben.
-4. Spiel starten. Liegt danach `res_mods/PnFMods/Overmatcher/overmatcher_log.txt` vor,
+   und vorhandene PenLight-Dateien überschreiben.
+4. Spiel starten. Liegt danach `res_mods/PnFMods/PenLight/penlight_log.txt` vor,
    wurde die Mod geladen.
 
 Ausführlichere Hinweise und Diagnose: [`mod/README.md`](mod/README.md).
 
-**Entfernen:** die Overmatcher-Dateien aus `res_mods` löschen (`PnFMods/Overmatcher/`,
-`gui/unbound2/PnFMods/Overmatcher*.unbound`, `ForgeBlueprints/OvermatcherContainer.xml`,
-`ModSchemas/diedreibeiden-overmatcher.schema.json`, `texts/*/overmatcher.mo`).
+**Entfernen:** die PenLight-Dateien aus `res_mods` löschen (`PnFMods/PenLight/`,
+`gui/unbound2/PnFMods/PenLight*.unbound`, `ForgeBlueprints/PenLightContainer.xml`,
+`ModSchemas/diedreibeiden-penlight.schema.json`, `texts/*/penlight.mo`).
 
 ---
 
@@ -164,7 +166,7 @@ Ausführlichere Hinweise und Diagnose: [`mod/README.md`](mod/README.md).
 Im Gefecht **Strg** halten, damit der Mauszeiger erscheint:
 
 - Symbole greifen und **ziehen**, um die Anzeige zu verschieben.
-- **Zahnrad** links neben der Anzeige öffnet die Overmatcher-Seite in TTaro Mod Config:
+- **Zahnrad** links neben der Anzeige öffnet die PenLight-Seite in TTaro Mod Config:
   Darstellungsmodus (Detail mit Alt / immer), Farben (Standard / Farbenblind),
   Größenskalierung, Verschieben sperren, Position zurücksetzen.
 
@@ -195,7 +197,7 @@ eine Spielversion. Passt `ships.json` nicht zur laufenden Version, schaltet sich
 # 1. GameParams.data mit dem WoWs Unpack Tool aus dem Client extrahieren
 # 2. Tabelle erzeugen (Version so, wie sie im python.log steht)
 python3 -I tools/gameparams.py GameParams.data ships_full.json \
-    mod/res_mods/PnFMods/Overmatcher/ships.json 15,9,0,13357625
+    mod/res_mods/PnFMods/PenLight/ships.json 15,9,0,13357625
 # 3. Mod bauen und testen
 python3 -I tools/build_mod.py
 python3 -m unittest discover -s tests
@@ -210,15 +212,15 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 | Aufgabe | Befehl |
 |---|---|
 | Tests | `python3 -m unittest discover -s tests` |
-| `Main.py` erzeugen (aus `src/overmatcher/`) | `python3 -I tools/build_mod.py` |
+| `Main.py` erzeugen (aus `src/penlight/`) | `python3 -I tools/build_mod.py` |
 | Granate/Schild-Icons zeichnen | `python3 -I tools/make_ampel_icons.py` |
 | Detail-Bilder, Beschriftungen, Rahmen | `python3 -I tools/make_detail_icons.py` |
 | Abbildungen der README | `python3 -I tools/make_readme_images.py` |
 | Texte der TTaro-Optionsseite | `python3 -I tools/make_texts.py` |
 | Flash-Teil `Main.swf` (`main-standalone`) | `tools/build_flash.py`, Voraussetzungen siehe Dateikopf |
 
-- Die Spiel-Logik (`src/overmatcher/logic.py`) läuft unter Python 2.7 (Client) und 3.x (Tests).
-- `mod/res_mods/PnFMods/Overmatcher/Main.py` ist generiert – Änderungen in `src/overmatcher/`.
+- Die Spiel-Logik (`src/penlight/logic.py`) läuft unter Python 2.7 (Client) und 3.x (Tests).
+- `mod/res_mods/PnFMods/PenLight/Main.py` ist generiert – Änderungen in `src/penlight/`.
 - Alle Grafiken werden per Skript gezeichnet; es werden keine Spielgrafiken mitgeliefert.
 - Konzept, Ampel-Logik und gesammelte Befunde zum Client: [`docs/KONZEPT.md`](docs/KONZEPT.md).
 
@@ -228,11 +230,11 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 
 ```
 mod/res_mods/                     Dateien so, wie sie in bin/<Build>/res_mods/ gehören
-  PnFMods/Overmatcher/            Main.py (generiert), ships.json, Icons, (Main.swf)
-  gui/unbound2/PnFMods/           Overmatcher.unbound – die Anzeige (Unbound 2)
+  PnFMods/PenLight/               Main.py (generiert), ships.json, Icons, (Main.swf)
+  gui/unbound2/PnFMods/           PenLight.unbound – die Anzeige (Unbound 2)
   ForgeBlueprints/                ModForge-Manifest
   ModSchemas/, texts/             Optionsseite für TTaro Mod Config
-src/overmatcher/                  logic.py (Ampel), mod_main.py (Anbindung an den Client)
+src/penlight/                     logic.py (Ampel), mod_main.py (Anbindung an den Client)
 src/as3/                          Flash-Teil zum Verschieben ohne TTaro (main-standalone)
 tools/                            GameParams-Auswertung, Build, Icon-Generatoren
 tests/                            Unit-Tests inkl. nachgebautem Client
@@ -252,5 +254,5 @@ docs/                             Konzept, Abbildungen
   wurde nichts.
 - Ziel-Erkennung nach dem Muster von XTargetTracker (Battle Expert).
 
-Overmatcher nutzt ausschließlich die offizielle ModsAPI bzw. die veröffentlichten Schnittstellen
+PenLight nutzt ausschließlich die offizielle ModsAPI bzw. die veröffentlichten Schnittstellen
 der genannten Mods. Eine Lizenz für dieses Repository ist noch nicht festgelegt.

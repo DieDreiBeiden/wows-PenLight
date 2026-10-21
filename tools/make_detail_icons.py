@@ -10,7 +10,7 @@ Bug/Heck, Mitte (unten mittig) und Deck (oberer Rumpfstreifen) in Gruen/Rot
 Mini-Granate (Target) bzw. der Mini-Schild (Me) mit Beschriftung "TARGET"/"ME".
 Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
 Das fruehere Grund-Icon assets/detail_ship_source.png wird nicht mehr verwendet.
-Ausgabe: mod/res_mods/PnFMods/Overmatcher/detail_<me|target>_<bugheck>_<mitte>_<deck>.png (g/r)
+Ausgabe: mod/res_mods/PnFMods/PenLight/detail_<me|target>_<bugheck>_<mitte>_<deck>.png (g/r)
 frame_<band|line|head>.png (Rahmen der Silhouetten-Ansicht)
 und label_<me|target>_[cb_]<green|yellow|red|grey>.png, label_target_<he|sap>_[cb_]<zustand>.png (Mini-Icon in Ampelfarbe + Beschriftung,
 fuer die Silhouetten-Ansicht).
@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import make_ampel_icons as icons  # noqa: E402
 
 TARGET_DIR = icons.TARGET_DIR
-SIZE = (125, 75)  # muss zu detailWidth/detailHeight in Overmatcher.unbound passen
+SIZE = (125, 75)  # muss zu detailWidth/detailHeight in PenLight.unbound passen
 SUPERSAMPLE = 8
 W, H = SIZE[0] * SUPERSAMPLE, SIZE[1] * SUPERSAMPLE
 SHIP_DY = 6  # Schiff nach unten versetzt, oben ist Platz fuer die Beschriftung
@@ -128,7 +128,7 @@ def render(key, combo):
 
 
 # Beschriftung der Silhouetten-Ansicht: Mini-Icon + Text, waagerecht mittig ueber der
-# Silhouette (Breite wie silhouetteWidth in Overmatcher.unbound), beide senkrecht mittig.
+# Silhouette (Breite wie silhouetteWidth in PenLight.unbound), beide senkrecht mittig.
 # Der Text wird direkt in Zielgroesse gezeichnet (FreeType-Hinting) statt verkleinert -> scharf.
 LABEL_IMAGE = (186, 24)
 LABEL_TEXT_SIZE = 13      # 1,5 x 8,5 px
@@ -159,7 +159,7 @@ def render_label(key, state, palette, ammo='ap'):
 
 # Rahmen der Silhouetten-Ansicht (Variante B3): dunkles Band, das zu den Seiten auslaeuft,
 # Haarlinien oben/unten bzw. unter der Kopfzeile, leicht aufgehellte Kopfzeile. Breite wie die
-# Silhouette; in Overmatcher.unbound senkrecht gestreckt (nur waagerechter Verlauf).
+# Silhouette; in PenLight.unbound senkrecht gestreckt (nur waagerechter Verlauf).
 FRAME_WIDTH = LABEL_IMAGE[0]
 FRAME_PANEL = (14, 22, 28)
 FRAME_LINE = (200, 204, 208)

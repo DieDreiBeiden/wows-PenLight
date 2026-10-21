@@ -45,7 +45,7 @@ class ModTest(unittest.TestCase):
         if ttaro:
             os.mkdir(os.path.join(root, 'TTaroModUtils'))
             open(os.path.join(root, 'TTaroModUtils', 'Main.py'), 'w').close()
-        mod_dir = os.path.join(root, 'Overmatcher')
+        mod_dir = os.path.join(root, 'PenLight')
         wrong_dir = os.path.join(root, 'OvermatcherProbe')  # getModDir-Befund im Client
         os.mkdir(mod_dir)
         os.mkdir(wrong_dir)
@@ -96,8 +96,8 @@ class ModTest(unittest.TestCase):
         self.env = env
         exec(compile(open(build_mod.build()).read(), 'Main.py', 'exec'), env)
         handlers['shown']()
-        self.log = open(os.path.join(mod_dir, 'overmatcher_log.txt')).read()
-        return open(os.path.join(mod_dir, 'overmatcher_last.txt')).read().splitlines()
+        self.log = open(os.path.join(mod_dir, 'penlight_log.txt')).read()
+        return open(os.path.join(mod_dir, 'penlight_last.txt')).read().splitlines()
 
     def test_cruiser_vs_mixed_enemies(self):
         lines = self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PBSC110_Minotaur', 'PASD013_Gearing'])
@@ -112,7 +112,7 @@ class ModTest(unittest.TestCase):
 
     def test_ui_payload_for_unbound(self):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PASD013_Gearing'])
-        self.assertEqual(self.ui_data[0], ('modOvermatcher', {'byId': {}, 'byName': {},
+        self.assertEqual(self.ui_data[0], ('modPenLight', {'byId': {}, 'byName': {},
                                                               'settings': DEFAULTS, 'ammo': 'ap'}))
         self.assertEqual(self.ui_data[-1], ('update', {
             'settings': DEFAULTS, 'ammo': 'ap',
@@ -127,7 +127,7 @@ class ModTest(unittest.TestCase):
 
     def saved(self):
         # ModPrefs existiert im Test nicht -> Rueckfall in den Mod-Ordner
-        return json.load(open(os.path.join(self.mod_dir, 'diedreibeiden-overmatcher.json')))
+        return json.load(open(os.path.join(self.mod_dir, 'diedreibeiden-penlight.json')))
 
     def test_position_keys_move_save_and_reset(self):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
@@ -169,7 +169,7 @@ class ModTest(unittest.TestCase):
         self.assertEqual(self.flash_calls[-1], ('omSetHandle', [30, 8, 62.0, 29.0, True]))
         self.flash_callbacks['omDragMove'](120.4, -50)
         self.assertEqual(self.ui_data[-1][1]['settings']['x'], 120)
-        self.assertFalse(os.path.exists(os.path.join(self.mod_dir, 'diedreibeiden-overmatcher.json')))
+        self.assertFalse(os.path.exists(os.path.join(self.mod_dir, 'diedreibeiden-penlight.json')))
         self.flash_callbacks['omDragEnd'](130, -40)
         self.assertEqual((self.saved()['x'], self.saved()['y']), (130, -40))
 

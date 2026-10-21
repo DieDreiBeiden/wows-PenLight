@@ -1,4 +1,8 @@
-# Overmatcher – Konzept
+# PenLight – Konzept
+
+Umbenannt von Overmatcher (seit HE/SAP mehr als nur Overmatch). Alle Kennungen
+(Ordner, Slug `diedreibeiden.penlight`, ModPrefs-Datei, Unbound-Elemente) heißen jetzt PenLight;
+alte Einstellungen werden nicht übernommen.
 
 Stand: 2026-10-19 · Client: WoWS EU · Verteilung: privat
 
@@ -82,7 +86,7 @@ Layout (rechts unter dem Fadenkreuz, linke obere Ecke Standard x +30, y +8):
   Bug/Heck, Mitte, Deck grün/rot = Overmatch/kein Overmatch, für Target und Me gleich.
   Die Mini-Icons der Beschriftung tragen die Ampelfarbe von Granate bzw. Schild. Die Schiffszeile liegt absolut an
   der Position der Symbole, damit nichts springt.
-Prototyp Silhouetten (`useSilhouettes` in `OVERMATCHER_SETTINGS`, Standard an): statt der
+Prototyp Silhouetten (`useSilhouettes` in `PENLIGHT_SETTINGS`, Standard an): statt der
 gezeichneten Schiffe die Spiel-Silhouetten `img://gui/ship_bars/<shortName>_h.png` (wie der
 Lebensbalken unten links, `own_ship_health.unbound`; `shortName` aus `shipInfo.ship.shortName`,
 Ziel über `vehicleInfo.shipInfoEntityId`). Lagen mit Maske + `colorTransform`: Rumpf Heck
@@ -94,7 +98,7 @@ Zielgröße gezeichnet für Schärfe). Granate auf Schildhöhe skaliert (`SHELL_
 Rahmen (Variante B3, Nutzerwahl): je Schiff ein dunkles Band über die ganze Höhe, das zu den
 Seiten ausläuft, Haarlinien oben/unten, leicht aufgehellte Kopfzeile mit Trennlinie
 (`frame_band/line/head.png` aus `tools/make_detail_icons.py`); Silhouette mit Kontur und
-weichem Schatten per `dropShadow`-Filter (`$OvermatcherSilhouetteFX`).
+weichem Schatten per `dropShadow`-Filter (`$PenLightSilhouetteFX`).
 Unter jeder Silhouette der Schiffsname in der Spielschrift (`$TextDefaultBold13NM`,
 `toUpper(tr(ship.nameIDS))` wie im Spiel-Lebensbalken), mittig. Ohne Silhouetten-Namen gelten die `detail_*.png`.
 Die Silhouetten werden nicht mitgeliefert (Spieldateien), passen also nach jedem Patch.
@@ -102,14 +106,14 @@ PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −1
 
 Branch `main-standalone` erkennt TTaroModUtils selbst (Nutzerwunsch): Das ModForge-Manifest hat
 zwei `<ubMountInBattle>` mit `<requires mods="TTaroModUtils"/>` bzw. `"not TTaroModUtils"`.
-Mit TTaro wird `OvermatcherTTaroRoot` (OvermatcherTTaro.unbound) eingehängt: TTaro-Optionsseite,
-Zahnrad und Ziehen wie auf `main`, Einstellungen als `_ext` an `OvermatcherRoot`. Ohne TTaro
-hängt `OvermatcherRoot` direkt (Einstellungen aus Main.py). Main.py prüft dieselbe Bedingung
+Mit TTaro wird `PenLightTTaroRoot` (PenLightTTaro.unbound) eingehängt: TTaro-Optionsseite,
+Zahnrad und Ziehen wie auf `main`, Einstellungen als `_ext` an `PenLightRoot`. Ohne TTaro
+hängt `PenLightRoot` direkt (Einstellungen aus Main.py). Main.py prüft dieselbe Bedingung
 (`PnFMods/TTaroModUtils/Main.py` vorhanden) und schaltet dann Tasten und Main.swf-Greiffläche ab.
 TTaros interne Technik (Sandbox-Umgehung über `xml.sax.saxutils.os`, verschlüsselte Namen) wird
 bewusst nicht übernommen; genutzt werden nur dessen veröffentlichte Makros/Elemente.
 Offene Frage: Der Client liest alle Dateien in `gui/unbound2/PnFMods/`; ohne TTaro sind die
-TT_-Makros in OvermatcherTTaro.unbound unbekannt – ob das nur einen Logeintrag erzeugt, ist ungetestet.
+TT_-Makros in PenLightTTaro.unbound unbekannt – ob das nur einen Logeintrag erzeugt, ist ungetestet.
 
 Ohne TTaro (ModForge bleibt für das Einhängen
 der Anzeige nötig – es ist laut README zum Mitliefern in Mod-Paketen gedacht):
@@ -131,11 +135,11 @@ FlashAPI): unsichtbare Greiffläche über Granate | Schild auf `gameAPI.stage`, 
 (Anzeige folgt live) und `omDragEnd [x, y]` (speichern). x/y = Abstand zur Bildschirmmitte.
 Kompiliert mit Apache Flex 4.16.1 gegen `wows_library.swc` (extern, der Client stellt `ModBase`),
 SWF-Version 13 wie die Spieldateien.
-Gespeichert in `(wows)/ModPrefs/diedreibeiden-overmatcher.json` (Rückfall: Mod-Ordner),
+Gespeichert in `(wows)/ModPrefs/diedreibeiden-penlight.json` (Rückfall: Mod-Ordner),
 übergeben an die Anzeige als `omData.settings` ({x, y, detailMode, colorMode, scale}).
 Farbenblind-Schema: an Okabe-Ito angelehnt, Blau #2B8CE8 = Overmatch, Gelb #F0E442 = nur Bug/Heck,
-Orange #D55E00 = kein Overmatch (Icons mit Präfix `cb_`, Silhouetten per `OVERMATCHER_CT_CB`).
-Silhouetten an/aus nur als `useSilhouettes` in `OVERMATCHER_SETTINGS`.
+Orange #D55E00 = kein Overmatch (Icons mit Präfix `cb_`, Silhouetten per `PENLIGHT_CT_CB`).
+Silhouetten an/aus nur als `useSilhouettes` in `PENLIGHT_SETTINGS`.
 
 - 16 Bilder `detail_<me|target>_<bugheck>_<mitte>_<deck>.png` (g/r), erzeugt mit
   `tools/make_detail_icons.py` (gezeichnet; das frühere Grund-Icon
@@ -162,7 +166,7 @@ Nur gegnerisches Team.
 
 - Der Client gibt GameParams-Werte an Mods nicht heraus (Probe v2.2: Werte `None`,
   `__dict__` → `RuntimeError`). Daten kommen daher offline aus `content/GameParams.data`.
-- Generator: `tools/gameparams.py` → `mod/res_mods/PnFMods/Overmatcher/ships.json`
+- Generator: `tools/gameparams.py` → `mod/res_mods/PnFMods/PenLight/ships.json`
   (`{gameVersion, ships: {name: [klasse, bug, deck, kaliber]}}`).
 - Panzerung: Hull-Modul `armor` = `{(lage << 16) | material_id: mm}`, Lage 1 = außen;
   Material-Namen aus wowsunpack (MIT), `tools/data/collision_materials.json`.
@@ -182,7 +186,7 @@ Nur gegnerisches Team.
 ## Technik
 
 - ModsAPI **v1.0** (Python 2.7, kein Entwickler-Schlüssel nötig).
-- Ordner: `bin/<Build>/res_mods/PnFMods/Overmatcher/`, plus leere
+- Ordner: `bin/<Build>/res_mods/PnFMods/PenLight/`, plus leere
   `res_mods/PnFModsLoader.py`.
 - Gegnerliste über `battle.getPlayersInfo()` (nicht `getAllShips()` – liefert nur sichtbare Schiffe).
 

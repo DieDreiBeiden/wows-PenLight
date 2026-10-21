@@ -10,7 +10,7 @@ package
 	 * Flash-Teil der Standalone-Fassung: Greifflaeche zum Verschieben der Anzeige per Maus.
 	 *
 	 * Offizielle ModsAPI (FlashAPI): gameAPI.stage fuer die Flaeche, gameAPI.data als Kanal zu
-	 * Main.py. Die Anzeige selbst bleibt in Overmatcher.unbound; diese Flaeche liegt unsichtbar
+	 * Main.py. Die Anzeige selbst bleibt in PenLight.unbound; diese Flaeche liegt unsichtbar
 	 * darueber, zeigt beim Ueberfahren einen feinen Rahmen und meldet beim Ziehen den Abstand der
 	 * linken oberen Ecke zur Bildschirmmitte:
 	 *   Python -> Flash  omSetHandle [x, y, breite, hoehe, aktiv]  (x/y relativ zur Mitte)
