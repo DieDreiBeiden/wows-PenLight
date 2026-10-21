@@ -6,6 +6,10 @@ try:
     import events, ui, utils, battle
 except Exception:
     pass
+try:
+    import Keys
+except Exception:
+    Keys = globals().get('Keys')
 
 MOD_NAME = 'Overmatcher'
 # Datenkomponente fuer Overmatcher.unbound (CC.mods_DataComponent mit dieser ID)
@@ -16,7 +20,23 @@ LOG_FILE = 'overmatcher_log.txt'
 
 LOG_KEEP = 300
 
-_state = {'data': None, 'disabled': False, 'results': None, 'log': [], 'ui_id': None}
+# Standalone-Einstellungen (ohne TTaroModUtils). Bedienung im Gefecht mit Strg+Alt+Taste:
+#   Pfeiltasten   Anzeige verschieben (5 px, mit Umschalt 1 px)
+#   Pos1          Position zuruecksetzen
+#   D             Detailansicht: mit Alt <-> immer
+#   F             Farben: Standard <-> Farbenblind
+#   + / -         Groesse in 0,1-Schritten (0,5 - 2,0)
+# Gespeichert im Spielverzeichnis unter ModPrefs/ (ueberlebt Patches), sonst im Mod-Ordner.
+DEFAULT_SETTINGS = {'x': 30, 'y': 8, 'detailMode': 0, 'colorMode': 0, 'scale': 1.0}
+POSITION_STEP = 5
+SCALE_STEP = 0.1
+SCALE_RANGE = (0.5, 2.0)
+SETTINGS_NAME = 'diedreibeiden-overmatcher.json'
+# Vom Mod-Ordner res_mods/PnFMods/Overmatcher aus: PnFMods, res_mods, <Build>, bin, Spielverzeichnis.
+SETTINGS_DIRS = ('/../../../../../ModPrefs', '')
+
+_state = {'data': None, 'disabled': False, 'results': None, 'log': [], 'ui_id': None,
+          'settings': None}
 
 # Client-Eigenheiten (python.log 15.9.0.13357625):
 # - open() verlangt immer (pfad, modus); Modus 'a' nur fuer bereits vorhandene Dateien.
@@ -157,6 +177,114 @@ def _report(results):
         _log('could not write %s: %r' % (RESULT_FILE, e))
 
 
+def _settings_paths():
+    return [_mod_dir() + d + '/' + SETTINGS_NAME for d in SETTINGS_DIRS]
+
+
+def clean_settings(raw):
+    """Gelesene Werte pruefen; Unbekanntes oder Kaputtes faellt auf den Standard zurueck."""
+    out = dict(DEFAULT_SETTINGS)
+    for key in ('x', 'y', 'detailMode', 'colorMode'):
+        try:
+            out[key] = int(raw[key])
+        except Exception:
+            pass
+    out['detailMode'] = 1 if out['detailMode'] == 1 else 0
+    out['colorMode'] = 1 if out['colorMode'] == 1 else 0
+    try:
+        out['scale'] = min(max(round(float(raw['scale']), 2), SCALE_RANGE[0]), SCALE_RANGE[1])
+    except Exception:
+        pass
+    return out
+
+
+def load_settings():
+    for path in _settings_paths():
+        try:
+            with open(path, 'r') as f:
+                return clean_settings(_decode_json(f.read()))
+        except Exception:
+            continue
+    return dict(DEFAULT_SETTINGS)
+
+
+def save_settings(settings):
+    text = '{%s}' % ', '.join('"%s": %s' % (k, repr(settings[k])) for k in sorted(settings))
+    for path in _settings_paths():
+        try:
+            with open(path, 'w') as f:
+                f.write(text)
+            return path
+        except Exception:
+            continue
+    _log('could not save settings')
+    return None
+
+
+def _settings():
+    if _state['settings'] is None:
+        _state['settings'] = load_settings()
+    return _state['settings']
+
+
+def _key(*names):
+    for name in names:
+        value = getattr(Keys, name, None) if Keys is not None else None
+        if value is not None:
+            return value
+    return None
+
+
+def _key_actions():
+    """Tastencode -> Aktion; Tasten, die der Client nicht kennt, fehlen."""
+    table = [
+        (('KEY_LEFTARROW',), ('move', -1, 0)), (('KEY_RIGHTARROW',), ('move', 1, 0)),
+        (('KEY_UPARROW',), ('move', 0, -1)), (('KEY_DOWNARROW',), ('move', 0, 1)),
+        (('KEY_HOME',), ('reset',)),
+        (('KEY_D',), ('toggle', 'detailMode')), (('KEY_F',), ('toggle', 'colorMode')),
+        (('KEY_EQUALS',), ('scale', 1)), (('KEY_ADD', 'KEY_NUMPADPLUS'), ('scale', 1)),
+        (('KEY_MINUS',), ('scale', -1)), (('KEY_NUMPADMINUS', 'KEY_SUBTRACT'), ('scale', -1)),
+    ]
+    out = {}
+    for names, action in table:
+        code = _key(*names)
+        if code is not None:
+            out[code] = action
+    return out
+
+
+def apply_action(settings, action, fine=False):
+    kind = action[0]
+    if kind == 'move':
+        step = 1 if fine else POSITION_STEP
+        settings['x'] += action[1] * step
+        settings['y'] += action[2] * step
+    elif kind == 'reset':
+        settings['x'], settings['y'] = DEFAULT_SETTINGS['x'], DEFAULT_SETTINGS['y']
+    elif kind == 'toggle':
+        settings[action[1]] = 1 - settings[action[1]]
+    elif kind == 'scale':
+        value = round(settings['scale'] + action[1] * SCALE_STEP, 2)
+        settings['scale'] = min(max(value, SCALE_RANGE[0]), SCALE_RANGE[1])
+    return settings
+
+
+def on_key(event):
+    """Strg+Alt+Taste aendert eine Einstellung (Tabelle oben)."""
+    try:
+        if not (event.isKeyDown() and event.isCtrlDown() and event.isAltDown()):
+            return
+        action = _key_actions().get(event.key)
+        if action is None:
+            return
+        settings = apply_action(_settings(), action, fine=event.isShiftDown())
+        path = save_settings(settings)
+        _log('settings %r saved to %s' % (settings, path))
+        _publish(_state['results'] or {})
+    except Exception as e:
+        _log('key handling failed: %r' % (e,))
+
+
 def ui_payload(results):
     """Daten fuer Overmatcher.unbound: Schluessel = Avatar-ID (als Text) bzw. Spielername.
 
@@ -169,7 +297,7 @@ def ui_payload(results):
         by_id[str(pid)] = pair
         if r.get('player'):
             by_name[r['player']] = pair
-    return {'byId': by_id, 'byName': by_name}
+    return {'byId': by_id, 'byName': by_name, 'settings': dict(_settings())}
 
 
 def _publish(results):
@@ -210,8 +338,9 @@ def _on_battle_quit(*args, **kwargs):
     _remove_ui()
 
 
-_log('Main.py loaded, game version %s, getModDir %s -> %s'
-     % (utils.getGameVersion(), utils.getModDir(), _mod_dir()))
+_log('Main.py loaded, game version %s, getModDir %s -> %s, keys %d/11'
+     % (utils.getGameVersion(), utils.getModDir(), _mod_dir(), len(_key_actions())))
 events.onBattleShown(_refresh)
 events.onPlayersListUpdated(_refresh)
 events.onBattleQuit(_on_battle_quit)
+events.onKeyEvent(on_key)

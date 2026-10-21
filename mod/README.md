@@ -11,19 +11,22 @@ Spiel beenden. Ordner mit der **höchsten Nummer** unter `World_of_Warships\bin\
 | `PnFMods\Overmatcher\shell_*.png`, `shield_*.png` | Icons Granate/Schild (29×29) |
 | `gui\unbound2\PnFMods\Overmatcher.unbound` | Anzeige am Fadenkreuz (ab 0.2, benötigt ModForge) |
 | `ForgeBlueprints\OvermatcherContainer.xml` | ModForge-Manifest für die Anzeige |
-| `ModSchemas\diedreibeiden-overmatcher.schema.json` | Optionsseite in TTaro Mod Config |
-| `texts\<Sprache>\overmatcher.mo` | Texte der Optionsseite (Deutsch, sonst Englisch) |
 
-Voraussetzung: **ModForge** und **TTaroModUtils** (TTaro Mod Config) müssen installiert sein.
+Voraussetzung: **ModForge**. TTaroModUtils wird in dieser Standalone-Fassung nicht gebraucht.
+Wer vorher die TTaro-Fassung installiert hatte, löscht `ModSchemas\diedreibeiden-overmatcher.schema.json`
+und `texts\<Sprache>\overmatcher.mo`.
 
-Position: im Gefecht mit Mauszeiger (z. B. Strg halten) die Symbole greifen und ziehen.
-Zurücksetzen/Sperren in TTaro Mod Config → Overmatcher. Gespeichert wird in `(wows)/ModPrefs/`.
+Einstellungen im Gefecht mit **Strg+Alt** und:
 
-Optionen: Zahnrad links neben der Anzeige (sichtbar bei Mauszeiger, z. B. Strg halten) oder
-TTaro Mod Config → Overmatcher:
-- Darstellungsmodus: Detailansicht mit Alt-Taste oder immer
-- Farben: Standard (Grün/Orange/Rot) oder Farbenblind (Blau/Gelb/Orange)
-- Größenskalierung 0,5–2,0
+| Taste | Wirkung |
+|---|---|
+| Pfeiltasten | Anzeige verschieben, 5 px (mit Umschalt 1 px) |
+| Pos1 | Position zurücksetzen |
+| D | Detailansicht: mit Alt-Taste oder immer |
+| F | Farben: Standard (Grün/Orange/Rot) oder Farbenblind (Blau/Gelb/Orange) |
+| + / − | Größe 0,5–2,0 |
+
+Gespeichert wird in `(wows)/ModPrefs/diedreibeiden-overmatcher.json`.
 
 Ablageorte wie bei PenetrationCalculator (vom Nutzer bestätigt).
 
@@ -45,6 +48,5 @@ gebraucht und kann ebenfalls gelöscht werden.
    (`<Version>` wie im python.log, z. B. `15,9,0,13357625`)
 3. `python3 -I tools/build_mod.py`, Tests: `python3 -m unittest discover -s tests`
 
-Texte der Optionsseite: `python3 -I tools/make_texts.py` (Quelle `tools/data/texts.json`).
 Icons neu erzeugen (nur nach Änderung der Grafiken): `python3 -I tools/make_ampel_icons.py`
 (gezeichnet: AP-Granate / Wappenschild, Ampelfarbe auf Spitze bzw. Sparren) und `python3 -I tools/make_detail_icons.py` (gezeichnet: Schiff mit Sektionen, Mini-Icon + Beschriftung).

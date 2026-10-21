@@ -30,6 +30,7 @@ SHIPS = {
     'PASD013_Gearing': ['Destroyer', 19.0, 19.0, 127.0],
 }
 VERSION = '15,9,0,13357625'
+DEFAULTS = {'x': 30, 'y': 8, 'detailMode': 0, 'colorMode': 0, 'scale': 1.0}
 
 
 class ModTest(unittest.TestCase):
@@ -49,6 +50,7 @@ class ModTest(unittest.TestCase):
             ship_names[i] = ship
         handlers = {}
         self.ui_data = []
+        self.mod_dir = mod_dir
 
         def client_open(path, mode):
             # wie im Client: Modus Pflicht, 'a' nur fuer vorhandene Dateien
@@ -69,8 +71,13 @@ class ModTest(unittest.TestCase):
                          jsonDncode=json.loads, logInfo=lambda *a, **k: None),
             'events': Obj(onBattleShown=lambda f: handlers.setdefault('shown', f),
                           onPlayersListUpdated=lambda f: handlers.setdefault('players', f),
-                          onBattleQuit=lambda f: handlers.setdefault('quit', f)),
+                          onBattleQuit=lambda f: handlers.setdefault('quit', f),
+                          onKeyEvent=lambda f: handlers.setdefault('key', f)),
+            'Keys': Obj(KEY_LEFTARROW=203, KEY_RIGHTARROW=205, KEY_UPARROW=200, KEY_DOWNARROW=208,
+                        KEY_HOME=199, KEY_D=32, KEY_F=33, KEY_EQUALS=13, KEY_MINUS=12),
         }
+        self.handlers = handlers
+        self.env = env
         exec(compile(open(build_mod.build()).read(), 'Main.py', 'exec'), env)
         handlers['shown']()
         self.log = open(os.path.join(mod_dir, 'overmatcher_log.txt')).read()
@@ -89,12 +96,56 @@ class ModTest(unittest.TestCase):
 
     def test_ui_payload_for_unbound(self):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PASD013_Gearing'])
-        self.assertEqual(self.ui_data[0], ('modOvermatcher', {'byId': {}, 'byName': {}}))
+        self.assertEqual(self.ui_data[0], ('modOvermatcher', {'byId': {}, 'byName': {},
+                                                              'settings': DEFAULTS}))
         self.assertEqual(self.ui_data[-1], ('update', {
+            'settings': DEFAULTS,
             # Detail: ich->Ziel [Bug, Mitte, Deck], Ziel->ich [Bug, Mitte, Deck]
             'byId': {'10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r']},
             'byName': {'bot10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r']},
         }))
+
+    def key(self, code, ctrl=True, alt=True, shift=False):
+        self.handlers['key'](Obj(key=code, isKeyDown=lambda: True, isCtrlDown=lambda: ctrl,
+                                 isAltDown=lambda: alt, isShiftDown=lambda: shift))
+
+    def saved(self):
+        # ModPrefs existiert im Test nicht -> Rueckfall in den Mod-Ordner
+        return json.load(open(os.path.join(self.mod_dir, 'diedreibeiden-overmatcher.json')))
+
+    def test_position_keys_move_save_and_reset(self):
+        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
+        self.key(205)                 # rechts, 5 px
+        self.key(208, shift=True)     # runter, 1 px
+        settings = self.ui_data[-1][1]['settings']
+        self.assertEqual((settings['x'], settings['y']), (35, 9))
+        self.assertEqual((self.saved()['x'], self.saved()['y']), (35, 9))
+        self.key(199)                 # Pos1 = zuruecksetzen
+        self.assertEqual(self.ui_data[-1][1]['settings'], DEFAULTS)
+
+    def test_option_keys(self):
+        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
+        self.key(32)                  # D: Detailansicht immer
+        self.key(33)                  # F: Farbenblind
+        for _ in range(20):
+            self.key(13)              # +: Groesse, gedeckelt bei 2,0
+        self.key(12)                  # -: 1,9
+        expected = dict(DEFAULTS, detailMode=1, colorMode=1, scale=1.9)
+        self.assertEqual(self.ui_data[-1][1]['settings'], expected)
+        self.assertEqual(self.saved(), expected)
+
+    def test_keys_without_ctrl_alt_are_ignored(self):
+        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
+        count = len(self.ui_data)
+        self.key(205, alt=False)
+        self.key(32, ctrl=False)
+        self.assertEqual(len(self.ui_data), count)
+
+    def test_saved_settings_are_checked(self):
+        self.run_mod('PASC720_Hawaii', [])
+        # kaputte bzw. unzulaessige Werte fallen auf den Standard zurueck, Groesse wird begrenzt
+        raw = {'x': 50, 'y': 'oben', 'detailMode': 7, 'colorMode': 1, 'scale': 9}
+        self.assertEqual(self.env['clean_settings'](raw), dict(DEFAULTS, x=50, colorMode=1, scale=2.0))
 
     def test_missing_mid_is_unknown(self):
         self.run_mod('PASC720_Hawaii', ['PBSC110_Minotaur'])  # Minotaur ohne Mitte-Wert

@@ -65,26 +65,25 @@ Unter jeder Silhouette der Schiffsname in der Spielschrift (`$TextDefaultBold13N
 Die Silhouetten werden nicht mitgeliefert (Spieldateien), passen also nach jedem Patch.
 PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
 
-Optionen (TTaro Mod Config, Seite `diedreibeiden.overmatcher`; eigenes Zahnrad
-`TT_ConfigButtonElement` links neben der Anzeige wie bei BuildViewer):
-- `overmatcher.detailMode` 0 = Detail mit Alt, 1 = immer (ersetzt die Symbole bei Bewertung)
-- Silhouetten an/aus nur als `useSilhouettes` in `OVERMATCHER_SETTINGS` (aus der Optionsseite
-  entfernt, Nutzerentscheidung)
-- `overmatcher.colorMode` 0 = Standard, 1 = Farbenblind (Okabe-Ito: Blau #56B4E9 = Overmatch,
-  Gelb #F0E442 = nur Bug/Heck, Orange #D55E00 = kein Overmatch); Icons mit Präfix `cb_`,
-  Silhouetten per `OVERMATCHER_CT_CB`. Die gezeichneten Ersatzbilder bleiben Standardfarben.
-- `overmatcher.scale` 0,5–2,0 (scaleX/scaleY der ganzen Anzeige)
-Beschriftungen: vorhandene TTaro-Texte (`IDS_TT_DISPLAY_MODE`, `IDS_TT_UI_SCALE`, …) plus
-eigene `IDS_OM_*` in `texts/<sprache>/overmatcher.mo` (wie TTaroModUtils; Quelle
-`tools/data/texts.json`, erzeugt von `tools/make_texts.py`).
+Standalone (Branch `main-standalone`, ohne TTaroModUtils; ModForge bleibt für das Einhängen
+der Anzeige nötig – es ist laut README zum Mitliefern in Mod-Paketen gedacht):
+Einen offiziellen Rückkanal Unbound → Python gibt es in der ModsAPI nur über einen Flash-Teil
+(`flash.addExternalCallback`); TTaro nutzt dafür interne Client-Zugriffe. Deshalb kein
+Optionsmenü per Maus, sondern Tastenkürzel über `events.onKeyEvent` (offiziell):
 
-Position im Spiel per Ziehen über TTaroModUtils (wie BuildViewer): eigenes Schema
-`ModSchemas/diedreibeiden-overmatcher.schema.json` (eigene `id`, nicht kopiert – TTaro warnt,
-doppelte IDs sperren beide Mods), Schlüssel `diedreibeiden.overmatcher.position` und
-`…disableDragDrop`. Ohne gespeicherte Position gilt der Rückfall aus `OVERMATCHER_SETTINGS`.
-Abhängigkeit: ModForge + TTaroModUtils (Makros `TT_GET_PREF`, `TT_DRAGGABLE_POSITION`,
-`TT_DRAGGABLE`). Referenz-Repos: github.com/AndrewTaro (ohne Lizenzdatei → nur als Referenz,
-kein Code übernommen).
+| Strg+Alt + | Wirkung |
+|---|---|
+| Pfeiltasten | Anzeige verschieben, 5 px (mit Umschalt 1 px) |
+| Pos1 | Position zurücksetzen (Mitte +30 / +8) |
+| D | Detailansicht: mit Alt ↔ immer |
+| F | Farben: Standard ↔ Farbenblind |
+| + / − | Größe in 0,1-Schritten, 0,5–2,0 |
+
+Gespeichert in `(wows)/ModPrefs/diedreibeiden-overmatcher.json` (Rückfall: Mod-Ordner),
+übergeben an die Anzeige als `omData.settings` ({x, y, detailMode, colorMode, scale}).
+Farbenblind-Schema: Okabe-Ito, Blau #56B4E9 = Overmatch, Gelb #F0E442 = nur Bug/Heck,
+Orange #D55E00 = kein Overmatch (Icons mit Präfix `cb_`, Silhouetten per `OVERMATCHER_CT_CB`).
+Silhouetten an/aus nur als `useSilhouettes` in `OVERMATCHER_SETTINGS`.
 
 - 16 Bilder `detail_<me|target>_<bugheck>_<mitte>_<deck>.png` (g/r), erzeugt mit
   `tools/make_detail_icons.py` (gezeichnet; das frühere Grund-Icon
