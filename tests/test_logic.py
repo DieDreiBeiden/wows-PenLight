@@ -115,8 +115,8 @@ class Filter(unittest.TestCase):
         ca = self.ship('Cruiser', 203, 25, 27)
         cv = self.ship('AirCarrier', None, 19, 19)
         ss = self.ship('Submarine', None, 19, 16)
-        # Kreuzer-HE 30 mm gegen Zerstoerer/Traeger/U-Boot: ueberall durch, Schild ohne Bewertung
-        for target in (dd, cv, ss):
+        # Kreuzer-HE 30 mm gegen Zerstoerer/Traeger: ueberall durch, Schild ohne Bewertung
+        for target in (dd, cv):
             r = evaluate(ca, target, 'he', 30)
             self.assertEqual((r['attack'], r['defense']), (GREEN, 'grey'))
             self.assertEqual(r['detail'][3:], [-1, -1, -1])
@@ -124,6 +124,9 @@ class Filter(unittest.TestCase):
         r = evaluate(dd, ca, 'sap', 26)
         self.assertEqual((r['attack'], r['defense']), ('bow', 'grey'))
         self.assertEqual(evaluate(dd, ca, 'he', 21)['attack'], RED)
+        # U-Boote werden nicht bewertet, weder als Ziel noch als eigenes Schiff
+        self.assertIsNone(evaluate(ca, ss, 'he', 30))
+        self.assertIsNone(evaluate(ss, ca, 'he', 30))
 
     def test_cruiser_pair_keeps_shield_with_he(self):
         ca = self.ship('Cruiser', 203, 25, 27)
