@@ -2,14 +2,15 @@
 
 **English** · [Deutsch](README.de.md)
 
-**Overmatch indicator for World of Warships.** When you lock onto a cruiser or a battleship,
-Overmatcher shows two traffic lights right next to your crosshair:
+**Overmatch and penetration indicator for World of Warships.** When you lock onto a cruiser or
+a battleship, Overmatcher shows two traffic lights right next to your crosshair:
 
-- **Shell:** can my armour-piercing (AP) shells overmatch the target?
+- **Shell:** does my **loaded** ammunition get through the target? AP is rated by overmatch,
+  HE and SAP by their penetration against the target's plating.
 - **Shield:** can the target's AP overmatch me?
 
 Hold **Alt** for a detail view: the game's own ship silhouettes, split into **bow/stern**,
-**midship** and **deck**, each green (overmatch) or red (no overmatch).
+**midship** and **deck**, each green (gets through) or red (does not).
 
 <p align="center">
   <img src="docs/images/ampel.png" alt="Shell and shield in every state, standard and colour-blind palettes" width="610">
@@ -93,9 +94,10 @@ penetration of the loaded HE/SAP.
 
 Holding **Alt** replaces shell and shield with two ships stacked on top of each other:
 
-- **TARGET** on top: where my AP overmatches the target.
+- **TARGET** on top: where my loaded shell gets through the target (AP: overmatch, HE/SAP:
+  penetration of bow/stern and deck).
 - **ME** below: where the target's AP overmatches me.
-- Here green always means **overmatch** – for Target and Me alike. (Only the normal view
+- Here green always means **gets through** – for Target and Me alike. (Only the normal view
   colours by good/bad for you.)
 - Each ship sits in a dark band that fades out to the sides, with hairlines and a slightly
   lighter header. The small shell/shield icon in the header carries the colour of the big icon.
