@@ -37,8 +37,9 @@ der Beplankung, nicht Zitadellentreffer.
 Granate und Schild färben nach **gut/schlecht für mich**: Granate grün = ich komme überall durch,
 Schild rot = das Ziel kommt überall durch (vorher war der Schild zwischenzeitlich „grün =
 Overmatch“, das war im Gefecht verwirrend). Die Alt-Detailansicht bleibt bei „grün = Overmatch“
-für Target und Me. Die Form der Icons zeigt weiter den Overmatch-Umfang (voll / teilweise /
-Schrägstrich). Extremfälle zusätzlich mit Zeichen (Variante P3): Stern an der grünen Granate,
+für Target und Me. Form der Granate = Overmatch-Umfang (voll / nur Spitze / Schrägstrich);
+Form des Schilds = Schutz (voll und heil / teilweise / voll aber gebrochen) – ein
+durchgestrichener grüner Schild wirkte irreführend (Nutzerentscheidung, Variante S1 nur mit Bruch bei Rot). Extremfälle zusätzlich mit Zeichen (Variante P3): Stern an der grünen Granate,
 Warndreieck am roten Schild (`mark_star.png`, `mark_warning.png`, weiß mit dunklem Rand),
 blinkt beim Aufschalten 4 × 0,25 s auf (`$Animation`, Einstellungen `mark*`).
 

@@ -6,13 +6,16 @@
 Granate = AP-Granate wie im Bewaffnungs-Fenster (grau-metallisch, schraeg nach unten rechts).
 Schild  = Wappenschild mit Sparren, Rand metallisch grau wie die Granate.
 Barrierearm (Pruefung nach WCAG 2.1, Variante A2): der Zustand ist auch ohne Farbe erkennbar.
-Je Icon drei Segmente auf dunklem Grund mit dunklen Trennlinien. Die Form zeigt den
-Overmatch-Umfang, die Farbe 'gut fuer mich' (Granate gruen = ich komme ueberall durch,
-Schild rot = Ziel kommt ueberall durch):
-  ueberall       -> alle Segmente in Farbe
-  nur Bug/Heck   -> Granate: Spitze, Schild: Fuss + unterer Sparren
-  kein Overmatch -> Schraegstrich, leere Segmente dunkel in Farbe getoent
-  grey (kein Ziel / keine Bewertung) -> alle Segmente leer
+Je Icon drei Segmente auf dunklem Grund mit dunklen Trennlinien; Farbe = gut/schlecht fuer mich.
+Granate (ich -> Ziel), Form = Overmatch-Umfang:
+  gruen  ueberall       -> alle Segmente (Spitze, Band, Heckring)
+  gelb   nur Bug/Heck   -> nur die Spitze
+  rot    kein Overmatch -> Schraegstrich, leere Segmente dunkel in Farbe getoent
+Schild (Ziel -> ich), Form = Schutz:
+  gruen  Ziel kommt nicht durch  -> voll, heil
+  gelb   nur Bug/Heck            -> Fuss + unterer Sparren
+  rot    Ziel kommt ueberall durch -> voll, aber gebrochen (Spalt)
+grey (kein Ziel / keine Bewertung) -> alle Segmente leer
 Dazu mark_star.png / mark_warning.png fuer die Extremfaelle (P3).
 Granate: Spitze, Band, Heckring. Schild: Fuss, unterer Sparren, oberer Sparren.
 Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
@@ -49,12 +52,14 @@ SEGMENT_GROUND = (46, 50, 54)   # dunkler Grund fuer die Farbsegmente (Helligkei
 SEGMENT_EMPTY = (92, 96, 100)   # leeres Segment, Form bleibt sichtbar
 SEPARATOR = (22, 24, 26)        # Trennlinie zwischen Farbe und Metall
 SLASH_TINT = 0.45               # 'kein Overmatch': leere Segmente so weit in Zustandsfarbe
-# Die Form zeigt den Overmatch-Umfang (Stufe 2 = ueberall, 1 = nur Bug/Heck, 0 = keiner),
-# die Farbe 'gut fuer mich': Granate gruen = Stufe 2, Schild gruen = Stufe 0.
-LEVEL = {'shell': {'green': 2, 'yellow': 1, 'red': 0},
-         'shield': {'green': 0, 'yellow': 1, 'red': 2}}
+# Granate: Form = Overmatch-Umfang (Stufe 2 = ueberall, 1 = nur Bug/Heck, 0 = keiner).
+LEVEL = {'shell': {'green': 2, 'yellow': 1, 'red': 0}}
 # gefuellte Segmente je Stufe (Granate: Spitze/Band/Heckring, Schild: Fuss/Sparren unten/oben)
-FILL = {'shell': {2: 3, 1: 1, 0: 0}, 'shield': {2: 3, 1: 2, 0: 0}}
+FILL = {'shell': {2: 3, 1: 1, 0: 0}}
+# Schild (Schutz): gefuellte Segmente je Farbe; rot zusaetzlich gebrochen (Zickzack-Spalt)
+SHIELD_FILL = {'green': 3, 'yellow': 2, 'red': 3, 'grey': 0}
+SHIELD_CRACK = [(0.70, 0.10), (0.56, 0.30), (0.64, 0.42), (0.46, 0.60), (0.53, 0.70), (0.38, 0.92)]
+SHIELD_CRACK_WIDTH = 0.11
 SHELL_SCALE = 1.28
 SHELL_SHIFT = 0.03  # Granate liegt sonst etwas links oben (Heck kuerzer als Spitze)
 
@@ -172,13 +177,22 @@ def shield(state, palette=None):
         (_shield_mask(x, y, inset=0.055), np.array(GUIDE_RING, np.float32)),  # Fuge wie Fuehrungsring
         (inner, np.array(SEGMENT_GROUND, np.float32)),
     ]
-    level = _level('shield', state)
-    filled = FILL['shield'].get(level, 0)
+    # Schild = Schutz: gruen voll und heil, gelb Fuss + unterer Sparren, rot voll aber gebrochen
+    filled = SHIELD_FILL.get(state, 0)
     for i, segment in enumerate(segments):
-        layers.append((segment, np.array(color if i < filled else _empty_color(level, color), np.float32)))
-    if level == 0:
-        layers += _slash(x, y, color)
+        layers.append((segment, np.array(color if i < filled else SEGMENT_EMPTY, np.float32)))
+    if state == 'red':
+        # Bruch: dunkle Kante, darin ein durchsichtiger Spalt quer durch den Schild
+        layers.append((_line_mask(SHIELD_CRACK, SHIELD_CRACK_WIDTH + 0.05) * outer, np.array(SEPARATOR, np.float32)))
+        rgb, alpha = _compose(layers)
+        return _outlined(rgb, alpha * (1 - _line_mask(SHIELD_CRACK, SHIELD_CRACK_WIDTH) * outer))
     return _outlined(*_compose(layers))
+
+
+def _line_mask(points, width):
+    im = Image.new('L', (W, W), 0)
+    ImageDraw.Draw(im).line([(px * W, py * W) for px, py in points], fill=255, width=int(width * W), joint='curve')
+    return np.asarray(im, np.float32) / 255
 
 
 # Hervorhebung der Extremfaelle (Variante P3), als eigene Bilder rechts oben am Symbol:

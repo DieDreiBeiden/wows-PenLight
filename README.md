@@ -58,10 +58,11 @@ well. The colours tell you whether the situation is **good or bad for you**:
 | no | – | Red – only a broadside is worth it | Green – angling works |
 | – | – | Grey – no target, or a destroyer/carrier/submarine | Grey |
 
-The **shape** shows how much is overmatched, independent of colour: all segments filled =
-everywhere, partly filled = bow/stern only, slash = nothing, empty = no target. Star and warning
-triangle flash briefly when you lock a target. Together this stays readable with colour vision
-deficiency.
+The **shape** carries the same message without colour. Shell: all segments filled = I get
+through everywhere, only the tip = bow/stern only, slash = I don't get through. Shield: full and
+intact = the target doesn't get through, partly filled = bow/stern only, **broken** = the target
+gets through everywhere. Star and warning triangle flash briefly when you lock a target.
+Together this stays readable with colour vision deficiency.
 
 Only pairings of **cruisers and battleships** are rated; everything else stays grey.
 A colour-blind scheme in blue/yellow/orange (Okabe-Ito palette) is available for red-green

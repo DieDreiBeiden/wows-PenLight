@@ -58,9 +58,11 @@ overmatcht werden. Die Farben zeigen, ob die Lage **gut oder schlecht für dich*
 | nein | – | Rot – nur die Breitseite lohnt | Grün – Anwinkeln wirkt |
 | – | – | Grau – kein Ziel, oder Zerstörer/Träger/U-Boot | Grau |
 
-Die **Form** zeigt unabhängig von der Farbe, wie viel overmatcht wird: alle Segmente gefüllt =
-überall, teilweise gefüllt = nur Bug/Heck, Schrägstrich = nirgends, leer = kein Ziel. Stern und
-Warndreieck blinken beim Aufschalten kurz auf. So bleibt alles auch bei Farbsehschwäche lesbar.
+Die **Form** trägt dieselbe Aussage ohne Farbe. Granate: alle Segmente gefüllt = ich komme
+überall durch, nur die Spitze = nur Bug/Heck, Schrägstrich = ich komme nicht durch. Schild: voll
+und heil = das Ziel kommt nicht durch, teilweise gefüllt = nur Bug/Heck, **gebrochen** = das Ziel
+kommt überall durch. Stern und Warndreieck blinken beim Aufschalten kurz auf. So bleibt alles auch
+bei Farbsehschwäche lesbar.
 
 Bewertet werden nur Paarungen aus **Kreuzern und Schlachtschiffen**; für alle anderen bleiben
 die Symbole grau. Für Rot-Grün-Schwäche gibt es ein Farbschema in Blau/Gelb/Orange
