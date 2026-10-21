@@ -192,6 +192,16 @@ class ModTest(unittest.TestCase):
         self.key(205)                                   # Tastenkuerzel aus
         self.assertEqual(len(self.ui_data), count)
 
+    def test_he_rates_destroyer(self):
+        # Hawaii HE 21 mm gegen Gearing (19 mm): gruen; Schild grau, weil kein Kreuzer/Schlachtschiff
+        lines = self.run_mod('PASC720_Hawaii', ['PASD013_Gearing'], ammo=2)
+        self.assertEqual(lines, ['PASD013_Gearing attack=he:green defense=grey'])
+        self.assertEqual(self.ui_data[-1][1]['byId']['10'][2][3:], [-1, -1, -1])
+
+    def test_destroyer_with_he_rates_cruiser(self):
+        lines = self.run_mod('PASD013_Gearing', ['PBSC110_Minotaur'], ammo=2)  # 21 mm gegen 16 mm
+        self.assertEqual(lines, ['PBSC110_Minotaur attack=he:green defense=grey'])
+
     def test_loaded_he_rates_penetration(self):
         # Hawaii mit HE 21 mm gegen Minotaur (16 mm ueberall): Bug/Heck und Deck -> gruen
         lines = self.run_mod('PASC720_Hawaii', ['PBSC110_Minotaur', 'PJSB018_Yamato_1944'], ammo=2)

@@ -104,11 +104,31 @@ class Filter(unittest.TestCase):
     def ship(self, cls, caliber, bow, deck):
         return {'class': cls, 'caliber': caliber, 'bow': bow, 'deck': deck}
 
-    def test_destroyer_is_hidden(self):
+    def test_destroyer_is_hidden_with_ap(self):
         dd = self.ship('Destroyer', 130, 19, 19)
         ca = self.ship('Cruiser', 203, 25, 27)
         self.assertIsNone(evaluate(ca, dd))
         self.assertIsNone(evaluate(dd, ca))
+
+    def test_he_rates_every_class(self):
+        dd = self.ship('Destroyer', 130, 19, 19)
+        ca = self.ship('Cruiser', 203, 25, 27)
+        cv = self.ship('AirCarrier', None, 19, 19)
+        ss = self.ship('Submarine', None, 19, 16)
+        # Kreuzer-HE 30 mm gegen Zerstoerer/Traeger/U-Boot: ueberall durch, Schild ohne Bewertung
+        for target in (dd, cv, ss):
+            r = evaluate(ca, target, 'he', 30)
+            self.assertEqual((r['attack'], r['defense']), (GREEN, 'grey'))
+            self.assertEqual(r['detail'][3:], [-1, -1, -1])
+        # Zerstoerer-HE 21 mm gegen Kreuzer (25 / 27 mm): nirgends
+        r = evaluate(dd, ca, 'sap', 26)
+        self.assertEqual((r['attack'], r['defense']), ('bow', 'grey'))
+        self.assertEqual(evaluate(dd, ca, 'he', 21)['attack'], RED)
+
+    def test_cruiser_pair_keeps_shield_with_he(self):
+        ca = self.ship('Cruiser', 203, 25, 27)
+        bb = self.ship('Battleship', 406, 32, 57)
+        self.assertEqual(evaluate(ca, bb, 'he', 30)['defense'], RED)  # 406 > 14.3 x 27
 
     def test_cruiser_vs_cruiser(self):
         # grosser Kreuzer 305 mm gegen leichten Kreuzer mit 16 mm Huelle

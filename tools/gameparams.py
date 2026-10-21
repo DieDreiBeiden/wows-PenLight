@@ -13,6 +13,9 @@ Material-Namen: tools/data/collision_materials.json.
 - Bug/Heck = Seitenbeplankung Bug ('Bow_ConstrSide'), Fallback Heck.
 - Deck     = duennste Mittschiffs-Deckplatte ('Cas_Deck', 'SSC_Deck').
 - Mitte    = duennste Mittschiffs-Seitenplatte ('Cas_Belt', 'SSC_ConstrSide'), nur Detailansicht.
+- U-Boote haben keine Mittschiffs-Deckplatte; Deck dort = duennste Zitadellen-/Bug-/Heck-Deckplatte.
+Klassen: Kreuzer und Schlachtschiffe (AP-Overmatch, Schild) sowie Zerstoerer, Traeger und U-Boote
+(nur als HE/SAP-Ziel bzw. Schiff mit HE/SAP); Traeger und manche U-Boote haben kein Hauptkaliber.
 Die Felder 'armourDeck'/'armourExtremities' sind in Build 15.9 nur Platzhalter [-1, -1].
 - Hauptkaliber = 'barrelDiameter' (m) der Geschuetze im Artillerie-Modul.
 - Voll ausgebaut = jeweils letztes Modul in ShipUpgradeInfo.
@@ -24,10 +27,13 @@ import pickle
 import sys
 import zlib
 
-RELEVANT_SPECIES = ('Cruiser', 'Battleship')
+RELEVANT_SPECIES = ('Cruiser', 'Battleship', 'Destroyer', 'AirCarrier', 'Submarine')
+# Klassen, fuer die ein Hauptkaliber Pflicht ist (AP-Overmatch und Schild)
+CALIBER_REQUIRED = ('Cruiser', 'Battleship')
 
 BOW_MATERIALS = ('Bow_ConstrSide', 'St_ConstrSide')
 DECK_MATERIALS = ('Cas_Deck', 'SSC_Deck')
+SUB_DECK_MATERIALS = ('OCit_Deck', 'Bow_Deck', 'St_Deck')
 MID_MATERIALS = ('Cas_Belt', 'SSC_ConstrSide')
 
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'collision_materials.json')) as _f:
@@ -171,7 +177,8 @@ def extract(params):
             'hull': hull_name,
             'artillery': art_name,
             'bow': bow_mm(plates),
-            'deck': deck_mm(plates),
+            'deck': deck_mm(plates) if species != 'Submarine' else
+            (deck_mm(plates) or _thinnest(plates, SUB_DECK_MATERIALS)),
             'mid': mid_mm(plates),
             'caliber': _main_caliber_mm(art),
         }
@@ -182,8 +189,10 @@ def mod_table(ships, game_version):
     """Kompakte Tabelle fuer die Mod: {name: [klasse, bug, deck, kaliber, mitte|None]}."""
     table = {}
     for name, s in ships.items():
-        if name.startswith('PX') or None in (s['bow'], s['deck'], s['caliber']):
+        if name.startswith('PX') or None in (s['bow'], s['deck']):
             continue  # Event-/Operationsschiffe bzw. unvollstaendige Daten
+        if s['caliber'] is None and s['class'] in CALIBER_REQUIRED:
+            continue
         table[name] = [s['class'], s['bow'], s['deck'], s['caliber'], s['mid']]
     return {'gameVersion': game_version, 'ships': table}
 
