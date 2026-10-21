@@ -64,14 +64,22 @@ die Symbole grau. Für Rot-Grün-Schwäche gibt es ein Farbschema in Blau/Gelb/O
 
 ### Detailansicht (Alt)
 
-<img src="docs/images/detail.png" alt="Detailansicht mit Target oben und Me unten" align="right" width="200">
+<img src="docs/images/detail.png" alt="Detailansicht: Target oben, Me unten, jeweils im Rahmen mit Beschriftung und Schiffsname" align="right" width="210">
+
+Mit gedrückter **Alt**-Taste ersetzen zwei untereinander stehende Schiffe Granate und Schild:
 
 - **TARGET** oben: wo meine AP das Ziel overmatcht.
 - **ME** unten: wo die AP des Ziels mich overmatcht.
-- Im Spiel werden die **echten Schiffs-Silhouetten** aus dem Lebensbalken verwendet und
-  eingefärbt, darunter steht der Schiffsname. Die Abbildung rechts zeigt die gezeichneten
-  Ersatzschiffe, die nur einspringen, wenn keine Silhouette gefunden wird.
-- Optional kann die Detailansicht dauerhaft statt der Symbole angezeigt werden.
+- Jedes Schiff liegt in einem dunklen, seitlich auslaufenden Band mit Haarlinien und leicht
+  aufgehellter Kopfzeile. Das kleine Granaten-/Schild-Symbol in der Kopfzeile trägt die Farbe
+  des großen Symbols.
+- Im Spiel werden die **Schiffs-Silhouetten aus dem Lebensbalken** eingefärbt: der Rumpf geteilt
+  in Heck, Mitte und Bug, alles oberhalb der Decklinie zählt als Deck. Die Silhouette hat eine
+  dunkle Kontur und einen weichen Schatten, darunter steht der Schiffsname in der Spielschrift.
+- Die Abbildung zeigt statt der Spiel-Silhouette ein gezeichnetes Schiff, weil keine
+  Spielgrafiken mitgeliefert werden. Dieselben gezeichneten Schiffe springen ein, wenn keine
+  Silhouette gefunden wird.
+- Optional ersetzt die Detailansicht die Symbole dauerhaft; das Farbenblind-Schema gilt auch hier.
 
 Bewusste Vereinfachung: Der Zitadellengürtel wird nicht bewertet. Grün heißt Overmatch der
 Beplankung, nicht Zitadellentreffer.
@@ -176,6 +184,7 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 | `Main.py` erzeugen (aus `src/overmatcher/`) | `python3 -I tools/build_mod.py` |
 | Granate/Schild-Icons zeichnen | `python3 -I tools/make_ampel_icons.py` |
 | Detail-Bilder, Beschriftungen, Rahmen | `python3 -I tools/make_detail_icons.py` |
+| Abbildungen der README | `python3 -I tools/make_readme_images.py` |
 | Texte der TTaro-Optionsseite | `python3 -I tools/make_texts.py` |
 | Flash-Teil `Main.swf` (`main-standalone`) | `tools/build_flash.py`, Voraussetzungen siehe Dateikopf |
 
