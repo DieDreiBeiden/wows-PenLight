@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Baut mod/res_mods/PnFMods/Overmatcher/Main.py aus src/overmatcher/.
+"""Baut mod/res_mods/PnFMods/PenLight/Main.py aus src/penlight/.
 
 Der Client laedt pro Mod eine Main.py; ob eigene Module importiert werden
 duerfen, ist nicht dokumentiert. Deshalb wird alles in eine Datei kopiert.
@@ -9,8 +9,8 @@ duerfen, ist nicht dokumentiert. Deshalb wird alles in eine Datei kopiert.
 import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SOURCES = ['src/overmatcher/logic.py', 'src/overmatcher/mod_main.py']
-TARGET = 'mod/res_mods/PnFMods/Overmatcher/Main.py'
+SOURCES = ['src/penlight/logic.py', 'src/penlight/mod_main.py']
+TARGET = 'mod/res_mods/PnFMods/PenLight/Main.py'
 
 HEADER = """# -*- coding: utf-8 -*-
 # GENERIERT von tools/build_mod.py - nicht direkt bearbeiten.

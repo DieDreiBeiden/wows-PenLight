@@ -2,13 +2,13 @@
   "schemaVersion": 5,
   "id": "ombfa94db7db89439222ff66",
   "author": "diedreibeiden",
-  "modName": "Overmatcher",
-  "slug": "overmatcher",
+  "modName": "PenLight",
+  "slug": "penlight",
   "order": 50,
   "tree": [
     {
       "kind": "group",
-      "key": "overmatcher.general",
+      "key": "penlight.general",
       "display": "section",
       "label": "IDS_TT_TITLE_GENERAL",
       "collapse": "expanded",
@@ -16,7 +16,7 @@
         {
           "kind": "setting",
           "control": "dropdown",
-          "key": "overmatcher.detailMode",
+          "key": "penlight.detailMode",
           "label": "IDS_TT_DISPLAY_MODE",
           "hint": {
             "text": "IDS_OM_HINT_DETAIL_MODE"
@@ -36,7 +36,7 @@
         {
           "kind": "setting",
           "control": "dropdown",
-          "key": "overmatcher.colorMode",
+          "key": "penlight.colorMode",
           "label": "IDS_OM_COLOR_MODE",
           "hint": {
             "text": "IDS_OM_HINT_COLOR_MODE"
@@ -56,7 +56,7 @@
         {
           "kind": "setting",
           "control": "slider",
-          "key": "overmatcher.scale",
+          "key": "penlight.scale",
           "label": "IDS_TT_UI_SCALE",
           "default": 1,
           "min": 0.5,
@@ -67,7 +67,7 @@
         {
           "kind": "setting",
           "control": "toggle",
-          "key": "overmatcher.disableDragDrop",
+          "key": "penlight.disableDragDrop",
           "label": "IDS_TT_DISABLE_DRAG_DROP",
           "hint": {
             "text": "IDS_TT_HINT_DISABLE_DRAG_DROP"
@@ -77,7 +77,7 @@
         {
           "kind": "setting",
           "control": "position",
-          "key": "overmatcher.position",
+          "key": "penlight.position",
           "label": "IDS_TT_DRAGDROP_RESET",
           "hint": {
             "text": "IDS_TT_HINT_DRAGDROP_RESET"

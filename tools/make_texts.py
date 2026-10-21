@@ -4,7 +4,7 @@
     python3 -I tools/make_texts.py
 
 Quelle: tools/data/texts.json {sprache: {IDS_...: text}}. Ausgabe wie bei TTaroModUtils:
-mod/res_mods/texts/<sprache>/overmatcher.mo (GNU gettext). Sprachen ohne eigene Texte
+mod/res_mods/texts/<sprache>/penlight.mo (GNU gettext). Sprachen ohne eigene Texte
 erhalten die englischen. Die uebrigen Beschriftungen nutzen vorhandene IDS_TT_*-Texte
 von TTaroModUtils.
 """
@@ -16,7 +16,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCE = os.path.join(ROOT, 'tools', 'data', 'texts.json')
 TARGET = os.path.join(ROOT, 'mod', 'res_mods', 'texts')
-DOMAIN = 'overmatcher'
+DOMAIN = 'penlight'
 # Sprachordner wie in TTaroModUtils/texts, dazu pt und zh (PortInterface, AdditionalOptions)
 LANGUAGES = ['cs', 'de', 'en', 'es', 'es_mx', 'fr', 'it', 'ja', 'ko', 'nl', 'pl', 'pt', 'pt_br',
              'ru', 'th', 'tr', 'uk', 'zh', 'zh_sg', 'zh_tw']

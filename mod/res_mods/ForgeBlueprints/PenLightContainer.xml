@@ -1,10 +1,10 @@
-<mod name="OvermatcherContainer" version="0.2.0" priority="0">
+<mod name="PenLightContainer" version="0.2.0" priority="0">
   <requires installer="&gt;=1.0.0"/>
 
   <!-- ModForge-Manifest nach Vorlage PenetrationCalculatorContainer.xml -->
   <ubMountInBattle unbound="2"
-                   rootElementId="OvermatcherRoot"
-                   name="unbound2Overmatcher"
+                   rootElementId="PenLightRoot"
+                   name="unbound2PenLight"
                    hitTest="true"
                    after="CrosshairContainer"/>
 </mod>

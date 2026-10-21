@@ -7,7 +7,7 @@
 - detail.png: Detailansicht wie im Spiel (Rahmen, farbige Mini-Icons, Schiffsname,
   Target oben, Me unten). Statt der Spiel-Silhouette steht das gezeichnete Schiff aus
   make_detail_icons, damit keine Spielgrafik ins Repository kommt.
-Masse wie OVERMATCHER_SETTINGS in Overmatcher.unbound (silhouetteWidth/-Height, labelOverlap,
+Masse wie PENLIGHT_SETTINGS in PenLight.unbound (silhouetteWidth/-Height, labelOverlap,
 nameGap, nameBottom, shipGap, headLineAlpha). Erst make_ampel_icons und make_detail_icons laufen lassen.
 """
 import os
@@ -37,7 +37,7 @@ def _icon(name):
 
 
 def _with_mark(icon, mark):
-    """Icon mit Zeichen rechts oben wie in Overmatcher.unbound (markOffset)."""
+    """Icon mit Zeichen rechts oben wie in PenLight.unbound (markOffset)."""
     pad = 8
     out = Image.new('RGBA', (icon.width + pad, icon.height + pad), (0, 0, 0, 0))
     out.alpha_composite(icon, (0, pad))
@@ -97,7 +97,7 @@ def _name(text):
 
 
 def _ship_block(key, state, combo, name):
-    """Ein Schiff wie OvermatcherSilhouetteShip: Rahmen, Beschriftung, Silhouette, Name."""
+    """Ein Schiff wie PenLightSilhouetteShip: Rahmen, Beschriftung, Silhouette, Name."""
     top = LABEL_H - LABEL_OVERLAP
     h = top + SIL_H + NAME_GAP + 16 + NAME_BOTTOM
     im = Image.new('RGBA', (SIL_W, h), (0, 0, 0, 0))

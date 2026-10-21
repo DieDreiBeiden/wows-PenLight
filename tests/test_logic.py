@@ -7,7 +7,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from overmatcher.logic import (GREEN, RED, YELLOW, attack_color, defense_color,
+from penlight.logic import (GREEN, RED, YELLOW, attack_color, defense_color,
                                detail_icons, evaluate, overmatches, pen_detail, pen_state,
                                zone_detail)
 

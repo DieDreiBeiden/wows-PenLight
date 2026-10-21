@@ -41,7 +41,7 @@ class ModTest(unittest.TestCase):
     def run_mod(self, own_ship, enemies, data_version=VERSION, ammo=1):
         root = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, root)
-        mod_dir = os.path.join(root, 'Overmatcher')
+        mod_dir = os.path.join(root, 'PenLight')
         wrong_dir = os.path.join(root, 'OvermatcherProbe')  # getModDir-Befund im Client
         os.mkdir(mod_dir)
         os.mkdir(wrong_dir)
@@ -83,8 +83,8 @@ class ModTest(unittest.TestCase):
         self.handlers = handlers
         exec(compile(open(build_mod.build()).read(), 'Main.py', 'exec'), env)
         handlers['shown']()
-        self.log = open(os.path.join(mod_dir, 'overmatcher_log.txt')).read()
-        return open(os.path.join(mod_dir, 'overmatcher_last.txt')).read().splitlines()
+        self.log = open(os.path.join(mod_dir, 'penlight_log.txt')).read()
+        return open(os.path.join(mod_dir, 'penlight_last.txt')).read().splitlines()
 
     def test_cruiser_vs_mixed_enemies(self):
         lines = self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PBSC110_Minotaur', 'PASD013_Gearing'])
@@ -99,7 +99,7 @@ class ModTest(unittest.TestCase):
 
     def test_ui_payload_for_unbound(self):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PASD013_Gearing'])
-        self.assertEqual(self.ui_data[0], ('modOvermatcher', {'byId': {}, 'byName': {}, 'ammo': 'ap'}))
+        self.assertEqual(self.ui_data[0], ('modPenLight', {'byId': {}, 'byName': {}, 'ammo': 'ap'}))
         self.assertEqual(self.ui_data[-1], ('update', {
             'ammo': 'ap',
             # Detail: ich->Ziel [Bug, Mitte, Deck], Ziel->ich [Bug, Mitte, Deck]

@@ -4,7 +4,7 @@
 GameParams.data = bytereversiertes, zlib-komprimiertes Python-2-Pickle.
 
     python3 -I tools/gameparams.py GameParams.data ships_full.json \
-        mod/res_mods/PnFMods/Overmatcher/ships.json 15,9,0,13357625
+        mod/res_mods/PnFMods/PenLight/ships.json 15,9,0,13357625
 
 Spielversion so, wie utils.getGameVersion() sie liefert (python.log / Probe-Dump).
 
