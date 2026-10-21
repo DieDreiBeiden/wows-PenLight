@@ -71,16 +71,17 @@ colour vision deficiency.
 ### HE and SAP
 
 The shell always rates the **ammunition currently loaded**; a small tag (AP / HE / SAP) like on
-the ammo slots in the HUD shows which. HE and SAP have their own shell drawings (HE: short, blunt
-nose with a burst; SAP: slim, flat nose with a white cap). Instead of overmatch they check the
+the ammo slots in the HUD shows which. HE and SAP have their own drawings modelled on the game's ammo
+icons: HE with a yellow tip hitting a surface and exploding (smoke and flash), SAP with a black tip,
+orange ring and splinters on impact. Instead of overmatch they check the
 fixed penetration value of the shell against the target's plating (penetration ≥ plate counts;
 the IFHE commander skill is deliberately not taken into account):
 
 | Bow/stern | Deck | Shell |
 |---|---|---|
-| yes | yes | Green + star – both filled |
-| yes | no | Orange – only the nose filled |
-| no | yes | Orange – only band and ring filled |
+| yes | yes | Green + star – band and ring filled |
+| yes | no | Orange – only the band (middle) filled |
+| no | yes | Orange – only the rear ring filled |
 | no | no | Red – slash |
 
 The shield always stays the enemy's AP overmatch. In the detail view the TARGET ship shows the

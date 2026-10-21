@@ -17,8 +17,9 @@ Schild (Ziel -> ich), Form = Schutz:
   rot    Ziel kommt ueberall durch -> voll, aber gebrochen (Spalt)
 grey (kein Ziel / keine Bewertung) -> alle Segmente leer
 Dazu mark_star.png / mark_warning.png fuer die Extremfaelle (P3).
-Geladene HE/SAP: eigene Granaten he_*.png / sap_*.png (Zustaende green, bow, deck, red, grey;
-Spitze = Bug/Heck, Band + Ring = Deck) und Plaketten tag_ap/he/sap.png.
+Geladene HE/SAP: eigene Granaten he_*.png / sap_*.png nach dem Spiel-HUD (HE gelbe Spitze,
+Aufschlag mit Rauch und Blitz; SAP schwarze Spitze mit orangem Ring, Splitter), Zustaende green,
+bow, deck, red, grey (Band = Bug/Heck, Ring = Deck), Plaketten tag_ap/he/sap.png.
 Granate: Spitze, Band, Heckring. Schild: Fuss, unterer Sparren, oberer Sparren.
 Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
 Ausgabe: mod/res_mods/PnFMods/Overmatcher/{shell,shield}_[cb_]{green,yellow,red,grey}.png
@@ -116,38 +117,84 @@ def _slash(x, y, color):
     return [(rim, np.array(SEPARATOR, np.float32)), (core, np.array(color, np.float32))]
 
 
-# Granatenformen (Koordinaten entlang der Achse u, quer v; Spitze bei +u):
-#   ap  = spitze Ogive (wie das AP-Symbol im Bewaffnungsfenster)
-#   he  = kurz und dick, runde Nase mit Zuenderkappe und Explosionsstrahlen davor
-#   sap = schlank, abgeflachte Nase mit weisser Kappe
+# Granatenformen (Koordinaten entlang der Achse u, quer v; Spitze bei +u). Vorbild sind die
+# Munitions-Symbole im Spiel-HUD: AP rote Spitze; HE gelbe Spitze, schlaegt auf eine Flaeche und
+# explodiert (Rauch); SAP schwarze Spitze mit orangem Ring, Splitter beim Aufschlag.
 SHELL_FORMS = {
-    'ap': dict(scale=SHELL_SCALE, shift=SHELL_SHIFT, r=0.15, tail=-0.40, ogive=0.12, tip=0.43, exp=1.6, flat=None),
-    'he': dict(scale=1.12, shift=-0.035, r=0.175, tail=-0.40, ogive=0.10, tip=0.31, exp=3.0, flat=None),
-    'sap': dict(scale=SHELL_SCALE, shift=SHELL_SHIFT, r=0.125, tail=-0.42, ogive=0.10, tip=0.43, exp=1.4, flat=0.33),
+    'ap': dict(scale=SHELL_SCALE, shift=SHELL_SHIFT),
+    'he': dict(scale=0.86, shift=-0.10),
+    'sap': dict(scale=0.86, shift=-0.10),
 }
-# gefuellte Segmente je Zustand. AP: Overmatch-Umfang. HE/SAP: Spitze = Bug/Heck, Band + Ring = Deck.
+SHELL_R, SHELL_TAIL, SHELL_OGIVE, SHELL_TIP = 0.15, -0.40, 0.12, 0.43
+# Typfarben der Spitze (Spiel-HUD); bei AP traegt die Spitze die Ampelfarbe
+HE_TIP = (226, 172, 40)
+SAP_TIP = (36, 38, 40)
+SAP_RING = (204, 96, 24)
+PLATE = (186, 190, 194)
+SMOKE = (150, 154, 158)
+FLASH = (255, 238, 160)
+# gefuellte Segmente je Zustand. AP: Spitze/Band/Ring = Overmatch-Umfang.
+# HE/SAP: Spitze = Typfarbe, Band = Bug/Heck, Ring = Deck.
 SHELL_FILL = {
     'ap': {'green': ('tip', 'band', 'ring'), 'yellow': ('tip',), 'red': (), 'grey': ()},
-    'he': {'green': ('tip', 'band', 'ring'), 'bow': ('tip',), 'deck': ('band', 'ring'), 'red': (), 'grey': ()},
+    'he': {'green': ('band', 'ring'), 'bow': ('band',), 'deck': ('ring',), 'red': (), 'grey': ()},
 }
 SHELL_FILL['sap'] = SHELL_FILL['he']
 # HE/SAP-Zustaende 'bow'/'deck' nutzen die Ampelfarbe 'yellow'
 STATE_COLOR = {'bow': 'yellow', 'deck': 'yellow'}
 
 
+def _axis(ammo):
+    g = SHELL_FORMS[ammo]
+    x, y = _grid()
+    gx, gy = x - 0.5 - g['shift'], y - 0.5 - g['shift']
+    u = (gx + gy) / np.sqrt(2) / g['scale']    # entlang der Achse, Spitze bei +u
+    v = (-gx + gy) / np.sqrt(2) / g['scale']   # quer zur Achse
+    return x, y, u, v
+
+
+def _to_xy(ammo, u, v):
+    g = SHELL_FORMS[ammo]
+    return ((0.5 + g['shift'] + g['scale'] * (u - v) / np.sqrt(2)) * W,
+            (0.5 + g['shift'] + g['scale'] * (u + v) / np.sqrt(2)) * W)
+
+
+def _impact_layers(ammo, u, v):
+    """Aufschlag: Flaeche quer vor der Spitze, HE mit Rauch und Blitz, SAP mit Splittern."""
+    hit = SHELL_TIP + 0.015
+    plate = ((np.abs(u - (hit + 0.035)) < 0.03) & (np.abs(v) < 0.42)).astype(np.float32)
+    layers = [(plate, np.array(PLATE, np.float32))]
+    if ammo == 'he':
+        smoke = np.zeros_like(u)
+        for cu, cv, cr in ((hit - 0.13, 0.22, 0.10), (hit - 0.13, -0.22, 0.10),
+                           (hit - 0.04, 0.32, 0.08), (hit - 0.04, -0.32, 0.08)):
+            smoke = np.maximum(smoke, (((u - cu) ** 2 + (v - cv) ** 2) < cr ** 2).astype(np.float32))
+        ang = np.arctan2(v, -(u - hit))
+        rad = np.hypot(u - hit, v)
+        star = (rad < 0.08 + 0.10 * np.clip(np.cos(5 * ang), 0, 1) ** 2) & (u < hit + 0.005)
+        layers += [(smoke, np.array(SMOKE, np.float32)), (star.astype(np.float32), np.array(FLASH, np.float32))]
+    return layers
+
+
+def _sap_sparks(im):
+    d = ImageDraw.Draw(im)
+    hit = SHELL_TIP + 0.01
+    for deg, length in ((50, 0.27), (75, 0.20), (-50, 0.27), (-75, 0.20), (28, 0.17), (-28, 0.17)):
+        a = np.radians(deg)
+        p0 = _to_xy('sap', hit - 0.05 * np.cos(a), 0.05 * np.sin(a))
+        p1 = _to_xy('sap', hit - length * np.cos(a), length * np.sin(a))
+        d.line([p0, p1], fill=OUTLINE + (255,), width=int(0.075 * W))
+        d.line([p0, p1], fill=(245, 245, 245, 255), width=int(0.035 * W))
+
+
 def shell(state, palette=None, ammo='ap'):
     palette = palette or PALETTES['']
     color = palette[STATE_COLOR.get(state, state)]
-    g = SHELL_FORMS[ammo]
-    x, y = _grid()
-    # scale: sichtbare Hoehe wie der Schild (~28 von 29 px); shift: Granate mittig
-    u = ((x - 0.5 - g['shift']) + (y - 0.5 - g['shift'])) / np.sqrt(2) / g['scale']
-    v = (-(x - 0.5 - g['shift']) + (y - 0.5 - g['shift'])) / np.sqrt(2) / g['scale']
-    r, tail, ogive, tip = g['r'], g['tail'], g['ogive'], g['tip']
+    x, y, u, v = _axis(ammo)
+    r, tail, ogive, tip = SHELL_R, SHELL_TAIL, SHELL_OGIVE, SHELL_TIP
     t = np.clip((u - ogive) / (tip - ogive), 0, 1)
-    radius = np.where(u < ogive, r, r * np.sqrt(np.clip(1 - t ** g['exp'], 0, 1)))
-    nose = tip if g['flat'] is None else g['flat']
-    body = (u > tail) & (u < nose) & (np.abs(v) < radius)
+    radius = np.where(u < ogive, r, r * np.sqrt(np.clip(1 - t ** 1.6, 0, 1)))
+    body = (u > tail) & (u < tip) & (np.abs(v) < radius)
     corner = 0.03  # abgerundetes Heck
     body &= ~((u < tail + corner) & (np.abs(v) > r - corner) &
               ((u - (tail + corner)) ** 2 + (np.abs(v) - (r - corner)) ** 2 > corner ** 2))
@@ -156,43 +203,33 @@ def shell(state, palette=None, ammo='ap'):
     shade = (0.62 + 0.38 * np.cos((s + 0.35) * 1.5) - 0.18 * np.clip(s, 0, 1))[..., None]
     lit = np.clip(shade + 0.1, 0, 1.2)
     edge = 0.012
-    tip_from = ogive + 0.06
-    tip_to = nose - (0.06 if ammo == 'sap' else 0.0)
     # Segmente: Spitze, Band, Heckring (jeweils mit dunklen Trennlinien)
     segments = {
-        'tip': (body * (u > tip_from) * (u < tip_to), body * (np.abs(u - tip_from) < edge)),
+        'tip': (body * (u > ogive + 0.06), body * (np.abs(u - (ogive + 0.06)) < edge)),
         'band': (body * ((u > -0.06) & (u < 0.04)), body * ((np.abs(u + 0.06) < edge) | (np.abs(u - 0.04) < edge))),
         'ring': (body * ((u > -0.31) & (u < -0.22)), body * ((np.abs(u + 0.31) < edge) | (np.abs(u + 0.22) < edge))),
     }
-    layers = [(body, np.array(METAL, np.float32) * shade)]
+    layers = [] if ammo == 'ap' else _impact_layers(ammo, u, v)
+    layers.append((body, np.array(METAL, np.float32) * shade))
     filled = SHELL_FILL[ammo].get(state, ())
     empty = SEGMENT_EMPTY if filled or state == 'grey' else _mix(SEGMENT_GROUND, color, SLASH_TINT)
     for name, (segment, separator) in segments.items():
-        layers.append((segment, np.array(color if name in filled else empty, np.float32) * lit))
+        if name == 'tip' and ammo != 'ap':
+            fill = HE_TIP if ammo == 'he' else SAP_TIP
+        else:
+            fill = color if name in filled else empty
+        layers.append((segment, np.array(fill, np.float32) * lit))
         layers.append((separator, np.array(SEPARATOR, np.float32)))
-    if ammo == 'sap':      # weisse Kappe an der flachen Nase
-        layers.append((body * (u > nose - 0.05), np.array((240, 242, 244), np.float32) * lit))
-        layers.append((body * (np.abs(u - (nose - 0.05)) < edge), np.array(SEPARATOR, np.float32)))
-    if ammo == 'he':       # Zuenderkappe vorn
-        layers.append((body * (u > tip - 0.045), np.array((240, 242, 244), np.float32) * lit))
+    if ammo == 'sap':      # oranger Ring hinter der schwarzen Spitze
+        ring = body * ((u > ogive + 0.065) & (u < ogive + 0.115))
+        layers.append((ring, np.array(SAP_RING, np.float32) * lit))
+        layers.append((body * (np.abs(u - (ogive + 0.115)) < edge), np.array(SEPARATOR, np.float32)))
     if state == 'red':
         layers += _slash(x, y, color)
     im = _outlined(*_compose(layers))
-    if ammo == 'he':
-        _he_burst(im, g)
+    if ammo == 'sap':
+        _sap_sparks(im)
     return im
-
-
-def _he_burst(im, g):
-    """Explosionsstrahlen vor der HE-Nase (weiss mit dunklem Rand)."""
-    d = ImageDraw.Draw(im)
-    c = 0.5 + g['shift'] + (g['tip'] + 0.02) * g['scale'] / np.sqrt(2)
-    for ang in (-60, 0, 60):
-        a = np.radians(45 + ang)
-        p0 = ((c + 0.045 * np.cos(a)) * W, (c + 0.045 * np.sin(a)) * W)
-        p1 = ((c + 0.16 * np.cos(a)) * W, (c + 0.16 * np.sin(a)) * W)
-        d.line([p0, p1], fill=OUTLINE + (255,), width=int(0.12 * W))
-        d.line([p0, p1], fill=(250, 250, 250, 255), width=int(0.06 * W))
 
 
 def _shield_mask(x, y, inset=0.0):
