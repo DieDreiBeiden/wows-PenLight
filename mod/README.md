@@ -7,6 +7,7 @@ Spiel beenden. Ordner mit der **höchsten Nummer** unter `World_of_Warships\bin\
 |---|---|
 | `PnFModsLoader.py` | leere Datei, aktiviert Python-Mods (bei dir schon vorhanden) |
 | `PnFMods\Overmatcher\Main.py` | die Mod (generiert, siehe unten) |
+| `PnFMods\Overmatcher\Main.swf` | Greiffläche zum Verschieben per Maus (gebaut mit `tools/build_flash.py`) |
 | `PnFMods\Overmatcher\ships.json` | Panzerungs-/Kaliberdaten für genau eine Spielversion |
 | `PnFMods\Overmatcher\shell_*.png`, `shield_*.png` | Icons Granate/Schild (29×29) |
 | `gui\unbound2\PnFMods\Overmatcher.unbound` | Anzeige am Fadenkreuz (ab 0.2, benötigt ModForge) |
@@ -15,6 +16,10 @@ Spiel beenden. Ordner mit der **höchsten Nummer** unter `World_of_Warships\bin\
 Voraussetzung: **ModForge**. TTaroModUtils wird in dieser Standalone-Fassung nicht gebraucht.
 Wer vorher die TTaro-Fassung installiert hatte, löscht `ModSchemas\diedreibeiden-overmatcher.schema.json`
 und `texts\<Sprache>\overmatcher.mo`.
+
+Verschieben mit der Maus: im Gefecht Mauszeiger einblenden (Strg halten), über Granate | Schild
+fahren (feiner Rahmen erscheint) und ziehen. Die Position wird beim Loslassen gespeichert.
+Dafür sorgt `PnFMods\Overmatcher\Main.swf` (Flash-Teil, offizielle ModsAPI).
 
 Einstellungen im Gefecht mit **Strg+Alt** und:
 
@@ -47,6 +52,9 @@ gebraucht und kann ebenfalls gelöscht werden.
 2. `python3 -I tools/gameparams.py GameParams.data ships_full.json mod/res_mods/PnFMods/Overmatcher/ships.json <Version>`
    (`<Version>` wie im python.log, z. B. `15,9,0,13357625`)
 3. `python3 -I tools/build_mod.py`, Tests: `python3 -m unittest discover -s tests`
+
+Flash-Teil neu bauen (nur nach Änderung an `src/as3/Main.as`): siehe Kopf von `tools/build_flash.py`
+(Apache Flex SDK 4.16.1, Adobe `playerglobal32_0.swc`, `wows_library.swc` aus dem ModSDK).
 
 Icons neu erzeugen (nur nach Änderung der Grafiken): `python3 -I tools/make_ampel_icons.py`
 (gezeichnet: AP-Granate / Wappenschild, Ampelfarbe auf Spitze bzw. Sparren) und `python3 -I tools/make_detail_icons.py` (gezeichnet: Schiff mit Sektionen, Mini-Icon + Beschriftung).

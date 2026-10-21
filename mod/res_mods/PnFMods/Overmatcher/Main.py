@@ -102,6 +102,10 @@ try:
 except Exception:
     pass
 try:
+    import flash
+except Exception:
+    flash = globals().get('flash')
+try:
     import Keys
 except Exception:
     Keys = globals().get('Keys')
@@ -121,6 +125,8 @@ LOG_KEEP = 300
 #   D             Detailansicht: mit Alt <-> immer
 #   F             Farben: Standard <-> Farbenblind
 #   + / -         Groesse in 0,1-Schritten (0,5 - 2,0)
+# Zusaetzlich mit der Maus ziehen (Mauszeiger z. B. per Strg): Main.swf legt eine unsichtbare
+# Greifflaeche ueber Granate | Schild (FlashAPI, Kanaele omSetHandle / omDragMove / omDragEnd).
 # Gespeichert im Spielverzeichnis unter ModPrefs/ (ueberlebt Patches), sonst im Mod-Ordner.
 DEFAULT_SETTINGS = {'x': 30, 'y': 8, 'detailMode': 0, 'colorMode': 0, 'scale': 1.0}
 POSITION_STEP = 5
@@ -130,8 +136,11 @@ SETTINGS_NAME = 'diedreibeiden-overmatcher.json'
 # Vom Mod-Ordner res_mods/PnFMods/Overmatcher aus: PnFMods, res_mods, <Build>, bin, Spielverzeichnis.
 SETTINGS_DIRS = ('/../../../../../ModPrefs', '')
 
+# Groesse der Greifflaeche bei Skalierung 1: Granate | Schild (2 x 29 px + 4 px Abstand)
+HANDLE_SIZE = (62, 29)
+
 _state = {'data': None, 'disabled': False, 'results': None, 'log': [], 'ui_id': None,
-          'settings': None}
+          'settings': None, 'in_battle': False}
 
 # Client-Eigenheiten (python.log 15.9.0.13357625):
 # - open() verlangt immer (pfad, modus); Modus 'a' nur fuer bereits vorhandene Dateien.
@@ -376,8 +385,44 @@ def on_key(event):
         path = save_settings(settings)
         _log('settings %r saved to %s' % (settings, path))
         _publish(_state['results'] or {})
+        _update_handle()
     except Exception as e:
         _log('key handling failed: %r' % (e,))
+
+
+def _update_handle():
+    """Greifflaeche in Main.swf an Position und Groesse der Anzeige anpassen."""
+    if flash is None:
+        return
+    s = _settings()
+    try:
+        flash.call('omSetHandle', [s['x'], s['y'], HANDLE_SIZE[0] * s['scale'],
+                                   HANDLE_SIZE[1] * s['scale'], bool(_state['in_battle'])])
+    except Exception as e:
+        _log('flash handle update failed: %r' % (e,))
+
+
+def _dragged(args):
+    settings = _settings()
+    settings['x'], settings['y'] = int(round(float(args[0]))), int(round(float(args[1])))
+    _publish(_state['results'] or {})
+    return settings
+
+
+def on_drag_move(*args):
+    """Waehrend des Ziehens: Anzeige mitfuehren, noch nicht speichern."""
+    try:
+        _dragged(args)
+    except Exception as e:
+        _log('drag move failed: %r' % (e,))
+
+
+def on_drag_end(*args):
+    try:
+        settings = _dragged(args)
+        _log('settings %r saved to %s (drag)' % (settings, save_settings(settings)))
+    except Exception as e:
+        _log('drag end failed: %r' % (e,))
 
 
 def ui_payload(results):
@@ -428,14 +473,33 @@ def _refresh(*args, **kwargs):
         _publish(results)
 
 
+def _on_battle_shown(*args, **kwargs):
+    _state['in_battle'] = True
+    _update_handle()
+    _refresh()
+
+
 def _on_battle_quit(*args, **kwargs):
     _state['results'] = None
+    _state['in_battle'] = False
+    _update_handle()
     _remove_ui()
 
 
-_log('Main.py loaded, game version %s, getModDir %s -> %s, keys %d/11'
-     % (utils.getGameVersion(), utils.getModDir(), _mod_dir(), len(_key_actions())))
-events.onBattleShown(_refresh)
+def _register_flash():
+    if flash is None:
+        return 'missing'
+    try:
+        flash.addExternalCallback('omDragMove', on_drag_move)
+        flash.addExternalCallback('omDragEnd', on_drag_end)
+        return 'ok'
+    except Exception as e:
+        return 'failed: %r' % (e,)
+
+
+_log('Main.py loaded, game version %s, getModDir %s -> %s, keys %d/11, flash %s'
+     % (utils.getGameVersion(), utils.getModDir(), _mod_dir(), len(_key_actions()), _register_flash()))
+events.onBattleShown(_on_battle_shown)
 events.onPlayersListUpdated(_refresh)
 events.onBattleQuit(_on_battle_quit)
 events.onKeyEvent(on_key)

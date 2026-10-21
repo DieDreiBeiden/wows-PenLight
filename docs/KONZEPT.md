@@ -79,6 +79,12 @@ Optionsmenü per Maus, sondern Tastenkürzel über `events.onKeyEvent` (offiziel
 | F | Farben: Standard ↔ Farbenblind |
 | + / − | Größe in 0,1-Schritten, 0,5–2,0 |
 
+Drag & Drop per Maus über einen Flash-Teil (`Main.swf`, Quelle `src/as3/Main.as`, offizielle
+FlashAPI): unsichtbare Greiffläche über Granate | Schild auf `gameAPI.stage`, Rahmen beim
+Überfahren; Python → Flash `omSetHandle [x, y, b, h, aktiv]`, Flash → Python `omDragMove [x, y]`
+(Anzeige folgt live) und `omDragEnd [x, y]` (speichern). x/y = Abstand zur Bildschirmmitte.
+Kompiliert mit Apache Flex 4.16.1 gegen `wows_library.swc` (extern, der Client stellt `ModBase`),
+SWF-Version 13 wie die Spieldateien.
 Gespeichert in `(wows)/ModPrefs/diedreibeiden-overmatcher.json` (Rückfall: Mod-Ordner),
 übergeben an die Anzeige als `omData.settings` ({x, y, detailMode, colorMode, scale}).
 Farbenblind-Schema: Okabe-Ito, Blau #56B4E9 = Overmatch, Gelb #F0E442 = nur Bug/Heck,

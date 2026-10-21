@@ -50,6 +50,8 @@ class ModTest(unittest.TestCase):
             ship_names[i] = ship
         handlers = {}
         self.ui_data = []
+        self.flash_calls = []
+        self.flash_callbacks = {}
         self.mod_dir = mod_dir
 
         def client_open(path, mode):
@@ -73,6 +75,8 @@ class ModTest(unittest.TestCase):
                           onPlayersListUpdated=lambda f: handlers.setdefault('players', f),
                           onBattleQuit=lambda f: handlers.setdefault('quit', f),
                           onKeyEvent=lambda f: handlers.setdefault('key', f)),
+            'flash': Obj(call=lambda name, args: self.flash_calls.append((name, args)),
+                         addExternalCallback=lambda name, f: self.flash_callbacks.setdefault(name, f)),
             'Keys': Obj(KEY_LEFTARROW=203, KEY_RIGHTARROW=205, KEY_UPARROW=200, KEY_DOWNARROW=208,
                         KEY_HOME=199, KEY_D=32, KEY_F=33, KEY_EQUALS=13, KEY_MINUS=12),
         }
@@ -146,6 +150,25 @@ class ModTest(unittest.TestCase):
         # kaputte bzw. unzulaessige Werte fallen auf den Standard zurueck, Groesse wird begrenzt
         raw = {'x': 50, 'y': 'oben', 'detailMode': 7, 'colorMode': 1, 'scale': 9}
         self.assertEqual(self.env['clean_settings'](raw), dict(DEFAULTS, x=50, colorMode=1, scale=2.0))
+
+    def test_drag_moves_live_and_saves_on_release(self):
+        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
+        # Greifflaeche im Gefecht aktiv, an der Standardposition, Groesse der Symbole
+        self.assertEqual(self.flash_calls[-1], ('omSetHandle', [30, 8, 62.0, 29.0, True]))
+        self.flash_callbacks['omDragMove'](120.4, -50)
+        self.assertEqual(self.ui_data[-1][1]['settings']['x'], 120)
+        self.assertFalse(os.path.exists(os.path.join(self.mod_dir, 'diedreibeiden-overmatcher.json')))
+        self.flash_callbacks['omDragEnd'](130, -40)
+        self.assertEqual((self.saved()['x'], self.saved()['y']), (130, -40))
+
+    def test_handle_follows_scale_and_battle_end(self):
+        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
+        self.key(13)                  # +: Groesse 1,1 -> Greifflaeche waechst mit
+        name, args = self.flash_calls[-1]
+        self.assertEqual((name, args[:2], args[4]), ('omSetHandle', [30, 8], True))
+        self.assertAlmostEqual(args[2], 62 * 1.1)
+        self.handlers['quit']()
+        self.assertFalse(self.flash_calls[-1][1][4])
 
     def test_missing_mid_is_unknown(self):
         self.run_mod('PASC720_Hawaii', ['PBSC110_Minotaur'])  # Minotaur ohne Mitte-Wert
