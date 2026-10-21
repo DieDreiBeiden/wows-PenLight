@@ -18,14 +18,16 @@ midship and deck.
   <img src="docs/images/ampel.png" alt="Shell and shield in every state, standard and colour-blind palettes" width="610">
 </p>
 
-> Interface mod built on the game's official ModsAPI. Tested with the EU client,
-> build 15.9.0.13357625 (Linux/Steam).
+> Information display built on the game's official ModsAPI. It only compares static armour and
+> calibre values, like the armour viewer in port – see [Fair play](#fair-play).
+> Tested with the EU client, build 15.9.0.13357625 (Linux/Steam).
 
 ---
 
 ## Contents
 
 - [What it shows](#what-it-shows)
+- [Fair play](#fair-play)
 - [Editions and branches](#editions-and-branches)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -140,6 +142,31 @@ Deliberate simplification: the citadel is not rated. Green means the outer plati
 penetrated, not that you hit the citadel.
 
 <br clear="right">
+
+---
+
+## Fair play
+
+PenLight is an information display. It answers the same question the armour viewer in port
+answers – "is this plate thinner than what my shell gets through?" – for the ship you have locked.
+
+**What it reads in battle** (official ModsAPI and the game's own UI data):
+
+- the ship type of each player, as shown in the team lists anyway;
+- which ship you have locked;
+- your **own** loaded main-battery ammunition and its fixed values, and your **own** HE
+  penetration modifier (e.g. the IFHE commander skill).
+
+**What it does not do:**
+
+- It reads nothing about other players beyond their ship type: no positions, spotting, health,
+  reload, ammunition, consumables or builds.
+- No aiming help, no lead or trajectory prediction, no automatic input.
+- No changes to game files, ship characteristics or game rules. No executables or DLLs;
+  everything lives in `res_mods`, settings in `ModPrefs`.
+
+Armour and calibres are static ship data. They are extracted offline from the client's
+`GameParams.data` and shipped as a table (`ships.json`) for exactly one game version.
 
 ---
 
@@ -275,8 +302,10 @@ docs/                             concept, images
   [wowsunpack](https://github.com/landaire/wowsunpack) (MIT).
 - **ModsAPI and ModSDK** by Wargaming/Lesta (official documentation and `wows_library.swc`).
 - **ModForge** and **TTaroModUtils** by [AndrewTaro](https://github.com/AndrewTaro): used as
-  dependencies, not shipped. Their code served as reference only; nothing was copied.
-- Target detection follows the pattern of XTargetTracker (Battle Expert).
+  dependencies, not shipped. Their code, and that of his PenetrationCalculator (for the
+  ammunition API), served as reference only; nothing was copied.
+- Detecting the locked target in Unbound is modelled on XTargetTracker (Battle Expert); no code
+  was copied.
 
 PenLight only uses the official ModsAPI and the published interfaces of the mods above.
 A licence for this repository has not been chosen yet.
