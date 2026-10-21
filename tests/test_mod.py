@@ -38,7 +38,7 @@ AMMO = {1: Obj(ammoType='AP', alphaPiercingHE=0.0, alphaPiercingCS=0),
 
 
 class ModTest(unittest.TestCase):
-    def run_mod(self, own_ship, enemies, data_version=VERSION, ammo=1):
+    def run_mod(self, own_ship, enemies, data_version=VERSION, ammo=1, he_coeff=1.0):
         root = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, root)
         mod_dir = os.path.join(root, 'PenLight')
@@ -66,7 +66,8 @@ class ModTest(unittest.TestCase):
                           getPlayerShipInfo=lambda pid: Obj(name=ship_names[pid]),
                           getSelfPlayerInfo=lambda: {'id': 1},
                           getSelectedAmmoId=lambda weapon: ammo,
-                          getAmmoParams=lambda ammo_id: AMMO[ammo_id]),
+                          getAmmoParams=lambda ammo_id: AMMO[ammo_id],
+                          getAmmoModifiers=lambda: Obj(GMPenetrationCoeffHE=he_coeff)),
             'constants': Obj(WeaponType=Obj(ARTILLERY=0)),
             'open': client_open,
             'ui': Obj(createUiElement=lambda: 7,
@@ -99,9 +100,10 @@ class ModTest(unittest.TestCase):
 
     def test_ui_payload_for_unbound(self):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PASD013_Gearing'])
-        self.assertEqual(self.ui_data[0], ('modPenLight', {'byId': {}, 'byName': {}, 'ammo': 'ap'}))
+        self.assertEqual(self.ui_data[0], ('modPenLight', {'byId': {}, 'byName': {}, 'ammo': 'ap',
+                                                              'ifhe': False}))
         self.assertEqual(self.ui_data[-1], ('update', {
-            'ammo': 'ap',
+            'ammo': 'ap', 'ifhe': False,
             # Detail: ich->Ziel [Bug, Mitte, Deck], Ziel->ich [Bug, Mitte, Deck]
             'byId': {'10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r']},
             'byName': {'bot10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r']},
@@ -115,6 +117,24 @@ class ModTest(unittest.TestCase):
         payload = self.ui_data[-1][1]
         self.assertEqual(payload['ammo'], 'he')
         self.assertEqual(payload['byId']['10'][2][:3], [1, -1, 1])  # Ziel-Teil = Durchschlag (Mitte unbekannt)
+
+    def test_ifhe_raises_he_penetration(self):
+        # Hawaii HE 21 mm x 1.3 (IFHE) = 27.3 -> 27 mm: Alaska-Bug 27 mm ja (Gleichstand), Deck 36 nein
+        lines = self.run_mod('PASC720_Hawaii', ['PASC510_Alaska'], ammo=2, he_coeff=1.3)
+        self.assertEqual(lines, ['PASC510_Alaska attack=he:bow defense=green'])
+        self.assertTrue(self.ui_data[-1][1]['ifhe'])
+
+    def test_he_penetration_rounds_down(self):
+        # 21 mm x 1.25 = 26.25 -> 26 mm < 27 mm Bug: rot, obwohl gerundet 26 nahe 27
+        lines = self.run_mod('PASC720_Hawaii', ['PASC510_Alaska'], ammo=2, he_coeff=1.25)
+        self.assertEqual(lines[0].split()[1], 'attack=he:red')
+
+    def test_no_ifhe_without_modifier_or_for_sap(self):
+        self.run_mod('PASC720_Hawaii', ['PASC510_Alaska'], ammo=2)
+        self.assertFalse(self.ui_data[-1][1]['ifhe'])
+        self.run_mod('PASC720_Hawaii', ['PASC510_Alaska'], ammo=3, he_coeff=1.25)  # SAP: kein Faktor
+        self.assertFalse(self.ui_data[-1][1]['ifhe'])
+        self.assertEqual(self.ui_data[-1][1]['ammo'], 'sap')
 
     def test_ammo_switch_refreshes(self):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])       # AP geladen

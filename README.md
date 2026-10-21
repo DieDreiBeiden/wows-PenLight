@@ -77,11 +77,13 @@ The shell always rates the **ammunition currently loaded**; a small tag (AP / HE
 the ammo slots in the HUD shows which. HE and SAP have their own drawings modelled on the game's ammo
 icons: HE hitting a surface and exploding (smoke and flash), SAP hitting a surface with splinters.
 The tip carries the traffic-light colour, as with AP. Instead of overmatch they check the
-fixed penetration value of the shell against the target's plating (penetration ≥ plate counts;
-the IFHE commander skill is deliberately not taken into account):
+penetration value of the shell against the target's plating. Penetration is always rounded down to
+whole millimetres, and penetration ≥ plate counts. For HE the game's own modifier for your ship is
+applied, so the **IFHE** commander skill is included; when it is active, a small **IFHE** tag
+appears at the bottom left of the HE shell. SAP is not affected by IFHE:
 
 <p align="center">
-  <img src="docs/images/ammo.png" alt="Shell icons for AP, HE and SAP in every state, with ammo tag" width="600">
+  <img src="docs/images/ammo.png" alt="Shell icons for AP, HE (with and without IFHE) and SAP in every state, with ammo tag" width="630">
 </p>
 
 | Bow/stern | Deck | Shell |

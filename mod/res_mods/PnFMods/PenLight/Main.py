@@ -82,7 +82,7 @@ def detail_icons(detail):
     return name('detail_target_', detail[:3]), name('detail_me_', detail[3:])
 
 
-# HE/SAP: fester Durchschlag je Granate (GameParams alphaPiercingHE / alphaPiercingCS, ohne IFHE).
+# HE/SAP: Durchschlag je Granate (alphaPiercingHE x IFHE-Faktor / alphaPiercingCS), abgerundet (floor_mm).
 # Gleichstand zaehlt als Durchschlag (Nutzervorgabe). Ampel nur fuer das Ziel, Zonen Bug/Heck und Deck:
 #   Bug/Heck  Deck   Zustand
 #   ja        ja     green  (dazu Stern wie bei AP)
@@ -90,6 +90,12 @@ def detail_icons(detail):
 #   nein      ja     deck   (orange, Band + Ring gefuellt)
 #   nein      nein   red    (Schraegstrich)
 PEN_AMMO = ('he', 'sap')
+
+
+def floor_mm(value):
+    """Durchschlag in ganzen mm, immer abgerundet; die Toleranz faengt Gleitkomma-Reste (39.99999).
+    Ohne math-Modul (Import in der Client-Sandbox ungeprueft); Werte sind nie negativ."""
+    return int(value + 1e-6)
 
 
 def penetrates(pen_mm, armor_mm):
@@ -153,11 +159,12 @@ LOG_FILE = 'penlight_log.txt'
 LOG_KEEP = 300
 
 _state = {'data': None, 'disabled': False, 'results': None, 'log': [], 'ui_id': None,
-          'in_battle': False, 'ammo': ('ap', None)}
+          'in_battle': False, 'ammo': ('ap', None, False)}
 
 # Geladene Munition (ModsAPI: battle.getSelectedAmmoId, battle.getAmmoParams,
 # events.onArtilleryAmmoChanged; wie PenetrationCalculator). ammoType -> Kurzname und Feld
-# mit dem festen Durchschlag (mm); IFHE wird bewusst nicht beruecksichtigt.
+# mit dem festen Durchschlag (mm). HE wird mit battle.getAmmoModifiers().GMPenetrationCoeffHE
+# multipliziert (IFHE und andere Modifikatoren des eigenen Schiffs), SAP nicht; immer abgerundet.
 AMMO_TYPES = {'AP': ('ap', None), 'HE': ('he', 'alphaPiercingHE'), 'CS': ('sap', 'alphaPiercingCS')}
 
 # Client-Eigenheiten (python.log 15.9.0.13357625):
@@ -278,7 +285,7 @@ def compute():
         if enemy is None:
             _log('no data for enemy ship %s' % name)
             continue
-        ammo, pen = _state['ammo']
+        ammo, pen = _state['ammo'][:2]
         verdict = evaluate(me, enemy, ammo, pen)
         if verdict is not None:
             verdict['ship'] = name
@@ -315,7 +322,7 @@ def ui_payload(results):
         by_id[str(pid)] = pair
         if r.get('player'):
             by_name[r['player']] = pair
-    return {'byId': by_id, 'byName': by_name, 'ammo': _state['ammo'][0]}
+    return {'byId': by_id, 'byName': by_name, 'ammo': _state['ammo'][0], 'ifhe': _state['ammo'][2]}
 
 
 def _publish(results):
@@ -351,12 +358,30 @@ def _refresh(*args, **kwargs):
         _publish(results)
 
 
+def _he_coeff():
+    """Faktor auf den HE-Durchschlag der Hauptbatterie (IFHE); nicht lesbar -> 1.0."""
+    try:
+        coeff = float(_get(battle.getAmmoModifiers(), 'GMPenetrationCoeffHE'))
+    except Exception as e:
+        _log('ammo modifiers not readable: %r' % (e,))
+        return 1.0
+    return coeff if coeff > 0 else 1.0
+
+
 def _read_ammo(ammo_id):
-    """(kurzname, durchschlag_mm) zur Granaten-ID; unbekannt -> AP-Bewertung."""
+    """(kurzname, durchschlag_mm, ifhe) zur Granaten-ID; unbekannt -> AP-Bewertung."""
     params = battle.getAmmoParams(ammo_id)
     name, field = AMMO_TYPES.get(str(_get(params, 'ammoType')), ('ap', None))
-    pen = float(_get(params, field)) if field else None
-    return (name, pen) if name == 'ap' or pen else ('ap', None)
+    if not field:
+        return ('ap', None, False)
+    raw = float(_get(params, field))
+    coeff = _he_coeff() if name == 'he' else 1.0
+    pen = floor_mm(raw * coeff)
+    if not pen:
+        return ('ap', None, False)
+    if coeff != 1.0:
+        _log('ammo %s raw %s mm, coeff %s' % (name, raw, coeff))
+    return (name, pen, coeff > 1.0 + 1e-6)
 
 
 def on_ammo_changed(ammo_id=None, *args):
@@ -364,10 +389,10 @@ def on_ammo_changed(ammo_id=None, *args):
         ammo = _read_ammo(ammo_id)
     except Exception as e:
         _log('ammo %r not readable: %r' % (ammo_id, e))
-        ammo = ('ap', None)
+        ammo = ('ap', None, False)
     if ammo != _state['ammo']:
         _state['ammo'] = ammo
-        _log('ammo %s, penetration %s mm' % ammo)
+        _log('ammo %s, penetration %s mm, ifhe %s' % ammo)
         if _state['in_battle']:
             _refresh()
 
@@ -388,7 +413,7 @@ def _on_battle_shown(*args, **kwargs):
 def _on_battle_quit(*args, **kwargs):
     _state['results'] = None
     _state['in_battle'] = False
-    _state['ammo'] = ('ap', None)
+    _state['ammo'] = ('ap', None, False)
     _remove_ui()
 
 

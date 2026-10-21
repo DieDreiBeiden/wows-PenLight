@@ -8,8 +8,8 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from penlight.logic import (GREEN, RED, YELLOW, attack_color, defense_color,
-                               detail_icons, evaluate, overmatches, pen_detail, pen_state,
-                               zone_detail)
+                            detail_icons, evaluate, floor_mm, overmatches, pen_detail, pen_state,
+                            zone_detail)
 
 
 class OvermatchRule(unittest.TestCase):
@@ -58,6 +58,13 @@ class Colors(unittest.TestCase):
 
 class Penetration(unittest.TestCase):
     YAMATO = {'bow': 32.0, 'mid': 32.0, 'deck': 57.0}
+
+    def test_floor_mm_always_rounds_down(self):
+        self.assertEqual(floor_mm(37.5), 37)
+        self.assertEqual(floor_mm(37.99), 37)
+        self.assertEqual(floor_mm(40.0), 40)
+        self.assertEqual(floor_mm(32 * 1.25), 40)
+        self.assertEqual(floor_mm(39.9999999999), 40)   # Gleitkomma-Rest, kein echter Wert darunter
 
     def test_tie_penetrates(self):
         self.assertEqual(pen_state(32, {'bow': 32.0, 'deck': 32.0}), GREEN)
