@@ -2,14 +2,15 @@
 
 [English](README.md) · **Deutsch**
 
-**Overmatch-Anzeige für World of Warships.** Schaltest du einen Kreuzer oder ein
+**Overmatch- und Durchschlags-Anzeige für World of Warships.** Schaltest du einen Kreuzer oder ein
 Schlachtschiff auf, zeigt Overmatcher direkt am Fadenkreuz zwei Ampeln:
 
-- **Granate:** Kann meine Panzerbrechende (AP) das Ziel überwiegend durchschlagen (overmatchen)?
+- **Granate:** Kommt meine **geladene** Munition durch das Ziel? AP wird nach Overmatch bewertet,
+  HE und SAP nach ihrem Durchschlag gegen die Beplankung des Ziels.
 - **Schild:** Kann das Ziel mit seiner AP mich overmatchen?
 
 Mit gedrückter **Alt**-Taste erscheint eine Detailansicht: die Schiffs-Silhouetten des Spiels,
-aufgeteilt in **Bug/Heck**, **Mitte** und **Deck**, jeweils grün (Overmatch) oder rot (kein Overmatch).
+aufgeteilt in **Bug/Heck**, **Mitte** und **Deck**, jeweils grün (kommt durch) oder rot (kommt nicht durch).
 
 <p align="center">
   <img src="docs/images/ampel.png" alt="Granate und Schild in allen Zuständen, Standard- und Farbenblind-Farben" width="610">
@@ -93,9 +94,10 @@ den Durchschlag der geladenen HE/SAP.
 
 Mit gedrückter **Alt**-Taste ersetzen zwei untereinander stehende Schiffe Granate und Schild:
 
-- **TARGET** oben: wo meine AP das Ziel overmatcht.
+- **TARGET** oben: wo meine geladene Granate durch das Ziel kommt (AP: Overmatch, HE/SAP:
+  Durchschlag von Bug/Heck und Deck).
 - **ME** unten: wo die AP des Ziels mich overmatcht.
-- Hier heißt Grün immer **Overmatch**, für Target und Me gleich. (Nur die normale Ansicht färbt
+- Hier heißt Grün immer **kommt durch**, für Target und Me gleich. (Nur die normale Ansicht färbt
   nach gut/schlecht für dich.)
 - Jedes Schiff liegt in einem dunklen, seitlich auslaufenden Band mit Haarlinien und leicht
   aufgehellter Kopfzeile. Das kleine Granaten-/Schild-Symbol in der Kopfzeile trägt die Farbe
