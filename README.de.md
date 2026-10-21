@@ -40,9 +40,16 @@ Bug/Heck, Mitte und Deck.
 
 ### Bewertete Zonen
 
-Jedes Schiff ist in drei Zonen geteilt: **Bug/Heck**, **Mitte** und **Deck**. Bewertet werden nur
-Paarungen aus **Kreuzern und Schlachtschiffen**, also dein eigenes Schiff und das Ziel. Alles andere
-(Zerstörer, Träger, U-Boote oder kein Ziel aufgeschaltet) bleibt grau.
+Jedes Schiff ist in drei Zonen geteilt: **Bug/Heck**, **Mitte** und **Deck**. Welche Schiffe
+bewertet werden, hängt von der geladenen Munition ab:
+
+- **AP** und **Schild**: nur, wenn dein eigenes Schiff und das Ziel beide **Kreuzer oder
+  Schlachtschiffe** sind.
+- **HE und SAP**: gegen jede Klasse – Zerstörer, Kreuzer, Schlachtschiffe, Träger und U-Boote –
+  und von jedem Schiff mit geladener HE/SAP. Ist die Paarung keine Kreuzer/Schlachtschiff-Paarung,
+  bleibt der Schild grau.
+
+Ohne Ziel oder bei einer nicht bewerteten Paarung bleiben die Symbole grau.
 
 ### Overmatch (AP)
 

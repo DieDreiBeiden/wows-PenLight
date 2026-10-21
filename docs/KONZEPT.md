@@ -60,6 +60,10 @@ Faktor > 1 -> Payload `ifhe: true`, Zusatzplakette `tag_ifhe.png` links unten an
 Im Spiel zu prüfen: Logzeile `ammo he raw … mm, coeff …` (Faktor vorhanden und ≈ 1.25 mit IFHE?).
 Ampel nur für die Granate:
 green (Bug/Heck und Deck), bow, deck, red. Schild und Me bleiben AP-Overmatch des Gegners.
+HE/SAP gilt für alle Klassen (`PEN_CLASSES`: Zerstörer, Kreuzer, Schlachtschiffe, Träger, U-Boote;
+eigenes Schiff: jede Klasse mit geladener HE/SAP). Ohne Kreuzer/Schlachtschiff-Paarung: Schild grau,
+Me-Teil von `detail` = -1. `ships.json` enthält dafür alle Klassen; Träger und manche U-Boote ohne
+Hauptkaliber (`null`), U-Boot-Deck = dünnste Zitadellen-/Bug-/Heck-Deckplatte (kein Mittschiffsdeck).
 Payload: `ammo` (ap/he/sap); Granate und Ziel-Teil von `detail` gelten für die geladene Munition.
 Eigene Zeichnungen `he_*.png`, `sap_*.png` nach den Spiel-Symbolen (HE Aufschlag mit Rauch und
 Blitz, SAP Aufschlag mit Splittern); Spitze in Ampelfarbe (Spiel-Typfarben wirkten neben der Ampel
@@ -82,7 +86,7 @@ Farbflächen hatten gegen das Metall fast keinen Helligkeitskontrast (1,0–1,3)
 Layout (rechts unter dem Fadenkreuz, linke obere Ecke Standard x +30, y +8):
 - ohne Alt: Granate | Schild (29×29) kompakt, 4 px Abstand, immer sichtbar (solange das
   Fadenkreuz sichtbar ist); Ampelfarben nur bei aufgeschaltetem, bewertetem Ziel, sonst grau
-  (kein Ziel, Zerstörer/Träger/U-Boot, keine Daten)
+  (kein Ziel, keine Daten, AP gegen bzw. von Zerstörer/Träger/U-Boot)
 - mit Alt (nur mit Bewertung, sonst bleiben die grauen Symbole): die Symbole werden ausgeblendet, an ihrer Stelle zwei Schiffe untereinander
   (oben Target, unten Me; 125×75, 4 px Abstand), freistehend ohne Hintergrund, Rumpf metallisch grau mit dunkler Kontur wie die
   Icons; oben links graue Mini-Granate + „TARGET“ = Ziel (ich → Ziel, unter der Granate) bzw.

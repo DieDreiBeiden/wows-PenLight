@@ -75,10 +75,23 @@ class GameParamsTest(unittest.TestCase):
 
     def test_extract(self):
         ships = gameparams.extract(gameparams.load(self.path))
-        self.assertEqual(sorted(ships), ['PJSB018_Yamato_1944', 'PXSC001_Test'])
+        # alle Klassen werden gelesen; Schiffe ohne Panzerungsdaten fallen erst in mod_table weg
+        self.assertEqual(sorted(ships), ['PJSB018_Yamato_1944', 'PXSC001_Test', 'PXSD001_Test'])
+        self.assertIsNone(ships['PXSD001_Test']['bow'])
         y = ships['PJSB018_Yamato_1944']
         self.assertEqual((y['class'], y['bow'], y['deck'], y['caliber'], y['mid']),
                          ('Battleship', 32.0, 57.0, 460.0, 32.0))
+
+    def test_mod_table_classes(self):
+        def row(cls, bow, deck, caliber):
+            return {'class': cls, 'bow': bow, 'deck': deck, 'caliber': caliber, 'mid': None}
+        table = gameparams.mod_table({
+            'PASD013_Gearing_1945': row('Destroyer', 19.0, 19.0, 127.0),
+            'PJSA718_Akagi': row('AirCarrier', 19.0, 19.0, None),       # Traeger: nur HE/SAP-Ziel
+            'PASC000_NoGuns': row('Cruiser', 25.0, 30.0, None),         # Kreuzer braucht Kaliber
+            'PASD000_NoArmor': row('Destroyer', None, 19.0, 127.0),
+        }, '15,9,0,1')['ships']
+        self.assertEqual(sorted(table), ['PASD013_Gearing_1945', 'PJSA718_Akagi'])
 
     def test_final_hull_is_used(self):
         ships = gameparams.extract(gameparams.load(self.path))

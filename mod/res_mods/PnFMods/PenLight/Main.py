@@ -15,6 +15,10 @@ RED = 'red'
 
 # Werte von Ship.subtype bzw. GameParams 'species'; per Probe-Mod zu bestaetigen.
 RELEVANT_CLASSES = frozenset(['Cruiser', 'Battleship'])
+# HE/SAP-Durchschlag wird gegen jede Klasse mit Daten bewertet (eigenes Schiff: jede Klasse mit
+# geladener HE/SAP); AP-Overmatch und Schild bleiben bei Kreuzern und Schlachtschiffen.
+PEN_CLASSES = frozenset(['Destroyer', 'Cruiser', 'Battleship', 'AirCarrier', 'Submarine'])
+GREY = 'grey'
 
 # Ampel nach Spieler-Definition (docs/KONZEPT.md, Variante B). Bug/Heck ist die
 # Grundvoraussetzung; Gruen erst, wenn auch Mitte und Deck overmatcht werden.
@@ -122,17 +126,20 @@ def evaluate(me, enemy, ammo='ap', pen_mm=None):
     ammo/pen_mm: geladene Munition ('ap', 'he', 'sap') und ihr Durchschlag (mm, nur HE/SAP).
     Bei HE/SAP bewerten 'attack' und der Target-Teil von 'detail' den Durchschlag statt des
     Overmatch; Schild und Me-Teil bleiben AP-Overmatch des Gegners.
+    HE/SAP wird auch fuer Zerstoerer, Traeger und U-Boote bewertet; Schild und Me-Teil gibt es
+    nur bei Kreuzer/Schlachtschiff-Paarungen, sonst grau bzw. unbekannt (-1).
     Liefert None, wenn die Paarung nicht angezeigt werden soll.
     """
-    if not is_relevant(me['class'], enemy['class']):
-        return None
     he = ammo in PEN_AMMO and pen_mm is not None
+    ap_rated = is_relevant(me['class'], enemy['class'])
+    if not ap_rated and not (he and enemy['class'] in PEN_CLASSES):
+        return None
     return {
         'ammo': ammo if he else 'ap',
         'attack': pen_state(pen_mm, enemy) if he else attack_color(me['caliber'], enemy),
-        'defense': defense_color(enemy['caliber'], me),
+        'defense': defense_color(enemy['caliber'], me) if ap_rated else GREY,
         'detail': (pen_detail(pen_mm, enemy) if he else zone_detail(me['caliber'], enemy))
-        + zone_detail(enemy['caliber'], me),
+        + (zone_detail(enemy['caliber'], me) if ap_rated else [-1, -1, -1]),
     }
 
 

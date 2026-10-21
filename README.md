@@ -40,9 +40,16 @@ midship and deck.
 
 ### Rated zones
 
-Each ship is split into three zones: **bow/stern**, **midship** and **deck**. Only pairings of
-**cruisers and battleships** are rated – your own ship and the target. Anything else (destroyers,
-carriers, submarines, or no target locked) stays grey.
+Each ship is split into three zones: **bow/stern**, **midship** and **deck**. Which ships are
+rated depends on the loaded ammunition:
+
+- **AP** and the **shield**: only if your own ship and the target are both **cruisers or
+  battleships**.
+- **HE and SAP**: against every class – destroyers, cruisers, battleships, carriers and
+  submarines – and from every ship that has HE/SAP loaded. If the pairing is not a
+  cruiser/battleship pairing, the shield stays grey.
+
+Without a target, or for a pairing that is not rated, the icons stay grey.
 
 ### Overmatch (AP)
 
