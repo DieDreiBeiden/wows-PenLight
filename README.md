@@ -58,6 +58,10 @@ Shell (me → target) and shield (target → me) use the same colours:
 | no | – | Red | only a broadside is worth it | angling works |
 | – | – | Grey | no target, or the target is a destroyer/carrier/submarine | |
 
+Each state also has its own **shape**, so it can be read without relying on colour:
+all segments filled = overmatch everywhere, partly filled = bow/stern only, slash = no
+overmatch, empty = no target.
+
 Only pairings of **cruisers and battleships** are rated; everything else stays grey.
 A colour-blind scheme in blue/yellow/orange (Okabe-Ito palette) is available for red-green
 colour vision deficiency.

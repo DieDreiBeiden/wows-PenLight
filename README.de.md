@@ -58,6 +58,10 @@ overmatcht werden. Granate (ich → Ziel) und Schild (Ziel → ich) verwenden di
 | nein | – | Rot | nur Breitseite lohnt | anwinkeln geht |
 | – | – | Grau | kein Ziel, oder Ziel ist Zerstörer/Träger/U-Boot | |
 
+Jeder Zustand hat zusätzlich eine eigene **Form**, damit er auch ohne Farbsehen lesbar ist:
+alle Segmente gefüllt = überall Overmatch, teilweise gefüllt = nur Bug/Heck, Schrägstrich =
+kein Overmatch, leer = kein Ziel.
+
 Bewertet werden nur Paarungen aus **Kreuzern und Schlachtschiffen**; für alle anderen bleiben
 die Symbole grau. Für Rot-Grün-Schwäche gibt es ein Farbschema in Blau/Gelb/Orange
 (Okabe-Ito-Palette).

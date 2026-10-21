@@ -3,15 +3,18 @@
 
     python3 -I tools/make_ampel_icons.py
 
-Granate = AP-Granate wie im Bewaffnungs-Fenster (grau-metallisch, schraeg nach unten rechts),
-Ampelfarbe auf Spitze und Ring (wo im Original Rot ist).
-Schild  = Wappenschild mit drei Sparren, Rand metallisch grau wie die Granate,
-          Sparren in Ampelfarbe auf Hellgrau.
+Granate = AP-Granate wie im Bewaffnungs-Fenster (grau-metallisch, schraeg nach unten rechts).
+Schild  = Wappenschild mit Sparren, Rand metallisch grau wie die Granate.
+Barrierearm (Pruefung nach WCAG 2.1, Variante A2): der Zustand ist auch ohne Farbe erkennbar.
+Je Icon drei Segmente auf dunklem Grund mit dunklen Trennlinien, gefuellt nach Zustand:
+  green  = Overmatch ueberall   -> alle Segmente in Farbe
+  yellow = nur Bug/Heck         -> Granate: Spitze, Schild: Fuss + unterer Sparren
+  red    = kein Overmatch       -> Schraegstrich in Farbe, leere Segmente dunkel in Farbe getoent
+  grey   = kein Ziel / keine Bewertung -> alle Segmente leer
+Granate: Spitze, Band, Heckring. Schild: Fuss, unterer Sparren, oberer Sparren.
 Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
-Die frueheren 19x19-Vorlagen in assets/icons_19/ werden nicht mehr verwendet.
 Ausgabe: mod/res_mods/PnFMods/Overmatcher/{shell,shield}_[cb_]{green,yellow,red,grey}.png
 (cb_ = Farbenblind-Schema AMPEL_CB)
-(grey = kein Ziel aufgeschaltet bzw. Ziel ohne Bewertung)
 """
 import os
 import sys
@@ -32,13 +35,19 @@ AMPEL = {'green': (0x3D, 0xDC, 0x5A), 'yellow': (0xFF, 0x8C, 0x00), 'red': (232,
 NEUTRAL = {'grey': (128, 132, 136)}
 # Farbenblind-Schema (Okabe-Ito, unterscheidbar bei Rot-Gruen-Schwaeche): Blau = Overmatch,
 # Gelb = nur Bug/Heck, Orange = kein Overmatch. Dateien mit Praefix 'cb_'.
-AMPEL_CB = {'green': (0x56, 0xB4, 0xE9), 'yellow': (0xF0, 0xE4, 0x42), 'red': (0xD5, 0x5E, 0x00)}
+# Blau kraeftiger als Okabe-Ito-Himmelblau, damit es sich vom Grau 'kein Ziel' abhebt.
+AMPEL_CB = {'green': (0x2B, 0x8C, 0xE8), 'yellow': (0xF0, 0xE4, 0x42), 'red': (0xD5, 0x5E, 0x00)}
 # Praefix im Dateinamen -> Farben (Zustandsnamen bleiben green/yellow/red/grey)
 PALETTES = {'': dict(AMPEL, **NEUTRAL), 'cb_': dict(AMPEL_CB, **NEUTRAL)}
 OUTLINE = (24, 26, 28)
 METAL = (168, 172, 176)
 GUIDE_RING = (92, 94, 98)
-LIGHT = (212, 214, 216)
+SEGMENT_GROUND = (46, 50, 54)   # dunkler Grund fuer die Farbsegmente (Helligkeitskontrast)
+SEGMENT_EMPTY = (92, 96, 100)   # leeres Segment, Form bleibt sichtbar
+SEPARATOR = (22, 24, 26)        # Trennlinie zwischen Farbe und Metall
+RED_TINT = 0.45                 # 'kein Overmatch': leere Segmente so weit in Zustandsfarbe
+# gefuellte Segmente je Zustand (Granate, Schild)
+FILL = {'green': (3, 3), 'yellow': (1, 2), 'red': (0, 0), 'grey': (0, 0)}
 SHELL_SCALE = 1.28
 SHELL_SHIFT = 0.03  # Granate liegt sonst etwas links oben (Heck kuerzer als Spitze)
 
@@ -71,7 +80,26 @@ def _outlined(rgb, alpha, px=1.1):
     return Image.fromarray(arr, 'RGBA')
 
 
-def shell(color):
+def _mix(a, b, t):
+    return tuple(p * (1 - t) + q * t for p, q in zip(a, b))
+
+
+def _empty_color(state, color):
+    return _mix(SEGMENT_GROUND, color, RED_TINT) if state == 'red' else SEGMENT_EMPTY
+
+
+def _slash(x, y, color):
+    """Schraegstrich rechts oben -> links unten mit dunklem Rand ('kein Overmatch')."""
+    d = np.abs((x - 0.5) + (y - 0.5)) / np.sqrt(2)
+    along = np.abs((x - 0.5) - (y - 0.5)) / np.sqrt(2)
+    core = ((d < 0.055) & (along < 0.40)).astype(np.float32)
+    rim = ((d < 0.095) & (along < 0.44)).astype(np.float32)
+    return [(rim, np.array(SEPARATOR, np.float32)), (core, np.array(color, np.float32))]
+
+
+def shell(state, palette=None):
+    palette = palette or PALETTES['']
+    color = palette[state]
     x, y = _grid()
     # SHELL_SCALE: gleiche Hoehe wie der Schild (sichtbar ~28 von 29 px)
     u = ((x - 0.5 - SHELL_SHIFT) + (y - 0.5 - SHELL_SHIFT)) / np.sqrt(2) / SHELL_SCALE    # entlang der Achse, Spitze bei +u
@@ -86,13 +114,23 @@ def shell(color):
     body = body.astype(np.float32)
     s = np.clip(v / r, -1, 1)
     shade = (0.62 + 0.38 * np.cos((s + 0.35) * 1.5) - 0.18 * np.clip(s, 0, 1))[..., None]
-    rgb, alpha = _compose([
-        (body, np.array(METAL, np.float32) * shade),
-        (body * ((u > -0.30) & (u < -0.24)), np.array(GUIDE_RING, np.float32) * shade),
-        (body * ((u > -0.04) & (u < 0.03)), np.array(color, np.float32) * shade),
-        (body * (u > ogive + 0.06), np.array(color, np.float32) * np.clip(shade + 0.1, 0, 1.2)),
-    ])
-    return _outlined(rgb, alpha)
+    lit = np.clip(shade + 0.1, 0, 1.2)
+    edge = 0.012
+    # Segmente: Spitze, Band, Heckring (jeweils mit dunklen Trennlinien)
+    segments = [
+        (body * (u > ogive + 0.06), body * (np.abs(u - (ogive + 0.06)) < edge)),
+        (body * ((u > -0.06) & (u < 0.04)), body * ((np.abs(u + 0.06) < edge) | (np.abs(u - 0.04) < edge))),
+        (body * ((u > -0.31) & (u < -0.22)), body * ((np.abs(u + 0.31) < edge) | (np.abs(u + 0.22) < edge))),
+    ]
+    layers = [(body, np.array(METAL, np.float32) * shade)]
+    filled = FILL[state][0]
+    for i, (segment, separator) in enumerate(segments):
+        fill = color if i < filled else _empty_color(state, color)
+        layers.append((segment, np.array(fill, np.float32) * lit))
+        layers.append((separator, np.array(SEPARATOR, np.float32)))
+    if state == 'red':
+        layers += _slash(x, y, color)
+    return _outlined(*_compose(layers))
 
 
 def _shield_mask(x, y, inset=0.0):
@@ -104,33 +142,38 @@ def _shield_mask(x, y, inset=0.0):
     return ((y > top_y) & (y < bottom) & (np.abs(x - 0.5) < w)).astype(np.float32)
 
 
-def shield(color):
+def shield(state, palette=None):
+    palette = palette or PALETTES['']
+    color = palette[state]
     x, y = _grid()
     outer = _shield_mask(x, y)
     inner = _shield_mask(x, y, inset=0.065)
     # Rand metallisch wie der Granatenkoerper (gleiches Grau, Licht von rechts)
     s = np.clip((x - 0.5) / 0.34, -1, 1)
     rim_shade = (0.62 + 0.38 * np.cos((s - 0.35) * 1.5) - 0.18 * np.clip(-s, 0, 1))[..., None]
-    # Sparren mit Spitze nach oben, unten in Ampelfarbe auslaufend
+    # Sparren mit Spitze nach oben; Segmente von unten: Fuss, unterer, oberer Sparren
     k = (y - 0.85 * np.abs(x - 0.5) - 0.03) / 0.15
-    chevron = (((np.floor(k) % 2 == 0) & (k > 0)) | (k > 4.0))[..., None]
-    face = np.where(chevron, np.array(color, np.float32), np.array(LIGHT, np.float32))
-    face_shade = (1.0 + 0.10 * (x - 0.5) / 0.34 - 0.08 * y)[..., None]
-    rgb, alpha = _compose([
+    segments = [inner * (k > 4.15), inner * ((k > 2.15) & (k < 2.85)), inner * ((k > 0.15) & (k < 0.85))]
+    layers = [
         (outer, np.array(METAL, np.float32) * rim_shade),
         (_shield_mask(x, y, inset=0.055), np.array(GUIDE_RING, np.float32)),  # Fuge wie Fuehrungsring
-        (inner, face * face_shade),
-    ])
-    return _outlined(rgb, alpha)
+        (inner, np.array(SEGMENT_GROUND, np.float32)),
+    ]
+    filled = FILL[state][1]
+    for i, segment in enumerate(segments):
+        layers.append((segment, np.array(color if i < filled else _empty_color(state, color), np.float32)))
+    if state == 'red':
+        layers += _slash(x, y, color)
+    return _outlined(*_compose(layers))
 
 
 def main():
     written = []
     for kind, draw in (('shell', shell), ('shield', shield)):
         for prefix, palette in sorted(PALETTES.items()):
-            for state, color in palette.items():
+            for state in palette:
                 name = '%s_%s%s.png' % (kind, prefix, state)
-                draw(color).reduce(SUPERSAMPLE).save(os.path.join(TARGET_DIR, name))
+                draw(state, palette).reduce(SUPERSAMPLE).save(os.path.join(TARGET_DIR, name))
                 written.append(name)
     print('%d Icons, %dx%d: %s' % (len(written), SIZE, SIZE, ' '.join(written)))
     return 0

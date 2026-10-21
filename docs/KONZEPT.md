@@ -33,6 +33,17 @@ Bug ohne alles 16,4 %, Bug nicht 73,1 % → Granate grün/gelb/rot 10,5/16,4/73,
 Bewusste Vereinfachung: Der Zitadellengürtel wird nicht bewertet; Grün heißt Overmatch
 der Beplankung, nicht Zitadellentreffer.
 
+## Icons: Barrierefreiheit (Variante A2)
+
+Prüfung nach WCAG 2.1 AA (Farbkontrast, Farbe als einziges Merkmal): Im Standardschema waren
+die Ampelfarben bei Deuteranopie kaum zu unterscheiden (ΔE2000 Grün–Orange 8,2), und die
+Farbflächen hatten gegen das Metall fast keinen Helligkeitskontrast (1,0–1,3). Umsetzung:
+- Zustand auch über die Form: je Icon drei Segmente (Granate: Spitze, Band, Heckring; Schild:
+  Fuß, unterer, oberer Sparren). Grün = alle gefüllt, Orange = Granate Spitze bzw. Schild Fuß +
+  unterer Sparren, Rot = Schrägstrich + leere Segmente dunkel in Zustandsfarbe getönt, Grau = leer.
+- Farbsegmente auf dunklem Grund mit dunklen Trennlinien (Kontrast Grün 7,1, Orange 5,5, Rot 3,3).
+- Farbenblind-Blau kräftiger (#2B8CE8), damit es sich vom Grau abhebt.
+
 ## Detailansicht (Alt gedrückt)
 
 Layout (rechts unter dem Fadenkreuz, linke obere Ecke Standard x +30, y +8):
@@ -70,7 +81,7 @@ Optionen (TTaro Mod Config, Seite `diedreibeiden.overmatcher`; eigenes Zahnrad
 - `overmatcher.detailMode` 0 = Detail mit Alt, 1 = immer (ersetzt die Symbole bei Bewertung)
 - Silhouetten an/aus nur als `useSilhouettes` in `OVERMATCHER_SETTINGS` (aus der Optionsseite
   entfernt, Nutzerentscheidung)
-- `overmatcher.colorMode` 0 = Standard, 1 = Farbenblind (Okabe-Ito: Blau #56B4E9 = Overmatch,
+- `overmatcher.colorMode` 0 = Standard, 1 = Farbenblind (Okabe-Ito: Blau #2B8CE8 = Overmatch,
   Gelb #F0E442 = nur Bug/Heck, Orange #D55E00 = kein Overmatch); Icons mit Präfix `cb_`,
   Silhouetten per `OVERMATCHER_CT_CB`. Die gezeichneten Ersatzbilder bleiben Standardfarben.
 - `overmatcher.scale` 0,5–2,0 (scaleX/scaleY der ganzen Anzeige)
