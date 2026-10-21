@@ -3,7 +3,7 @@
 
     python3 -I tools/make_readme_images.py
 
-- ampel.png:  Granate | Schild in allen Zustaenden, Standard- und Farbenblind-Farben
+- ampel.png:  Granate | Schild je Bedeutung (Spalten), Standard- und Farbenblind-Farben, mit Zeichen
 - detail.png: Detailansicht wie im Spiel (Rahmen, farbige Mini-Icons, Schiffsname,
   Target oben, Me unten). Statt der Spiel-Silhouette steht das gezeichnete Schiff aus
   make_detail_icons, damit keine Spielgrafik ins Repository kommt.
@@ -36,23 +36,42 @@ def _icon(name):
     return Image.open(os.path.join(ICONS, name)).convert('RGBA')
 
 
+def _with_mark(icon, mark):
+    """Icon mit Zeichen rechts oben wie in Overmatcher.unbound (markOffset)."""
+    pad = 8
+    out = Image.new('RGBA', (icon.width + pad, icon.height + pad), (0, 0, 0, 0))
+    out.alpha_composite(icon, (0, pad))
+    if mark:
+        m = _icon(mark)
+        out.alpha_composite(m, (icon.width + pad - m.width, 0))
+    return out
+
+
 def ampel():
+    """Spalten nach Bedeutung: Granate ich -> Ziel, Schild Ziel -> ich (Farbe = gut fuer mich)."""
     f = ImageFont.truetype(FONT, 13)
     fs = ImageFont.truetype(FONT_REGULAR, 12)
     rows = [('Standard', ''), ('Colour-blind', 'cb_')]
-    states = [('green', 'overmatch\neverywhere'), ('yellow', 'bow/stern\nonly'),
-              ('red', 'no\novermatch'), ('grey', 'no target /\nnot relevant')]
-    im = Image.new('RGBA', (130 + 4 * 120, 40 + 2 * 95), BACKGROUND)
+    columns = [('overmatch\neverywhere', 'green', 'red'), ('bow/stern\nonly', 'yellow', 'yellow'),
+               ('no\novermatch', 'red', 'green'), ('no target /\nnot relevant', 'grey', 'grey')]
+    cw = 130
+    im = Image.new('RGBA', (140 + 4 * cw, 44 + 2 * 100), BACKGROUND)
     d = ImageDraw.Draw(im)
-    for i, (_, label) in enumerate(states):
-        d.multiline_text((130 + i * 120, 6), label, font=fs, fill=(220, 222, 224), spacing=1)
+    for i, (label, _, _) in enumerate(columns):
+        d.multiline_text((140 + i * cw, 6), label, font=fs, fill=(220, 222, 224), spacing=1)
     for r, (name, prefix) in enumerate(rows):
-        y = 48 + r * 95
-        d.text((14, y + 22), name, font=f, fill=(236, 238, 240))
-        for i, (state, _) in enumerate(states):
-            for j, kind in enumerate(('shell', 'shield')):
-                ic = _icon('%s_%s%s.png' % (kind, prefix, state)).resize((29 * ZOOM,) * 2, Image.LANCZOS)
-                im.alpha_composite(ic, (130 + i * 120 + j * (29 * ZOOM + 2), y))
+        y = 44 + r * 100
+        d.text((14, y + 30), name, font=f, fill=(236, 238, 240))
+        for i, (_, shell_state, shield_state) in enumerate(columns):
+            shell = _with_mark(_icon('shell_%s%s.png' % (prefix, shell_state)),
+                               'mark_star.png' if shell_state == 'green' else None)
+            shield = _with_mark(_icon('shield_%s%s.png' % (prefix, shield_state)),
+                                'mark_warning.png' if shield_state == 'red' else None)
+            for j, icon in enumerate((shell, shield)):
+                big = icon.resize((icon.width * ZOOM, icon.height * ZOOM), Image.LANCZOS)
+                im.alpha_composite(big, (140 + i * cw + j * 60, y))
+    d.text((14, 44 + 2 * 100 - 16), 'left: my shell vs target  -  right: target vs my shield',
+           font=fs, fill=(170, 172, 174))
     im.save(os.path.join(OUT, 'ampel.png'))
 
 

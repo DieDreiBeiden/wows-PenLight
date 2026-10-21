@@ -18,12 +18,12 @@ RELEVANT_CLASSES = frozenset(['Cruiser', 'Battleship'])
 
 # Ampel nach Spieler-Definition (docs/KONZEPT.md, Variante B). Bug/Heck ist die
 # Grundvoraussetzung; Gruen erst, wenn auch Mitte und Deck overmatcht werden.
-# Farben bedeuten fuer Granate und Schild dasselbe: Gruen = Overmatch, Rot = kein Overmatch
-# (Granate: ich -> Ziel, Schild: Ziel -> ich).
-#   Bug/Heck  Mitte+Deck   Farbe
-#   ja        beide ja     gruen    ueberall Overmatch
-#   ja        nicht beide  gelb     nur Bug/Heck
-#   nein      egal         rot      kein Overmatch
+# Farben der normalen Ansicht = gut / schlecht fuer mich (Granate: ich -> Ziel, Schild: Ziel -> ich).
+#   Bug/Heck  Mitte+Deck   Granate                    Schild
+#   ja        beide ja     gruen (ich komme durch)    rot   (Ziel kommt ueberall durch)
+#   ja        nicht beide  gelb                       gelb
+#   nein      egal         rot                        gruen (Ziel kommt nicht durch)
+# Die Alt-Detailansicht faerbt dagegen fuer Target und Me gleich: gruen = Overmatch (detail_icons).
 # Fehlt der Mitte-Wert, entscheiden Bug/Heck und Deck allein.
 
 
@@ -48,8 +48,11 @@ def attack_color(my_caliber_mm, target):
 
 
 def defense_color(enemy_caliber_mm, me):
-    """Schild: kann der Gegner mich overmatchen? Gruen = ja (gleiche Farben wie die Granate)."""
-    return LEVEL_COLORS[_level(enemy_caliber_mm, me)]
+    """Schild: kann der Gegner mich overmatchen? Farbe = gut fuer mich: rot = ja, ueberall."""
+    return DEFENSE_COLORS[_level(enemy_caliber_mm, me)]
+
+
+DEFENSE_COLORS = (GREEN, YELLOW, RED)
 
 
 def is_relevant(my_class, enemy_class):

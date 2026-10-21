@@ -6,11 +6,14 @@
 Granate = AP-Granate wie im Bewaffnungs-Fenster (grau-metallisch, schraeg nach unten rechts).
 Schild  = Wappenschild mit Sparren, Rand metallisch grau wie die Granate.
 Barrierearm (Pruefung nach WCAG 2.1, Variante A2): der Zustand ist auch ohne Farbe erkennbar.
-Je Icon drei Segmente auf dunklem Grund mit dunklen Trennlinien, gefuellt nach Zustand:
-  green  = Overmatch ueberall   -> alle Segmente in Farbe
-  yellow = nur Bug/Heck         -> Granate: Spitze, Schild: Fuss + unterer Sparren
-  red    = kein Overmatch       -> Schraegstrich in Farbe, leere Segmente dunkel in Farbe getoent
-  grey   = kein Ziel / keine Bewertung -> alle Segmente leer
+Je Icon drei Segmente auf dunklem Grund mit dunklen Trennlinien. Die Form zeigt den
+Overmatch-Umfang, die Farbe 'gut fuer mich' (Granate gruen = ich komme ueberall durch,
+Schild rot = Ziel kommt ueberall durch):
+  ueberall       -> alle Segmente in Farbe
+  nur Bug/Heck   -> Granate: Spitze, Schild: Fuss + unterer Sparren
+  kein Overmatch -> Schraegstrich, leere Segmente dunkel in Farbe getoent
+  grey (kein Ziel / keine Bewertung) -> alle Segmente leer
+Dazu mark_star.png / mark_warning.png fuer die Extremfaelle (P3).
 Granate: Spitze, Band, Heckring. Schild: Fuss, unterer Sparren, oberer Sparren.
 Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verkleinert.
 Ausgabe: mod/res_mods/PnFMods/Overmatcher/{shell,shield}_[cb_]{green,yellow,red,grey}.png
@@ -20,7 +23,7 @@ import os
 import sys
 
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TARGET_DIR = os.path.join(ROOT, 'mod', 'res_mods', 'PnFMods', 'Overmatcher')
@@ -45,9 +48,13 @@ GUIDE_RING = (92, 94, 98)
 SEGMENT_GROUND = (46, 50, 54)   # dunkler Grund fuer die Farbsegmente (Helligkeitskontrast)
 SEGMENT_EMPTY = (92, 96, 100)   # leeres Segment, Form bleibt sichtbar
 SEPARATOR = (22, 24, 26)        # Trennlinie zwischen Farbe und Metall
-RED_TINT = 0.45                 # 'kein Overmatch': leere Segmente so weit in Zustandsfarbe
-# gefuellte Segmente je Zustand (Granate, Schild)
-FILL = {'green': (3, 3), 'yellow': (1, 2), 'red': (0, 0), 'grey': (0, 0)}
+SLASH_TINT = 0.45               # 'kein Overmatch': leere Segmente so weit in Zustandsfarbe
+# Die Form zeigt den Overmatch-Umfang (Stufe 2 = ueberall, 1 = nur Bug/Heck, 0 = keiner),
+# die Farbe 'gut fuer mich': Granate gruen = Stufe 2, Schild gruen = Stufe 0.
+LEVEL = {'shell': {'green': 2, 'yellow': 1, 'red': 0},
+         'shield': {'green': 0, 'yellow': 1, 'red': 2}}
+# gefuellte Segmente je Stufe (Granate: Spitze/Band/Heckring, Schild: Fuss/Sparren unten/oben)
+FILL = {'shell': {2: 3, 1: 1, 0: 0}, 'shield': {2: 3, 1: 2, 0: 0}}
 SHELL_SCALE = 1.28
 SHELL_SHIFT = 0.03  # Granate liegt sonst etwas links oben (Heck kuerzer als Spitze)
 
@@ -84,8 +91,13 @@ def _mix(a, b, t):
     return tuple(p * (1 - t) + q * t for p, q in zip(a, b))
 
 
-def _empty_color(state, color):
-    return _mix(SEGMENT_GROUND, color, RED_TINT) if state == 'red' else SEGMENT_EMPTY
+def _empty_color(level, color):
+    return _mix(SEGMENT_GROUND, color, SLASH_TINT) if level == 0 else SEGMENT_EMPTY
+
+
+def _level(kind, state):
+    """Overmatch-Stufe zum Farbzustand; None = kein Ziel (grau, alles leer, kein Strich)."""
+    return LEVEL[kind].get(state)
 
 
 def _slash(x, y, color):
@@ -123,12 +135,13 @@ def shell(state, palette=None):
         (body * ((u > -0.31) & (u < -0.22)), body * ((np.abs(u + 0.31) < edge) | (np.abs(u + 0.22) < edge))),
     ]
     layers = [(body, np.array(METAL, np.float32) * shade)]
-    filled = FILL[state][0]
+    level = _level('shell', state)
+    filled = FILL['shell'].get(level, 0)
     for i, (segment, separator) in enumerate(segments):
-        fill = color if i < filled else _empty_color(state, color)
+        fill = color if i < filled else _empty_color(level, color)
         layers.append((segment, np.array(fill, np.float32) * lit))
         layers.append((separator, np.array(SEPARATOR, np.float32)))
-    if state == 'red':
+    if level == 0:
         layers += _slash(x, y, color)
     return _outlined(*_compose(layers))
 
@@ -159,12 +172,50 @@ def shield(state, palette=None):
         (_shield_mask(x, y, inset=0.055), np.array(GUIDE_RING, np.float32)),  # Fuge wie Fuehrungsring
         (inner, np.array(SEGMENT_GROUND, np.float32)),
     ]
-    filled = FILL[state][1]
+    level = _level('shield', state)
+    filled = FILL['shield'].get(level, 0)
     for i, segment in enumerate(segments):
-        layers.append((segment, np.array(color if i < filled else _empty_color(state, color), np.float32)))
-    if state == 'red':
+        layers.append((segment, np.array(color if i < filled else _empty_color(level, color), np.float32)))
+    if level == 0:
         layers += _slash(x, y, color)
     return _outlined(*_compose(layers))
+
+
+# Hervorhebung der Extremfaelle (Variante P3), als eigene Bilder rechts oben am Symbol:
+# Stern = ich komme ueberall durch (Granate gruen), Warndreieck = Ziel kommt ueberall durch
+# (Schild rot). Weiss mit dunklem Rand, also unabhaengig von Farbschema und Farbsehen.
+MARK_SIZE = 16
+MARK_DARK = (16, 18, 20, 255)
+MARK_LIGHT = (250, 250, 250, 255)
+
+
+def mark_star():
+    S = MARK_SIZE * SUPERSAMPLE
+    im = Image.new('RGBA', (S, S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    c, r = S / 2, S * 0.36
+    pts = []
+    for i in range(8):
+        ang = np.pi / 4 * i - np.pi / 2
+        rr = r if i % 2 == 0 else r * 0.32
+        pts.append((c + rr * np.cos(ang), c + rr * np.sin(ang)))
+    d.polygon([(c + (x - c) * 1.35, c + (y - c) * 1.35) for x, y in pts], fill=MARK_DARK)
+    d.polygon(pts, fill=MARK_LIGHT)
+    return im.reduce(SUPERSAMPLE)
+
+
+def mark_warning():
+    S = MARK_SIZE * SUPERSAMPLE
+    im = Image.new('RGBA', (S, S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    cx, top, size, rim = S / 2, S * 0.10, S * 0.80, S * 0.07
+    d.polygon([(cx, top - rim * 1.4), (cx + size / 2 + rim * 1.3, top + size * 0.87 + rim * 0.75),
+               (cx - size / 2 - rim * 1.3, top + size * 0.87 + rim * 0.75)], fill=MARK_DARK)
+    d.polygon([(cx, top), (cx + size / 2, top + size * 0.87), (cx - size / 2, top + size * 0.87)], fill=MARK_LIGHT)
+    w = size * 0.15
+    d.rounded_rectangle([cx - w / 2, top + size * 0.30, cx + w / 2, top + size * 0.62], radius=w / 2, fill=MARK_DARK)
+    d.ellipse([cx - w / 2, top + size * 0.68, cx + w / 2, top + size * 0.68 + w], fill=MARK_DARK)
+    return im.reduce(SUPERSAMPLE)
 
 
 def main():
@@ -175,6 +226,9 @@ def main():
                 name = '%s_%s%s.png' % (kind, prefix, state)
                 draw(state, palette).reduce(SUPERSAMPLE).save(os.path.join(TARGET_DIR, name))
                 written.append(name)
+    for name, draw in (('mark_star.png', mark_star), ('mark_warning.png', mark_warning)):
+        draw().save(os.path.join(TARGET_DIR, name))
+        written.append(name)
     print('%d Icons, %dx%d: %s' % (len(written), SIZE, SIZE, ' '.join(written)))
     return 0
 

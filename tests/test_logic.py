@@ -40,15 +40,15 @@ class Colors(unittest.TestCase):
         self.assertEqual(attack_color(406, self.NEW_ORLEANS_LIKE), GREEN)
 
     def test_defense(self):
-        # gleiche Farben wie die Granate: Gruen = Gegner overmatcht mich
-        self.assertEqual(defense_color(460, self.THUNDERER), GREEN)
+        # Farbe = gut fuer mich: Rot = Gegner overmatcht mich ueberall
+        self.assertEqual(defense_color(460, self.THUNDERER), RED)
         self.assertEqual(defense_color(460, self.HAWAII), YELLOW)
-        self.assertEqual(defense_color(457, self.THUNDERER), RED)
+        self.assertEqual(defense_color(457, self.THUNDERER), GREEN)
 
     def test_deck_only_counts_as_nothing(self):
         ship = {'bow': 32.0, 'mid': 32.0, 'deck': 30.0}
         self.assertEqual(attack_color(457, ship), RED)
-        self.assertEqual(defense_color(457, ship), RED)
+        self.assertEqual(defense_color(457, ship), GREEN)
 
     def test_missing_mid_uses_bow_and_deck(self):
         self.assertEqual(attack_color(460, {'bow': 32.0, 'mid': None, 'deck': 32.0}), GREEN)
@@ -85,9 +85,9 @@ class Filter(unittest.TestCase):
         large = self.ship('Cruiser', 305, 27, 30)
         light = self.ship('Cruiser', 152, 16, 16)
         self.assertEqual(evaluate(large, light)['attack'], GREEN)
-        self.assertEqual(evaluate(large, light)['defense'], RED)
+        self.assertEqual(evaluate(large, light)['defense'], GREEN)
         self.assertEqual(evaluate(light, large)['attack'], RED)
-        self.assertEqual(evaluate(light, large)['defense'], GREEN)
+        self.assertEqual(evaluate(light, large)['defense'], RED)
 
     def test_battleship_vs_battleship_shown(self):
         bb = self.ship('Battleship', 460, 32, 32)

@@ -29,6 +29,13 @@
 	iconGap: 4,
 	# Groesse von Granate/Schild (Icons werden so erzeugt, tools/make_ampel_icons.py)
 	iconSize: 29,
+	# Zeichen fuer die Extremfaelle (mark_*.png, tools/make_ampel_icons.py): Groesse, Versatz zur
+	# rechten oberen Ecke des Symbols, Aufblinken (Dauer je Puls in s, Anzahl Pulse)
+	markSize: 16,
+	markOffsetX: 6,
+	markOffsetY: -7,
+	markPulse: 0.25,
+	markPulseCount: 4,
 	# senkrechter Abstand zwischen den beiden Detail-Schiffen (Alt, Target oben, Me unten)
 	shipGap: 6,
 	# Groesse der Detail-Schiffe (Bilder werden in dieser Groesse erzeugt, tools/make_detail_icons.py)
@@ -193,6 +200,9 @@
 		(var altVision:bool = "cameraEntity.camera.altVision" (event "cameraEntity.camera.evAltVisionChanged"))
 		(var attackIcon:str = "OVERMATCHER_ICON_PATH + 'shell_' + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
 		(var defenseIcon:str = "OVERMATCHER_ICON_PATH + 'shield_' + palettePrefix + (hasVerdict ? verdict[1] : 'grey') + '.png'")
+		# Extremfaelle: ich komme ueberall durch (Granate gruen) / Ziel kommt ueberall durch (Schild rot)
+		(var attackMark:str = "hasVerdict && verdict[0] == 'green' ? OVERMATCHER_ICON_PATH + 'mark_star.png' : ''")
+		(var defenseMark:str = "hasVerdict && verdict[1] == 'red' ? OVERMATCHER_ICON_PATH + 'mark_warning.png' : ''")
 		# Option "Immer AN": Detailansicht auch ohne Alt (nur mit Bewertung, sonst graue Symbole)
 		(var showDetail:bool = "(altVision || isDetailAlways) && hasVerdict")
 
@@ -244,8 +254,8 @@
 		)
 		(hblock
 			(bind visible "!showDetail")
-			(element OvermatcherIcon _url="attackIcon")
-			(element OvermatcherIcon _url="defenseIcon")
+			(element OvermatcherIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey")
+			(element OvermatcherIcon _url="defenseIcon" _mark="defenseMark" _pulseKey="targetKey")
 		)
 		# absolut an derselben Stelle wie die Symbole, damit nichts springt
 		(block
@@ -397,12 +407,30 @@
 	(bind colorTransform "_ct")
 )
 
-(def element OvermatcherIcon(_url:str) layout=true
+# Symbol mit optionalem Zeichen rechts oben (Stern / Warndreieck fuer die Extremfaelle).
+# Das Zeichen blinkt beim Erscheinen und bei jedem neuen Ziel kurz auf (_pulseKey).
+(def element OvermatcherIcon(_url:str, _mark:str = '', _pulseKey:str = '') layout=true
 	(style
 		(bind backgroundImage "_url")
 		(bind width "OVERMATCHER_SETTINGS.iconSize") (bind height "OVERMATCHER_SETTINGS.iconSize")
 		(backgroundSize = "fill")
 		(bind marginRight "OVERMATCHER_SETTINGS.iconGap")
+	)
+	(block
+		(bind visible "_mark != ''")
+		(style
+			(position = "absolute")
+			(bind left "OVERMATCHER_SETTINGS.iconSize - OVERMATCHER_SETTINGS.markSize + OVERMATCHER_SETTINGS.markOffsetX")
+			(bind top "OVERMATCHER_SETTINGS.markOffsetY")
+			(bind width "OVERMATCHER_SETTINGS.markSize") (bind height "OVERMATCHER_SETTINGS.markSize")
+			(bind backgroundImage "_mark")
+			(backgroundSize = "fill")
+		)
+		(controller $Animation
+			(bindcall play duration="OVERMATCHER_SETTINGS.markPulse" from="{alpha: 0.2}" to="{alpha: 1}"
+				repeatCount="OVERMATCHER_SETTINGS.markPulseCount" action="killAll" easing="Easing.quad_out"
+				init=false (bind trigger "_pulseKey + _mark"))
+		)
 	)
 )
 
