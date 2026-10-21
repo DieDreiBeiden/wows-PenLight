@@ -52,9 +52,9 @@ beim Gefechtsstart, `events.onArtilleryAmmoChanged(ammoId)` bei jedem Wechsel, D
 (Gleichstand = durch, Nutzervorgabe), IFHE wird nicht berücksichtigt. Ampel nur für die Granate:
 green (Bug/Heck und Deck), bow, deck, red. Schild und Me bleiben AP-Overmatch des Gegners.
 Payload: `ammo` (ap/he/sap); Granate und Ziel-Teil von `detail` gelten für die geladene Munition.
-Eigene Zeichnungen `he_*.png`, `sap_*.png` nach den Spiel-Symbolen (HE gelbe Spitze, Aufschlag mit
-Rauch und Blitz; SAP schwarze Spitze, oranger Ring, Splitter); Spitze = Typfarbe, Band = Bug/Heck,
-Ring = Deck. Plaketten
+Eigene Zeichnungen `he_*.png`, `sap_*.png` nach den Spiel-Symbolen (HE Aufschlag mit Rauch und
+Blitz, SAP Aufschlag mit Splittern); Spitze in Ampelfarbe (Spiel-Typfarben wirkten neben der Ampel
+verwirrend), dazu Band = Bug/Heck, Ring = Deck. Plaketten
 `tag_ap/he/sap.png`, Mini-Icons `label_target_<he|sap>_*.png`.
 
 ## Icons: Barrierefreiheit (Variante A2)
