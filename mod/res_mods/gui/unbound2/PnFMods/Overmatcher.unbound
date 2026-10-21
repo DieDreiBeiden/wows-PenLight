@@ -76,7 +76,7 @@
 })
 # Farbenblind-Schema (AMPEL_CB in tools/make_ampel_icons.py): blau = Overmatch, orange = kein Overmatch
 (def constant OVERMATCHER_CT_CB {
-	green: { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:86,greenOffset:180,blueOffset:233,alphaOffset:0 },
+	green: { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:43,greenOffset:140,blueOffset:232,alphaOffset:0 },
 	red:   { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:213,greenOffset:94,blueOffset:0,alphaOffset:0 },
 	grey:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:128,greenOffset:132,blueOffset:136,alphaOffset:0 },
 	base:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:40,greenOffset:42,blueOffset:44,alphaOffset:0 }

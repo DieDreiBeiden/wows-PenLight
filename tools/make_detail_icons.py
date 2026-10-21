@@ -116,7 +116,7 @@ def _label(text):
 def _mini_icon(kind):
     draw = icons.shell if kind == 'shell' else icons.shield
     px = MINI_ICON * SUPERSAMPLE
-    return draw(icons.NEUTRAL['grey']).resize((px, px), Image.LANCZOS)
+    return draw('grey').resize((px, px), Image.LANCZOS)
 
 
 def render(key, combo):
@@ -136,7 +136,7 @@ LABEL_ICON = 14           # Kantenlaenge Mini-Icon, passend zur Versalhoehe des 
 LABEL_ICON_GAP = 4
 
 
-def render_label(key, color):
+def render_label(key, state, palette):
     """Mini-Icon + Beschriftung allein (Silhouetten-Ansicht: Schiff kommt aus dem Spiel)."""
     text, kind = LABELS[key]
     w, h = LABEL_IMAGE
@@ -147,7 +147,7 @@ def render_label(key, color):
     x0 = (w - total) // 2
     img = Image.new('RGBA', (w, h), (0, 0, 0, 0))
     draw = icons.shell if kind == 'shell' else icons.shield
-    icon = draw(color).resize((LABEL_ICON * SUPERSAMPLE,) * 2, Image.LANCZOS).reduce(SUPERSAMPLE)
+    icon = draw(state, palette).resize((LABEL_ICON * SUPERSAMPLE,) * 2, Image.LANCZOS).reduce(SUPERSAMPLE)
     img.alpha_composite(icon, (x0, (h - LABEL_ICON) // 2))
     baseline = (h + cap_h) // 2
     tx = x0 + LABEL_ICON + LABEL_ICON_GAP - box[0]
@@ -192,9 +192,9 @@ def main():
     for key in sorted(LABELS):
         # Mini-Icon in der Ampelfarbe der Granate (Target) bzw. des Schilds (Me)
         for prefix, palette in sorted(icons.PALETTES.items()):
-            for state, color in palette.items():
+            for state in palette:
                 name = 'label_%s_%s%s.png' % (key, prefix, state)
-                render_label(key, color).save(os.path.join(TARGET_DIR, name))
+                render_label(key, state, palette).save(os.path.join(TARGET_DIR, name))
                 written.append(name)
     for key in sorted(LABELS):
         for combo in itertools.product('gr', repeat=3):
