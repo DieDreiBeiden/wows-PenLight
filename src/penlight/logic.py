@@ -76,7 +76,7 @@ def detail_icons(detail):
     return name('detail_target_', detail[:3]), name('detail_me_', detail[3:])
 
 
-# HE/SAP: fester Durchschlag je Granate (GameParams alphaPiercingHE / alphaPiercingCS, ohne IFHE).
+# HE/SAP: Durchschlag je Granate (alphaPiercingHE x IFHE-Faktor / alphaPiercingCS), abgerundet (floor_mm).
 # Gleichstand zaehlt als Durchschlag (Nutzervorgabe). Ampel nur fuer das Ziel, Zonen Bug/Heck und Deck:
 #   Bug/Heck  Deck   Zustand
 #   ja        ja     green  (dazu Stern wie bei AP)
@@ -84,6 +84,12 @@ def detail_icons(detail):
 #   nein      ja     deck   (orange, Band + Ring gefuellt)
 #   nein      nein   red    (Schraegstrich)
 PEN_AMMO = ('he', 'sap')
+
+
+def floor_mm(value):
+    """Durchschlag in ganzen mm, immer abgerundet; die Toleranz faengt Gleitkomma-Reste (39.99999).
+    Ohne math-Modul (Import in der Client-Sandbox ungeprueft); Werte sind nie negativ."""
+    return int(value + 1e-6)
 
 
 def penetrates(pen_mm, armor_mm):

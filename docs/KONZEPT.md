@@ -53,7 +53,12 @@ Main.py liest die geladene Munition über die ModsAPI (`battle.getSelectedAmmoId
 beim Gefechtsstart, `events.onArtilleryAmmoChanged(ammoId)` bei jedem Wechsel, Daten aus
 `battle.getAmmoParams(ammoId)`: `ammoType` AP/HE/CS, Durchschlag `alphaPiercingHE` bzw.
 `alphaPiercingCS`; Muster wie PenetrationCalculator). Bei HE/SAP gilt Durchschlag ≥ Platte
-(Gleichstand = durch, Nutzervorgabe), IFHE wird nicht berücksichtigt. Ampel nur für die Granate:
+(Gleichstand = durch, Nutzervorgabe), Durchschlag immer auf ganze mm abgerundet (`floor_mm`).
+IFHE: HE der Hauptbatterie wird mit `battle.getAmmoModifiers().GMPenetrationCoeffHE` multipliziert
+(Faktor des eigenen Schiffs inkl. Kommandant, wie PenetrationCalculator; nicht lesbar -> 1.0), SAP nicht.
+Faktor > 1 -> Payload `ifhe: true`, Zusatzplakette `tag_ifhe.png` links unten an der HE-Granate.
+Im Spiel zu prüfen: Logzeile `ammo he raw … mm, coeff …` (Faktor vorhanden und ≈ 1.25 mit IFHE?).
+Ampel nur für die Granate:
 green (Bug/Heck und Deck), bow, deck, red. Schild und Me bleiben AP-Overmatch des Gegners.
 Payload: `ammo` (ap/he/sap); Granate und Ziel-Teil von `detail` gelten für die geladene Munition.
 Eigene Zeichnungen `he_*.png`, `sap_*.png` nach den Spiel-Symbolen (HE Aufschlag mit Rauch und

@@ -308,14 +308,17 @@ def mark_warning():
 TAG_FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'  # DejaVu-Lizenz, frei
 TAG_SIZE = 8
 TAG_HEIGHT = 10
+# Zusatzplakette IFHE (tag_ifhe.png) links unten an der HE-Granate, etwas kleiner
+IFHE_SIZE = 7
+IFHE_HEIGHT = 9
 
 
-def tag(text):
-    font = ImageFont.truetype(TAG_FONT, TAG_SIZE)
+def tag(text, size=TAG_SIZE, height=TAG_HEIGHT):
+    font = ImageFont.truetype(TAG_FONT, size)
     width = int(ImageDraw.Draw(Image.new('L', (1, 1))).textlength(text, font=font)) + 5
-    im = Image.new('RGBA', (width, TAG_HEIGHT), (0, 0, 0, 0))
+    im = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
-    d.rounded_rectangle([0, 0, width - 1, TAG_HEIGHT - 1], radius=2, fill=(16, 18, 20, 230))
+    d.rounded_rectangle([0, 0, width - 1, height - 1], radius=2, fill=(16, 18, 20, 230))
     d.text((2, 0), text, font=font, fill=(245, 245, 245, 255))
     return im
 
@@ -334,6 +337,8 @@ def main():
     for ammo in ('ap', 'he', 'sap'):
         tag(ammo.upper()).save(os.path.join(TARGET_DIR, 'tag_%s.png' % ammo))
         written.append('tag_%s.png' % ammo)
+    tag('IFHE', IFHE_SIZE, IFHE_HEIGHT).save(os.path.join(TARGET_DIR, 'tag_ifhe.png'))
+    written.append('tag_ifhe.png')
     for kind, draw in (('shell', shell), ('shield', shield)):
         for prefix, palette in sorted(PALETTES.items()):
             for state in palette:

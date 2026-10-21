@@ -77,11 +77,13 @@ Die Granate bewertet immer die **gerade geladene Munition**; eine kleine Plakett
 wie an den Munitions-Slots im HUD zeigt, welche. HE und SAP haben eigene Zeichnungen nach den
 Munitions-Symbolen des Spiels: HE schlägt auf eine Fläche auf und explodiert (Rauch und Blitz), SAP
 schlägt auf und splittert. Die Spitze trägt wie bei AP die Ampelfarbe. Statt
-Overmatch prüfen sie den festen Durchschlag der Granate gegen die Panzerung des Ziels
-(Durchschlag ≥ Platte zählt; die Kapitänsfertigkeit IFHE wird bewusst nicht berücksichtigt):
+Overmatch prüfen sie den Durchschlag der Granate gegen die Panzerung des Ziels. Der Durchschlag wird
+immer auf ganze Millimeter abgerundet, Durchschlag ≥ Platte zählt. Bei HE rechnet PenLight mit dem
+Modifikator des Spiels für dein Schiff, die Kapitänsfertigkeit **IFHE** ist also enthalten; ist sie
+aktiv, erscheint links unten an der HE-Granate eine kleine Plakette **IFHE**. SAP ist von IFHE nicht betroffen:
 
 <p align="center">
-  <img src="docs/images/ammo.png" alt="Granaten-Symbole für AP, HE und SAP in allen Zuständen, mit Munitions-Plakette" width="600">
+  <img src="docs/images/ammo.png" alt="Granaten-Symbole für AP, HE (mit und ohne IFHE) und SAP in allen Zuständen, mit Munitions-Plakette" width="630">
 </p>
 
 | Bug/Heck | Deck | Granate |

@@ -76,15 +76,18 @@ def ampel():
     im.save(os.path.join(OUT, 'ampel.png'))
 
 
-def _with_tag(icon, tag, mark):
-    """Granate mit Plakette links oben (tagOffset) und Zeichen rechts oben (markOffset)."""
+def _with_tag(icon, tag, mark, ifhe=False):
+    """Granate mit Plakette links oben (tagOffset), Zeichen rechts oben (markOffset) und
+    optional IFHE-Plakette links unten (badgeOffset)."""
     ox, oy = 4, 10
-    out = Image.new('RGBA', (icon.width + 12, icon.height + oy), (0, 0, 0, 0))
+    out = Image.new('RGBA', (icon.width + 12, icon.height + oy + 4), (0, 0, 0, 0))
     out.alpha_composite(icon, (ox, oy))
     if mark:
         m = _icon(mark)
         out.alpha_composite(m, (ox + icon.width - m.width + 6, oy - 7))
     out.alpha_composite(_icon(tag), (ox - 2, oy - 9))
+    if ifhe:
+        out.alpha_composite(_icon('tag_ifhe.png'), (ox - 3, oy + 22))
     return out
 
 
@@ -95,24 +98,25 @@ def ammo():
     columns = [('everywhere', 'green', 'green'), ('bow/stern\nonly', 'yellow', 'bow'),
                ('deck only\n(HE/SAP)', None, 'deck'), ('nowhere', 'red', 'red'),
                ('no target /\nnot relevant', 'grey', 'grey')]
-    rows = [('AP', 'shell_', 0), ('HE', 'he_', 1), ('SAP', 'sap_', 1)]
+    rows = [('AP', 'shell_', 0, False), ('HE', 'he_', 1, False), ('HE + IFHE', 'he_', 1, True),
+            ('SAP', 'sap_', 1, False)]
     cw, rh = 104, 88
-    im = Image.new('RGBA', (80 + len(columns) * cw, 44 + len(rows) * rh + 22), BACKGROUND)
+    im = Image.new('RGBA', (110 + len(columns) * cw, 44 + len(rows) * rh + 22), BACKGROUND)
     d = ImageDraw.Draw(im)
     for i, (label, _, _) in enumerate(columns):
-        d.multiline_text((80 + i * cw, 6), label, font=fs, fill=(220, 222, 224), spacing=1)
-    for r, (name, prefix, idx) in enumerate(rows):
+        d.multiline_text((110 + i * cw, 6), label, font=fs, fill=(220, 222, 224), spacing=1)
+    for r, (name, prefix, idx, ifhe) in enumerate(rows):
         y = 44 + r * rh
         d.text((14, y + 30), name, font=f, fill=(236, 238, 240))
         for i, col in enumerate(columns):
             state = col[1 + idx]
             if state is None:
                 continue
-            icon = _with_tag(_icon('%s%s.png' % (prefix, state)), 'tag_%s.png' % name.lower(),
-                             'mark_star.png' if state == 'green' else None)
+            icon = _with_tag(_icon('%s%s.png' % (prefix, state)), 'tag_%s.png' % name.split()[0].lower(),
+                             'mark_star.png' if state == 'green' else None, ifhe)
             big = icon.resize((icon.width * ZOOM, icon.height * ZOOM), Image.LANCZOS)
-            im.alpha_composite(big, (80 + i * cw, y))
-    d.text((14, im.height - 20), 'AP: overmatch  -  HE/SAP: penetration >= plate (IFHE not counted)',
+            im.alpha_composite(big, (110 + i * cw, y))
+    d.text((14, im.height - 20), 'AP: overmatch  -  HE/SAP: penetration >= plate, rounded down; HE incl. IFHE',
            font=fs, fill=(170, 172, 174))
     im.save(os.path.join(OUT, 'ammo.png'))
 

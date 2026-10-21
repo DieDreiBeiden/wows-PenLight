@@ -39,6 +39,9 @@
 	# Plakette AP / HE / SAP (tag_*.png) links oben an der Granate
 	tagOffsetX: -2,
 	tagOffsetY: -9,
+	# Zusatzplakette IFHE (tag_ifhe.png) links unten an der HE-Granate, wenn IFHE erkannt ist
+	badgeOffsetX: -3,
+	badgeOffsetY: 22,
 	# senkrechter Abstand zwischen den beiden Detail-Schiffen (Alt, Target oben, Me unten)
 	shipGap: 6,
 	# Groesse der Detail-Schiffe (Bilder werden in dieser Groesse erzeugt, tools/make_detail_icons.py)
@@ -205,6 +208,9 @@
 		(var ammo:str = "'ammo' in omData && null != omData.ammo ? omData.ammo : 'ap'")
 		(var attackIcon:str = "PENLIGHT_ICON_PATH + (ammo == 'ap' ? 'shell_' : ammo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
 		(var attackTag:str = "PENLIGHT_ICON_PATH + 'tag_' + ammo + '.png'")
+		# IFHE erkannt (Main.py: HE-Faktor des eigenen Schiffs > 1) -> Zusatzplakette an der HE-Granate
+		(var hasIfhe:bool = "ammo == 'he' && ('ifhe' in omData && null != omData.ifhe ? omData.ifhe : false)")
+		(var attackBadge:str = "hasIfhe ? PENLIGHT_ICON_PATH + 'tag_ifhe.png' : ''")
 		(var defenseIcon:str = "PENLIGHT_ICON_PATH + 'shield_' + palettePrefix + (hasVerdict ? verdict[1] : 'grey') + '.png'")
 		# Extremfaelle: ich komme ueberall durch (Granate gruen) / Ziel kommt ueberall durch (Schild rot)
 		(var attackMark:str = "hasVerdict && verdict[0] == 'green' ? PENLIGHT_ICON_PATH + 'mark_star.png' : ''")
@@ -260,7 +266,7 @@
 		)
 		(hblock
 			(bind visible "!showDetail")
-			(element PenLightIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey" _tag="attackTag")
+			(element PenLightIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey" _tag="attackTag" _badge="attackBadge")
 			(element PenLightIcon _url="defenseIcon" _mark="defenseMark" _pulseKey="targetKey")
 		)
 		# absolut an derselben Stelle wie die Symbole, damit nichts springt
@@ -415,7 +421,7 @@
 
 # Symbol mit optionalem Zeichen rechts oben (Stern / Warndreieck fuer die Extremfaelle).
 # Das Zeichen blinkt beim Erscheinen und bei jedem neuen Ziel kurz auf (_pulseKey).
-(def element PenLightIcon(_url:str, _mark:str = '', _pulseKey:str = '', _tag:str = '') layout=true
+(def element PenLightIcon(_url:str, _mark:str = '', _pulseKey:str = '', _tag:str = '', _badge:str = '') layout=true
 	(style
 		(bind backgroundImage "_url")
 		(bind width "PENLIGHT_SETTINGS.iconSize") (bind height "PENLIGHT_SETTINGS.iconSize")
@@ -431,6 +437,17 @@
 			(bind top "PENLIGHT_SETTINGS.tagOffsetY")
 			(backgroundSize = "autosize")
 			(bind backgroundImage "_tag")
+		)
+	)
+	# Zusatzplakette links unten (IFHE)
+	(block
+		(bind visible "_badge != ''")
+		(style
+			(position = "absolute")
+			(bind left "PENLIGHT_SETTINGS.badgeOffsetX")
+			(bind top "PENLIGHT_SETTINGS.badgeOffsetY")
+			(backgroundSize = "autosize")
+			(bind backgroundImage "_badge")
 		)
 	)
 	(block
