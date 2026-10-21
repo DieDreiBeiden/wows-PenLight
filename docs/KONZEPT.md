@@ -60,8 +60,8 @@ Faktor > 1 -> Payload `ifhe: true`, Zusatzplakette `tag_ifhe.png` links unten an
 Im Spiel zu prüfen: Logzeile `ammo he raw … mm, coeff …` (Faktor vorhanden und ≈ 1.25 mit IFHE?).
 Ampel nur für die Granate:
 green (Bug/Heck und Deck), bow, deck, red. Schild und Me bleiben AP-Overmatch des Gegners.
-HE/SAP gilt auch für Zerstörer und Träger (`PEN_CLASSES`: Zerstörer, Kreuzer, Schlachtschiffe, Träger;
-eigenes Schiff: jede dieser Klassen mit geladener HE/SAP). Ohne Kreuzer/Schlachtschiff-Paarung: Schild
+HE/SAP gilt auch für Zerstörer und Träger (Ziel `PEN_CLASSES`: Zerstörer, Kreuzer, Schlachtschiffe, Träger;
+eigenes Schiff `PEN_SHOOTER_CLASSES`: Zerstörer, Kreuzer, Schlachtschiffe – Träger nur als Ziel). Ohne Kreuzer/Schlachtschiff-Paarung: Schild
 grau, Me-Teil von `detail` = -1. `ships.json` enthält dafür auch Zerstörer und Träger (Träger ohne
 Hauptkaliber, `null`). U-Boote werden nicht bewertet (Nutzervorgabe; getaucht ohnehin nicht von HE treffbar).
 Payload: `ammo` (ap/he/sap); Granate und Ziel-Teil von `detail` gelten für die geladene Munition.

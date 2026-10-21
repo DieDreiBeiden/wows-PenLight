@@ -45,9 +45,9 @@ rated depends on the loaded ammunition:
 
 - **AP** and the **shield**: only if your own ship and the target are both **cruisers or
   battleships**.
-- **HE and SAP**: against destroyers, cruisers, battleships and carriers, and from every ship
-  that has HE/SAP loaded. If the pairing is not a cruiser/battleship pairing, the shield stays
-  grey. Submarines are not rated.
+- **HE and SAP**: from destroyers, cruisers and battleships against destroyers, cruisers,
+  battleships and carriers. If the pairing is not a cruiser/battleship pairing, the shield stays
+  grey. Carriers are only rated as a target, submarines not at all.
 
 Without a target, or for a pairing that is not rated, the icons stay grey.
 

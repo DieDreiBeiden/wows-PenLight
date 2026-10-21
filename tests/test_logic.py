@@ -127,6 +127,8 @@ class Filter(unittest.TestCase):
         # U-Boote werden nicht bewertet, weder als Ziel noch als eigenes Schiff
         self.assertIsNone(evaluate(ca, ss, 'he', 30))
         self.assertIsNone(evaluate(ss, ca, 'he', 30))
+        # Traeger nur als Ziel, nicht als eigenes Schiff
+        self.assertIsNone(evaluate(cv, ca, 'he', 30))
 
     def test_cruiser_pair_keeps_shield_with_he(self):
         ca = self.ship('Cruiser', 203, 25, 27)

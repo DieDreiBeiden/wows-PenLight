@@ -11,8 +11,9 @@ RED = 'red'
 RELEVANT_CLASSES = frozenset(['Cruiser', 'Battleship'])
 # HE/SAP-Durchschlag wird gegen jede Klasse mit Daten bewertet (eigenes Schiff: jede Klasse mit
 # geladener HE/SAP); AP-Overmatch und Schild bleiben bei Kreuzern und Schlachtschiffen.
-# U-Boote werden bewusst nicht bewertet.
+# Traeger nur als Ziel; U-Boote werden bewusst nicht bewertet.
 PEN_CLASSES = frozenset(['Destroyer', 'Cruiser', 'Battleship', 'AirCarrier'])
+PEN_SHOOTER_CLASSES = frozenset(['Destroyer', 'Cruiser', 'Battleship'])
 GREY = 'grey'
 
 # Ampel nach Spieler-Definition (docs/KONZEPT.md, Variante B). Bug/Heck ist die
@@ -121,13 +122,13 @@ def evaluate(me, enemy, ammo='ap', pen_mm=None):
     ammo/pen_mm: geladene Munition ('ap', 'he', 'sap') und ihr Durchschlag (mm, nur HE/SAP).
     Bei HE/SAP bewerten 'attack' und der Target-Teil von 'detail' den Durchschlag statt des
     Overmatch; Schild und Me-Teil bleiben AP-Overmatch des Gegners.
-    HE/SAP wird auch fuer Zerstoerer und Traeger bewertet (U-Boote nicht); Schild und Me-Teil gibt es
+    HE/SAP wird auch fuer Zerstoerer und Traeger (nur als Ziel) bewertet, U-Boote nicht; Schild und Me-Teil gibt es
     nur bei Kreuzer/Schlachtschiff-Paarungen, sonst grau bzw. unbekannt (-1).
     Liefert None, wenn die Paarung nicht angezeigt werden soll.
     """
     he = ammo in PEN_AMMO and pen_mm is not None
     ap_rated = is_relevant(me['class'], enemy['class'])
-    if not ap_rated and not (he and me['class'] in PEN_CLASSES and enemy['class'] in PEN_CLASSES):
+    if not ap_rated and not (he and me['class'] in PEN_SHOOTER_CLASSES and enemy['class'] in PEN_CLASSES):
         return None
     return {
         'ammo': ammo if he else 'ap',
