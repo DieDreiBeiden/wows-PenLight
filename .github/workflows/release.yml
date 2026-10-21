@@ -1,0 +1,78 @@
+# Release von Hand ausloesen: Actions -> Release -> Run workflow (auf main).
+# Prueft beide Fassungen (Tests, Main.py aktuell), baut die Zips direkt aus main und
+# main-standalone und legt Tag v<Version> auf dem main-Commit samt Release an.
+# Release-Text: docs/RELEASE_NOTES.md (vor jedem Release anpassen).
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version ohne "v", z. B. 0.3.0'
+        required: true
+      prerelease:
+        description: 'Als Vorabversion markieren'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version }}
+      PRERELEASE: ${{ inputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Version pruefen
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Version '$VERSION' hat nicht die Form 1.2.3"
+            exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            echo "::error::Tag v$VERSION existiert bereits"
+            exit 1
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Tests und Main.py (main)
+        run: |
+          python3 -m unittest discover -s tests
+          python3 -I tools/build_mod.py
+          git diff --exit-code -- mod/res_mods/PnFMods/PenLight/Main.py
+
+      - name: Tests und Main.py (main-standalone)
+        run: |
+          git worktree add ../standalone origin/main-standalone
+          cd ../standalone
+          python3 -m unittest discover -s tests
+          python3 -I tools/build_mod.py
+          git diff --exit-code -- mod/res_mods/PnFMods/PenLight/Main.py
+
+      - name: Pakete bauen
+        run: |
+          mkdir dist
+          git archive --format=zip -o "dist/PenLight-$VERSION-ttaro.zip" HEAD:mod res_mods
+          git archive --format=zip -o "dist/PenLight-$VERSION-standalone.zip" origin/main-standalone:mod res_mods
+          for z in dist/*.zip; do unzip -l "$z" | tail -1; done
+
+      - name: Release anlegen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=()
+          if [ "$PRERELEASE" = "true" ]; then flags+=(--prerelease); fi
+          gh release create "v$VERSION" dist/*.zip \
+            --target "$GITHUB_SHA" \
+            --title "PenLight $VERSION" \
+            --notes-file docs/RELEASE_NOTES.md \
+            "${flags[@]}"
