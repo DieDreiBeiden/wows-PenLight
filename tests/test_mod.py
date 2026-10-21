@@ -30,11 +30,16 @@ SHIPS = {
     'PASD013_Gearing': ['Destroyer', 19.0, 19.0, 127.0],
 }
 VERSION = '15,9,0,13357625'
+# Granaten wie battle.getAmmoParams: 1 = AP, 2 = HE (Hawaii 127 mm: 21 mm), 3 = SAP 30 mm, 4 = HE 36 mm
+AMMO = {1: Obj(ammoType='AP', alphaPiercingHE=0.0, alphaPiercingCS=0),
+        2: Obj(ammoType='HE', alphaPiercingHE=21.0, alphaPiercingCS=0),
+        3: Obj(ammoType='CS', alphaPiercingHE=0.0, alphaPiercingCS=30),
+        4: Obj(ammoType='HE', alphaPiercingHE=36.0, alphaPiercingCS=0)}
 DEFAULTS = {'x': 30, 'y': 8, 'detailMode': 0, 'colorMode': 0, 'scale': 1.0}
 
 
 class ModTest(unittest.TestCase):
-    def run_mod(self, own_ship, enemies, data_version=VERSION, ttaro=False):
+    def run_mod(self, own_ship, enemies, data_version=VERSION, ttaro=False, ammo=1):
         root = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, root)
         if ttaro:
@@ -66,7 +71,10 @@ class ModTest(unittest.TestCase):
             '__name__': 'Main',
             'battle': Obj(getPlayersInfo=lambda: players,
                           getPlayerShipInfo=lambda pid: Obj(name=ship_names[pid]),
-                          getSelfPlayerInfo=lambda: {'id': 1}),
+                          getSelfPlayerInfo=lambda: {'id': 1},
+                          getSelectedAmmoId=lambda weapon: ammo,
+                          getAmmoParams=lambda ammo_id: AMMO[ammo_id]),
+            'constants': Obj(WeaponType=Obj(ARTILLERY=0)),
             'open': client_open,
             'ui': Obj(createUiElement=lambda: 7,
                       addDataComponentWithId=lambda uid, cid, data: self.ui_data.append((cid, data)),
@@ -77,7 +85,8 @@ class ModTest(unittest.TestCase):
             'events': Obj(onBattleShown=lambda f: handlers.setdefault('shown', f),
                           onPlayersListUpdated=lambda f: handlers.setdefault('players', f),
                           onBattleQuit=lambda f: handlers.setdefault('quit', f),
-                          onKeyEvent=lambda f: handlers.setdefault('key', f)),
+                          onKeyEvent=lambda f: handlers.setdefault('key', f),
+                          onArtilleryAmmoChanged=lambda f: handlers.setdefault('ammo', f)),
             'flash': Obj(call=lambda name, args: self.flash_calls.append((name, args)),
                          addExternalCallback=lambda name, f: self.flash_callbacks.setdefault(name, f)),
             'Keys': Obj(KEY_LEFTARROW=203, KEY_RIGHTARROW=205, KEY_UPARROW=200, KEY_DOWNARROW=208,
@@ -104,9 +113,9 @@ class ModTest(unittest.TestCase):
     def test_ui_payload_for_unbound(self):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PASD013_Gearing'])
         self.assertEqual(self.ui_data[0], ('modOvermatcher', {'byId': {}, 'byName': {},
-                                                              'settings': DEFAULTS}))
+                                                              'settings': DEFAULTS, 'ammo': 'ap'}))
         self.assertEqual(self.ui_data[-1], ('update', {
-            'settings': DEFAULTS,
+            'settings': DEFAULTS, 'ammo': 'ap',
             # Detail: ich->Ziel [Bug, Mitte, Deck], Ziel->ich [Bug, Mitte, Deck]
             'byId': {'10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r']},
             'byName': {'bot10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r']},
@@ -180,6 +189,26 @@ class ModTest(unittest.TestCase):
         count = len(self.ui_data)
         self.key(205)                                   # Tastenkuerzel aus
         self.assertEqual(len(self.ui_data), count)
+
+    def test_loaded_he_rates_penetration(self):
+        # Hawaii mit HE 21 mm gegen Minotaur (16 mm ueberall): Bug/Heck und Deck -> gruen
+        lines = self.run_mod('PASC720_Hawaii', ['PBSC110_Minotaur', 'PJSB018_Yamato_1944'], ammo=2)
+        self.assertEqual(lines, ['PBSC110_Minotaur attack=he:green defense=green',
+                                 'PJSB018_Yamato_1944 attack=he:red defense=yellow'])
+        payload = self.ui_data[-1][1]
+        self.assertEqual(payload['ammo'], 'he')
+        self.assertEqual(payload['byId']['10'][2][:3], [1, -1, 1])  # Ziel-Teil = Durchschlag (Mitte unbekannt)
+
+    def test_ammo_switch_refreshes(self):
+        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])       # AP geladen
+        self.handlers['ammo'](3)                                       # SAP 30 mm
+        entry = self.ui_data[-1][1]
+        self.assertEqual(entry['ammo'], 'sap')
+        self.assertEqual(entry['byId']['10'][0], 'red')                # 30 mm < 32 mm Bug, < 57 mm Deck
+        self.handlers['ammo'](4)                                       # HE 36 mm: Bug 32 ja, Deck 57 nein
+        self.assertEqual(self.ui_data[-1][1]['byId']['10'][0], 'bow')
+        self.handlers['ammo'](1)
+        self.assertEqual(self.ui_data[-1][1]['ammo'], 'ap')
 
     def test_missing_mid_is_unknown(self):
         self.run_mod('PASC720_Hawaii', ['PBSC110_Minotaur'])  # Minotaur ohne Mitte-Wert

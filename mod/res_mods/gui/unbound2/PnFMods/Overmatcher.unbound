@@ -36,6 +36,9 @@
 	markOffsetY: -7,
 	markPulse: 0.25,
 	markPulseCount: 4,
+	# Plakette AP / HE / SAP (tag_*.png) links oben an der Granate
+	tagOffsetX: -2,
+	tagOffsetY: -9,
 	# senkrechter Abstand zwischen den beiden Detail-Schiffen (Alt, Target oben, Me unten)
 	shipGap: 6,
 	# Groesse der Detail-Schiffe (Bilder werden in dieser Groesse erzeugt, tools/make_detail_icons.py)
@@ -198,7 +201,10 @@
 		# Detailansicht solange Alt gedrueckt ist (wie PenetrationCalculator)
 		(var cameraEntity:gfx = "$datahub.getSingleEntity(CC.camera)")
 		(var altVision:bool = "cameraEntity.camera.altVision" (event "cameraEntity.camera.evAltVisionChanged"))
-		(var attackIcon:str = "OVERMATCHER_ICON_PATH + 'shell_' + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
+		# geladene Munition aus Main.py: ap (Overmatch), he / sap (Durchschlag Bug/Heck und Deck)
+		(var ammo:str = "'ammo' in omData && null != omData.ammo ? omData.ammo : 'ap'")
+		(var attackIcon:str = "OVERMATCHER_ICON_PATH + (ammo == 'ap' ? 'shell_' : ammo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
+		(var attackTag:str = "OVERMATCHER_ICON_PATH + 'tag_' + ammo + '.png'")
 		(var defenseIcon:str = "OVERMATCHER_ICON_PATH + 'shield_' + palettePrefix + (hasVerdict ? verdict[1] : 'grey') + '.png'")
 		# Extremfaelle: ich komme ueberall durch (Granate gruen) / Ziel kommt ueberall durch (Schild rot)
 		(var attackMark:str = "hasVerdict && verdict[0] == 'green' ? OVERMATCHER_ICON_PATH + 'mark_star.png' : ''")
@@ -230,7 +236,7 @@
 		(var mMid:str = "detail[4] == 1 ? 'green' : (detail[4] == 0 ? 'red' : 'grey')")
 		(var mDeck:str = "detail[5] == 1 ? 'green' : (detail[5] == 0 ? 'red' : 'grey')")
 		# Mini-Icons der Beschriftung in der Ampelfarbe von Granate bzw. Schild
-		(var targetLabel:str = "OVERMATCHER_ICON_PATH + 'label_target_' + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
+		(var targetLabel:str = "OVERMATCHER_ICON_PATH + 'label_target_' + (ammo == 'ap' ? '' : ammo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
 		(var ownLabel:str = "OVERMATCHER_ICON_PATH + 'label_me_' + palettePrefix + (hasVerdict ? verdict[1] : 'grey') + '.png'")
 	)
 
@@ -254,7 +260,7 @@
 		)
 		(hblock
 			(bind visible "!showDetail")
-			(element OvermatcherIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey")
+			(element OvermatcherIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey" _tag="attackTag")
 			(element OvermatcherIcon _url="defenseIcon" _mark="defenseMark" _pulseKey="targetKey")
 		)
 		# absolut an derselben Stelle wie die Symbole, damit nichts springt
@@ -409,12 +415,23 @@
 
 # Symbol mit optionalem Zeichen rechts oben (Stern / Warndreieck fuer die Extremfaelle).
 # Das Zeichen blinkt beim Erscheinen und bei jedem neuen Ziel kurz auf (_pulseKey).
-(def element OvermatcherIcon(_url:str, _mark:str = '', _pulseKey:str = '') layout=true
+(def element OvermatcherIcon(_url:str, _mark:str = '', _pulseKey:str = '', _tag:str = '') layout=true
 	(style
 		(bind backgroundImage "_url")
 		(bind width "OVERMATCHER_SETTINGS.iconSize") (bind height "OVERMATCHER_SETTINGS.iconSize")
 		(backgroundSize = "fill")
 		(bind marginRight "OVERMATCHER_SETTINGS.iconGap")
+	)
+	# Plakette der geladenen Munition (AP / HE / SAP) links oben, wie die Munitions-Slots im HUD
+	(block
+		(bind visible "_tag != ''")
+		(style
+			(position = "absolute")
+			(bind left "OVERMATCHER_SETTINGS.tagOffsetX")
+			(bind top "OVERMATCHER_SETTINGS.tagOffsetY")
+			(backgroundSize = "autosize")
+			(bind backgroundImage "_tag")
+		)
 	)
 	(block
 		(bind visible "_mark != ''")

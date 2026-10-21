@@ -14,6 +14,10 @@ try:
     import Keys
 except Exception:
     Keys = globals().get('Keys')
+try:
+    import constants
+except Exception:
+    constants = globals().get('constants')
 
 MOD_NAME = 'Overmatcher'
 # Datenkomponente fuer Overmatcher.unbound (CC.mods_DataComponent mit dieser ID)
@@ -47,7 +51,13 @@ SETTINGS_DIRS = ('/../../../../../ModPrefs', '')
 HANDLE_SIZE = (62, 29)
 
 _state = {'data': None, 'disabled': False, 'results': None, 'log': [], 'ui_id': None,
-          'settings': None, 'in_battle': False, 'ttaro': None}
+          'settings': None, 'in_battle': False, 'ttaro': None,
+          'ammo': ('ap', None)}
+
+# Geladene Munition (ModsAPI: battle.getSelectedAmmoId, battle.getAmmoParams,
+# events.onArtilleryAmmoChanged; wie PenetrationCalculator). ammoType -> Kurzname und Feld
+# mit dem festen Durchschlag (mm); IFHE wird bewusst nicht beruecksichtigt.
+AMMO_TYPES = {'AP': ('ap', None), 'HE': ('he', 'alphaPiercingHE'), 'CS': ('sap', 'alphaPiercingCS')}
 
 # Client-Eigenheiten (python.log 15.9.0.13357625):
 # - open() verlangt immer (pfad, modus); Modus 'a' nur fuer bereits vorhandene Dateien.
@@ -167,7 +177,8 @@ def compute():
         if enemy is None:
             _log('no data for enemy ship %s' % name)
             continue
-        verdict = evaluate(me, enemy)
+        ammo, pen = _state['ammo']
+        verdict = evaluate(me, enemy, ammo, pen)
         if verdict is not None:
             verdict['ship'] = name
             verdict['player'] = _get(players[pid], 'name')
@@ -176,7 +187,8 @@ def compute():
 
 
 def _report(results):
-    lines = ['%s attack=%s defense=%s' % (r['ship'], r['attack'], r['defense'])
+    lines = ['%s attack=%s defense=%s' % (r['ship'], r['attack'] if r.get('ammo', 'ap') == 'ap'
+                                          else '%s:%s' % (r['ammo'], r['attack']), r['defense'])
              for r in sorted(results.values(), key=lambda r: r['ship'])]
     if not lines:
         lines = ['(keine relevanten Gegner oder Mod inaktiv, siehe %s)' % LOG_FILE]
@@ -349,6 +361,8 @@ def ui_payload(results):
 
     Wert: [granate, schild, [ich->ziel bug, mitte, deck, ziel->ich bug, mitte, deck],
            bild_granate, bild_schild]  (Bildnamen ohne .png, '' = keine Daten)
+    Granate und Ziel-Teil gelten fuer die geladene Munition ('ammo': ap / he / sap); bei HE/SAP
+    ist die Granate green / bow / deck / red und der Ziel-Teil der Durchschlag statt Overmatch.
     """
     by_id, by_name = {}, {}
     for pid, r in results.items():
@@ -356,7 +370,7 @@ def ui_payload(results):
         by_id[str(pid)] = pair
         if r.get('player'):
             by_name[r['player']] = pair
-    return {'byId': by_id, 'byName': by_name, 'settings': dict(_settings())}
+    return {'byId': by_id, 'byName': by_name, 'settings': dict(_settings()), 'ammo': _state['ammo'][0]}
 
 
 def _publish(results):
@@ -392,14 +406,44 @@ def _refresh(*args, **kwargs):
         _publish(results)
 
 
+def _read_ammo(ammo_id):
+    """(kurzname, durchschlag_mm) zur Granaten-ID; unbekannt -> AP-Bewertung."""
+    params = battle.getAmmoParams(ammo_id)
+    name, field = AMMO_TYPES.get(str(_get(params, 'ammoType')), ('ap', None))
+    pen = float(_get(params, field)) if field else None
+    return (name, pen) if name == 'ap' or pen else ('ap', None)
+
+
+def on_ammo_changed(ammo_id=None, *args):
+    try:
+        ammo = _read_ammo(ammo_id)
+    except Exception as e:
+        _log('ammo %r not readable: %r' % (ammo_id, e))
+        ammo = ('ap', None)
+    if ammo != _state['ammo']:
+        _state['ammo'] = ammo
+        _log('ammo %s, penetration %s mm' % ammo)
+        if _state['in_battle']:
+            _refresh()
+
+
+def _selected_ammo():
+    try:
+        on_ammo_changed(battle.getSelectedAmmoId(constants.WeaponType.ARTILLERY))
+    except Exception as e:
+        _log('selected ammo not readable: %r' % (e,))
+
+
 def _on_battle_shown(*args, **kwargs):
     _state['in_battle'] = True
     _update_handle()
+    _selected_ammo()
     _refresh()
 
 
 def _on_battle_quit(*args, **kwargs):
     _state['results'] = None
+    _state['ammo'] = ('ap', None)
     _state['in_battle'] = False
     _update_handle()
     _remove_ui()
@@ -423,3 +467,7 @@ events.onBattleShown(_on_battle_shown)
 events.onPlayersListUpdated(_refresh)
 events.onBattleQuit(_on_battle_quit)
 events.onKeyEvent(on_key)
+try:
+    events.onArtilleryAmmoChanged(on_ammo_changed)
+except Exception as e:
+    _log('ammo events unavailable: %r' % (e,))

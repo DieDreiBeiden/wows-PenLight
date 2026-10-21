@@ -43,6 +43,18 @@ durchgestrichener grüner Schild wirkte irreführend (Nutzerentscheidung, Varian
 Warndreieck am roten Schild (`mark_star.png`, `mark_warning.png`, weiß mit dunklem Rand),
 blinkt beim Aufschalten 4 × 0,25 s auf (`$Animation`, Einstellungen `mark*`).
 
+## HE und SAP (geladene Munition)
+
+Main.py liest die geladene Munition über die ModsAPI (`battle.getSelectedAmmoId(constants.WeaponType.ARTILLERY)`
+beim Gefechtsstart, `events.onArtilleryAmmoChanged(ammoId)` bei jedem Wechsel, Daten aus
+`battle.getAmmoParams(ammoId)`: `ammoType` AP/HE/CS, Durchschlag `alphaPiercingHE` bzw.
+`alphaPiercingCS`; Muster wie PenetrationCalculator). Bei HE/SAP gilt Durchschlag ≥ Platte
+(Gleichstand = durch, Nutzervorgabe), IFHE wird nicht berücksichtigt. Ampel nur für die Granate:
+green (Bug/Heck und Deck), bow, deck, red. Schild und Me bleiben AP-Overmatch des Gegners.
+Payload: `ammo` (ap/he/sap); Granate und Ziel-Teil von `detail` gelten für die geladene Munition.
+Eigene Zeichnungen `he_*.png`, `sap_*.png` (Spitze = Bug/Heck, Band + Ring = Deck), Plaketten
+`tag_ap/he/sap.png`, Mini-Icons `label_target_<he|sap>_*.png`.
+
 ## Icons: Barrierefreiheit (Variante A2)
 
 Prüfung nach WCAG 2.1 AA (Farbkontrast, Farbe als einziges Merkmal): Im Standardschema waren

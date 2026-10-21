@@ -12,7 +12,7 @@ Gezeichnet mit SUPERSAMPLE-facher Aufloesung und per Mittelwert auf SIZE verklei
 Das fruehere Grund-Icon assets/detail_ship_source.png wird nicht mehr verwendet.
 Ausgabe: mod/res_mods/PnFMods/Overmatcher/detail_<me|target>_<bugheck>_<mitte>_<deck>.png (g/r)
 frame_<band|line|head>.png (Rahmen der Silhouetten-Ansicht)
-und label_<me|target>_[cb_]<green|yellow|red|grey>.png (Mini-Icon in Ampelfarbe + Beschriftung,
+und label_<me|target>_[cb_]<green|yellow|red|grey>.png, label_target_<he|sap>_[cb_]<zustand>.png (Mini-Icon in Ampelfarbe + Beschriftung,
 fuer die Silhouetten-Ansicht).
 """
 import itertools
@@ -136,7 +136,7 @@ LABEL_ICON = 14           # Kantenlaenge Mini-Icon, passend zur Versalhoehe des 
 LABEL_ICON_GAP = 4
 
 
-def render_label(key, state, palette):
+def render_label(key, state, palette, ammo='ap'):
     """Mini-Icon + Beschriftung allein (Silhouetten-Ansicht: Schiff kommt aus dem Spiel)."""
     text, kind = LABELS[key]
     w, h = LABEL_IMAGE
@@ -147,7 +147,7 @@ def render_label(key, state, palette):
     x0 = (w - total) // 2
     img = Image.new('RGBA', (w, h), (0, 0, 0, 0))
     draw = icons.shell if kind == 'shell' else icons.shield
-    icon = draw(state, palette).resize((LABEL_ICON * SUPERSAMPLE,) * 2, Image.LANCZOS).reduce(SUPERSAMPLE)
+    icon = (draw(state, palette, ammo) if kind == 'shell' else draw(state, palette)).resize((LABEL_ICON * SUPERSAMPLE,) * 2, Image.LANCZOS).reduce(SUPERSAMPLE)
     img.alpha_composite(icon, (x0, (h - LABEL_ICON) // 2))
     baseline = (h + cap_h) // 2
     tx = x0 + LABEL_ICON + LABEL_ICON_GAP - box[0]
@@ -195,6 +195,13 @@ def main():
             for state in palette:
                 name = 'label_%s_%s%s.png' % (key, prefix, state)
                 render_label(key, state, palette).save(os.path.join(TARGET_DIR, name))
+                written.append(name)
+    # TARGET mit geladener HE/SAP: Mini-Icon der jeweiligen Granate
+    for ammo, states in sorted(icons.AMMO_STATES.items()):
+        for prefix, palette in sorted(icons.PALETTES.items()):
+            for state in states:
+                name = 'label_target_%s_%s%s.png' % (ammo, prefix, state)
+                render_label('target', state, palette, ammo).save(os.path.join(TARGET_DIR, name))
                 written.append(name)
     for key in sorted(LABELS):
         for combo in itertools.product('gr', repeat=3):

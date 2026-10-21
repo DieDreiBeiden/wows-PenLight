@@ -76,15 +76,49 @@ def detail_icons(detail):
     return name('detail_target_', detail[:3]), name('detail_me_', detail[3:])
 
 
-def evaluate(me, enemy):
+# HE/SAP: fester Durchschlag je Granate (GameParams alphaPiercingHE / alphaPiercingCS, ohne IFHE).
+# Gleichstand zaehlt als Durchschlag (Nutzervorgabe). Ampel nur fuer das Ziel, Zonen Bug/Heck und Deck:
+#   Bug/Heck  Deck   Zustand
+#   ja        ja     green  (dazu Stern wie bei AP)
+#   ja        nein   bow    (orange, Spitze gefuellt)
+#   nein      ja     deck   (orange, Band + Ring gefuellt)
+#   nein      nein   red    (Schraegstrich)
+PEN_AMMO = ('he', 'sap')
+
+
+def penetrates(pen_mm, armor_mm):
+    return pen_mm >= armor_mm
+
+
+def pen_detail(pen_mm, ship):
+    """Wie zone_detail, aber fuer HE/SAP-Durchschlag: [bug, mitte, deck] je 1/0/-1."""
+    return [-1 if ship.get(z) is None else int(penetrates(pen_mm, ship[z])) for z in ('bow', 'mid', 'deck')]
+
+
+def pen_state(pen_mm, ship):
+    bow, deck = penetrates(pen_mm, ship['bow']), penetrates(pen_mm, ship['deck'])
+    if bow and deck:
+        return GREEN
+    if bow:
+        return 'bow'
+    return 'deck' if deck else RED
+
+
+def evaluate(me, enemy, ammo='ap', pen_mm=None):
     """me/enemy: dict mit 'class', 'caliber', 'bow', 'deck', optional 'mid' (mm).
 
+    ammo/pen_mm: geladene Munition ('ap', 'he', 'sap') und ihr Durchschlag (mm, nur HE/SAP).
+    Bei HE/SAP bewerten 'attack' und der Target-Teil von 'detail' den Durchschlag statt des
+    Overmatch; Schild und Me-Teil bleiben AP-Overmatch des Gegners.
     Liefert None, wenn die Paarung nicht angezeigt werden soll.
     """
     if not is_relevant(me['class'], enemy['class']):
         return None
+    he = ammo in PEN_AMMO and pen_mm is not None
     return {
-        'attack': attack_color(me['caliber'], enemy),
+        'ammo': ammo if he else 'ap',
+        'attack': pen_state(pen_mm, enemy) if he else attack_color(me['caliber'], enemy),
         'defense': defense_color(enemy['caliber'], me),
-        'detail': zone_detail(me['caliber'], enemy) + zone_detail(enemy['caliber'], me),
+        'detail': (pen_detail(pen_mm, enemy) if he else zone_detail(me['caliber'], enemy))
+        + zone_detail(enemy['caliber'], me),
     }
