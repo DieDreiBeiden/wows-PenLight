@@ -1,13 +1,18 @@
-First public pre-release of **PenLight** – overmatch and penetration indicator for World of Warships (formerly developed as "Overmatcher").
+**PenLight 0.3.1** – the display is now shown only in the zoomed aiming view (binoculars / scope) and hidden in the normal third-person view.
 
 Tested with the EU client, build **15.9.0.13357625**. The ship data (`ships.json`) is valid for exactly this game version; on any other version the mod switches itself off and says so in its log.
+
+## Changes since 0.3.0
+
+- Display, gear button and drag area appear only in the aiming view (binoculars / scope).
+- Both editions now report version 0.3.1 to ModForge.
 
 ## Downloads
 
 | File | Edition | Requires |
 |---|---|---|
-| `PenLight-0.3.0-ttaro.zip` | `main` | [ModForge](https://github.com/AndrewTaro/ModForge) **and** [TTaroModUtils](https://github.com/AndrewTaro/TTaroModUtils) – settings page in TTaro Mod Config |
-| `PenLight-0.3.0-standalone.zip` | `main-standalone` | [ModForge](https://github.com/AndrewTaro/ModForge); TTaroModUtils optional – without it: hotkeys (Ctrl+Alt) and mouse drag |
+| `PenLight-0.3.1-ttaro.zip` | `main` | [ModForge](https://github.com/AndrewTaro/ModForge) **and** [TTaroModUtils](https://github.com/AndrewTaro/TTaroModUtils) – settings page in TTaro Mod Config |
+| `PenLight-0.3.1-standalone.zip` | `main-standalone` | [ModForge](https://github.com/AndrewTaro/ModForge); TTaroModUtils optional – without it: hotkeys (Ctrl+Alt) and mouse drag |
 
 Install only **one** of the two.
 
@@ -36,10 +41,11 @@ See the [README](https://github.com/DieDreiBeiden/wows-PenLight#readme) for deta
 ## Known limitations
 
 - Pre-release: IFHE detection is implemented but not yet confirmed in game.
+- The aiming-view detection is new in 0.3.1 and not yet confirmed in game.
+- Standalone edition without TTaro: the invisible Flash drag area stays active in the third-person view (only with the mouse cursor shown).
 - Mouse drag is confirmed in game with TTaroModUtils; the standalone Flash drag without TTaro is not yet confirmed.
 - The citadel is not rated; green means the outer plating is penetrated.
-- The ModForge manifest of the TTaro edition still reports version 0.2.0.
 
 ---
 
-**Deutsch (kurz):** Erste öffentliche Vorabversion. Nur **eines** der beiden Zips installieren (TTaro-Fassung oder Standalone), Inhalt nach `World of Warships/bin/<höchste Nummer>/` entpacken. Getestet mit EU-Client 15.9.0.13357625. Details und Fair-Play-Hinweise in der [README auf Deutsch](https://github.com/DieDreiBeiden/wows-PenLight/blob/main/README.de.md).
+**Deutsch (kurz):** 0.3.1 zeigt die Anzeige nur noch in der Zielansicht (Fernglas / Zielfernrohr). Nur **eines** der beiden Zips installieren (TTaro-Fassung oder Standalone), Inhalt nach `World of Warships/bin/<höchste Nummer>/` entpacken. Getestet mit EU-Client 15.9.0.13357625. Details und Fair-Play-Hinweise in der [README auf Deutsch](https://github.com/DieDreiBeiden/wows-PenLight/blob/main/README.de.md).

@@ -14,6 +14,9 @@ PenLight direkt neben dem Fadenkreuz zwei kleine Ampeln:
 Mit gedrückter **Alt**-Taste zeigt eine Detailansicht dasselbe für jede Zone beider Schiffe:
 Bug/Heck, Mitte und Deck.
 
+Die Anzeige erscheint nur in der **gezoomten Zielansicht** (Fernglas / Zielfernrohr). In der
+normalen Außenperspektive ist sie ausgeblendet.
+
 <p align="center">
   <img src="docs/images/ampel.png" alt="Granate und Schild in allen Zuständen, Standard- und Farbenblind-Farben" width="610">
 </p>
@@ -216,7 +219,7 @@ TTaro speichert seine Einstellungen zusätzlich in `World of Warships/ModPrefs/d
 
 ### Mit TTaroModUtils
 
-Im Gefecht **Strg** halten, damit der Mauszeiger erscheint:
+Im Gefecht in die Zielansicht wechseln und **Strg** halten, damit der Mauszeiger erscheint:
 
 - Symbole greifen und **ziehen**, um die Anzeige zu verschieben.
 - **Zahnrad** links neben der Anzeige öffnet die PenLight-Seite in TTaro Mod Config:
@@ -225,7 +228,7 @@ Im Gefecht **Strg** halten, damit der Mauszeiger erscheint:
 
 ### Ohne TTaroModUtils (`main-standalone`)
 
-- **Ziehen** mit der Maus: Strg halten, über Granate | Schild fahren (feiner Rahmen erscheint), ziehen.
+- **Ziehen** mit der Maus in der Zielansicht: Strg halten, über Granate | Schild fahren (feiner Rahmen erscheint), ziehen.
 - **Tastenkürzel** mit **Strg+Alt**:
 
 | Taste | Wirkung |

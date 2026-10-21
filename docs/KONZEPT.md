@@ -216,6 +216,9 @@ Nur gegnerisches Team.
   Die Tests laufen deshalb mit Builtins ohne `globals`/`locals`/`vars`.
 - 0.3.0 im Client bestätigt: Mod lädt, Ziehen mit der Maus über die vergrößerte Greiffläche
   funktioniert (TTaro-Fassung).
+- 0.3.1: Anzeige (samt Zahnrad und Greifflaeche) nur in der Zielansicht, `camera.isBinocular` /
+  `camera.evIsBinocularChanged` (Muster wie TTaros SmokeMarker); in der Aussenperspektive ausgeblendet.
+  Der Flash-Griff der Standalone-Fassung ohne TTaro kennt die Kameraansicht nicht und bleibt aktiv.
 - Bekanntes Problem: Nebraska, Delaware und Louisiana haben laut `gameparams.py` ein 6-mm-Deck
   (dünnste `Cas_Deck`-Platte, vermutlich ein Kleinteil statt des eigentlichen Decks). Als Ziel
   dadurch Deck für jede HE/SAP durchschlagbar und ab 86 mm AP overmatcht. In den Release-Notes als
