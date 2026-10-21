@@ -48,19 +48,20 @@ A tie does not count as overmatch.
 
 ### The traffic light
 
-Bow/stern is the precondition; green requires midship **and** deck to be overmatched as well.
-Shell (me → target) and shield (target → me) use the same colours:
+Bow/stern is the precondition; "everywhere" requires midship **and** deck to be overmatched as
+well. The colours tell you whether the situation is **good or bad for you**:
 
-| Bow/stern | Midship and deck | Colour | Shell | Shield |
-|---|---|---|---|---|
-| yes | both yes | Green | penetrates everywhere, even angled | the enemy gets through everywhere – dodge |
-| yes | not both | Orange | aim at bow/stern | protect your bow/stern |
-| no | – | Red | only a broadside is worth it | angling works |
-| – | – | Grey | no target, or the target is a destroyer/carrier/submarine | |
+| Bow/stern | Midship and deck | Shell (me → target) | Shield (target → me) |
+|---|---|---|---|
+| yes | both yes | **Green + star** – I get through everywhere, even angled | **Red + warning triangle** – the target gets through everywhere, dodge |
+| yes | not both | Orange – aim at bow/stern | Orange – protect your bow/stern |
+| no | – | Red – only a broadside is worth it | Green – angling works |
+| – | – | Grey – no target, or a destroyer/carrier/submarine | Grey |
 
-Each state also has its own **shape**, so it can be read without relying on colour:
-all segments filled = overmatch everywhere, partly filled = bow/stern only, slash = no
-overmatch, empty = no target.
+The **shape** shows how much is overmatched, independent of colour: all segments filled =
+everywhere, partly filled = bow/stern only, slash = nothing, empty = no target. Star and warning
+triangle flash briefly when you lock a target. Together this stays readable with colour vision
+deficiency.
 
 Only pairings of **cruisers and battleships** are rated; everything else stays grey.
 A colour-blind scheme in blue/yellow/orange (Okabe-Ito palette) is available for red-green
@@ -74,6 +75,8 @@ Holding **Alt** replaces shell and shield with two ships stacked on top of each 
 
 - **TARGET** on top: where my AP overmatches the target.
 - **ME** below: where the target's AP overmatches me.
+- Here green always means **overmatch** – for Target and Me alike. (Only the normal view
+  colours by good/bad for you.)
 - Each ship sits in a dark band that fades out to the sides, with hairlines and a slightly
   lighter header. The small shell/shield icon in the header carries the colour of the big icon.
 - In game the **ship silhouettes from the health bar** are coloured in: the hull is split into

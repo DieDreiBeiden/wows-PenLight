@@ -48,19 +48,19 @@ Gleichstand zählt nicht als Overmatch.
 
 ### Die Ampel
 
-Bug/Heck ist die Grundvoraussetzung; Grün gibt es erst, wenn zusätzlich Mitte **und** Deck
-overmatcht werden. Granate (ich → Ziel) und Schild (Ziel → ich) verwenden dieselben Farben:
+Bug/Heck ist die Grundvoraussetzung; „überall“ heißt, dass zusätzlich Mitte **und** Deck
+overmatcht werden. Die Farben zeigen, ob die Lage **gut oder schlecht für dich** ist:
 
-| Bug/Heck | Mitte und Deck | Farbe | Granate | Schild |
-|---|---|---|---|---|
-| ja | beide ja | Grün | überall durch, auch gewinkelt | der Gegner kommt überall durch – ausweichen |
-| ja | nicht beide | Orange | gezielt auf Bug/Heck | Bug/Heck schützen |
-| nein | – | Rot | nur Breitseite lohnt | anwinkeln geht |
-| – | – | Grau | kein Ziel, oder Ziel ist Zerstörer/Träger/U-Boot | |
+| Bug/Heck | Mitte und Deck | Granate (ich → Ziel) | Schild (Ziel → ich) |
+|---|---|---|---|
+| ja | beide ja | **Grün + Stern** – ich komme überall durch, auch gewinkelt | **Rot + Warndreieck** – das Ziel kommt überall durch, ausweichen |
+| ja | nicht beide | Orange – auf Bug/Heck zielen | Orange – Bug/Heck schützen |
+| nein | – | Rot – nur die Breitseite lohnt | Grün – Anwinkeln wirkt |
+| – | – | Grau – kein Ziel, oder Zerstörer/Träger/U-Boot | Grau |
 
-Jeder Zustand hat zusätzlich eine eigene **Form**, damit er auch ohne Farbsehen lesbar ist:
-alle Segmente gefüllt = überall Overmatch, teilweise gefüllt = nur Bug/Heck, Schrägstrich =
-kein Overmatch, leer = kein Ziel.
+Die **Form** zeigt unabhängig von der Farbe, wie viel overmatcht wird: alle Segmente gefüllt =
+überall, teilweise gefüllt = nur Bug/Heck, Schrägstrich = nirgends, leer = kein Ziel. Stern und
+Warndreieck blinken beim Aufschalten kurz auf. So bleibt alles auch bei Farbsehschwäche lesbar.
 
 Bewertet werden nur Paarungen aus **Kreuzern und Schlachtschiffen**; für alle anderen bleiben
 die Symbole grau. Für Rot-Grün-Schwäche gibt es ein Farbschema in Blau/Gelb/Orange
@@ -74,6 +74,8 @@ Mit gedrückter **Alt**-Taste ersetzen zwei untereinander stehende Schiffe Grana
 
 - **TARGET** oben: wo meine AP das Ziel overmatcht.
 - **ME** unten: wo die AP des Ziels mich overmatcht.
+- Hier heißt Grün immer **Overmatch**, für Target und Me gleich. (Nur die normale Ansicht färbt
+  nach gut/schlecht für dich.)
 - Jedes Schiff liegt in einem dunklen, seitlich auslaufenden Band mit Haarlinien und leicht
   aufgehellter Kopfzeile. Das kleine Granaten-/Schild-Symbol in der Kopfzeile trägt die Farbe
   des großen Symbols.

@@ -79,13 +79,13 @@ class ModTest(unittest.TestCase):
     def test_cruiser_vs_mixed_enemies(self):
         lines = self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PBSC110_Minotaur', 'PASD013_Gearing'])
         self.assertEqual(lines, [
-            'PBSC110_Minotaur attack=red defense=red',
+            'PBSC110_Minotaur attack=red defense=green',
             'PJSB018_Yamato_1944 attack=red defense=yellow',  # 460 > 27 Bug, < 36 Deck
         ])
 
     def test_large_cruiser_overmatches_minotaur(self):
         lines = self.run_mod('PASC510_Alaska', ['PBSC110_Minotaur'])
-        self.assertEqual(lines, ['PBSC110_Minotaur attack=green defense=red'])
+        self.assertEqual(lines, ['PBSC110_Minotaur attack=green defense=green'])
 
     def test_ui_payload_for_unbound(self):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PASD013_Gearing'])

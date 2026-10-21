@@ -13,16 +13,15 @@ Auf einen Blick erkennen, ob AP-Granaten Bug/Heck bzw. Deck overmatchen:
 Overmatch: `Kaliber > 14,3 × Plattendicke` (Gleichstand = kein Overmatch).
 Bug und Heck werden als gleich dick behandelt (ein Wert „bow“).
 
-Variante B (vom Nutzer gewählt): Bug/Heck ist Grundvoraussetzung, Grün erst, wenn auch
-Mitte **und** Deck overmatcht werden. Die Farben bedeuten für Granate (ich → Ziel) und
-Schild (Ziel → ich) dasselbe: Grün = Overmatch, Rot = kein Overmatch (geändert vom Nutzer;
-vorher war der Schild „gut für mich“ gefärbt, also umgekehrt).
+Variante B (vom Nutzer gewählt): Bug/Heck ist Grundvoraussetzung, „überall“ erst, wenn auch
+Mitte **und** Deck overmatcht werden. Normale Ansicht: Farbe = gut/schlecht für mich
+(siehe „Farben der normalen Ansicht“); Alt-Detailansicht: Grün = Overmatch für Target und Me.
 
-| Bug/Heck | Mitte und Deck | Farbe | Granate | Schild |
-|---|---|---|---|---|
-| ja | beide ja | Grün | überall durch, auch gewinkelt | Gegner kommt überall durch – aktiv ausweichen |
-| ja | nicht beide | Gelb | gezielt auf Bug/Heck | Bug/Heck schützen, auf Distanz Panzerung nutzen |
-| nein | egal | Rot | nur Breitseite | aggressiv anwinkeln |
+| Bug/Heck | Mitte und Deck | Granate (ich → Ziel) | Schild (Ziel → ich) |
+|---|---|---|---|
+| ja | beide ja | Grün + Stern – überall durch, auch gewinkelt | Rot + Warndreieck – Gegner kommt überall durch, ausweichen |
+| ja | nicht beide | Gelb – gezielt auf Bug/Heck | Gelb – Bug/Heck schützen, auf Distanz Panzerung nutzen |
+| nein | egal | Rot – nur Breitseite | Grün – aggressiv anwinkeln |
 
 Mitte = dünnste Seitenplatte mittschiffs (`Cas_Belt`, `SSC_ConstrSide`). Fehlt der Wert,
 entscheiden Bug/Heck und Deck allein.
@@ -32,6 +31,16 @@ Bug ohne alles 16,4 %, Bug nicht 73,1 % → Granate grün/gelb/rot 10,5/16,4/73,
 
 Bewusste Vereinfachung: Der Zitadellengürtel wird nicht bewertet; Grün heißt Overmatch
 der Beplankung, nicht Zitadellentreffer.
+
+## Farben der normalen Ansicht (Nutzerentscheidung, zuletzt geändert)
+
+Granate und Schild färben nach **gut/schlecht für mich**: Granate grün = ich komme überall durch,
+Schild rot = das Ziel kommt überall durch (vorher war der Schild zwischenzeitlich „grün =
+Overmatch“, das war im Gefecht verwirrend). Die Alt-Detailansicht bleibt bei „grün = Overmatch“
+für Target und Me. Die Form der Icons zeigt weiter den Overmatch-Umfang (voll / teilweise /
+Schrägstrich). Extremfälle zusätzlich mit Zeichen (Variante P3): Stern an der grünen Granate,
+Warndreieck am roten Schild (`mark_star.png`, `mark_warning.png`, weiß mit dunklem Rand),
+blinkt beim Aufschalten 4 × 0,25 s auf (`$Animation`, Einstellungen `mark*`).
 
 ## Icons: Barrierefreiheit (Variante A2)
 
