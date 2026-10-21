@@ -8,7 +8,8 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from overmatcher.logic import (GREEN, RED, YELLOW, attack_color, defense_color,
-                               detail_icons, evaluate, overmatches, zone_detail)
+                               detail_icons, evaluate, overmatches, pen_detail, pen_state,
+                               zone_detail)
 
 
 class OvermatchRule(unittest.TestCase):
@@ -53,6 +54,28 @@ class Colors(unittest.TestCase):
     def test_missing_mid_uses_bow_and_deck(self):
         self.assertEqual(attack_color(460, {'bow': 32.0, 'mid': None, 'deck': 32.0}), GREEN)
         self.assertEqual(attack_color(460, {'bow': 32.0, 'deck': 38.0}), YELLOW)
+
+
+class Penetration(unittest.TestCase):
+    YAMATO = {'bow': 32.0, 'mid': 32.0, 'deck': 57.0}
+
+    def test_tie_penetrates(self):
+        self.assertEqual(pen_state(32, {'bow': 32.0, 'deck': 32.0}), GREEN)
+
+    def test_states(self):
+        self.assertEqual(pen_state(36, self.YAMATO), 'bow')
+        self.assertEqual(pen_state(57, self.YAMATO), GREEN)
+        self.assertEqual(pen_state(30, self.YAMATO), RED)
+        self.assertEqual(pen_state(40, {'bow': 50.0, 'deck': 38.0}), 'deck')
+
+    def test_detail(self):
+        self.assertEqual(pen_detail(36, self.YAMATO), [1, 1, 0])
+
+    def test_evaluate_with_he_keeps_shield_on_ap(self):
+        me = {'class': 'Cruiser', 'caliber': 203, 'bow': 27, 'deck': 30, 'mid': 27}
+        r = evaluate(me, dict(self.YAMATO, **{'class': 'Battleship', 'caliber': 460}), 'he', 51)
+        self.assertEqual((r['ammo'], r['attack'], r['defense']), ('he', 'bow', RED))
+        self.assertEqual(r['detail'], [1, 1, 0, 1, 1, 1])
 
 
 class Detail(unittest.TestCase):
