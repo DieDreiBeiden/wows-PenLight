@@ -58,8 +58,10 @@ SETTINGS_NAME = 'diedreibeiden-penlight.json'
 # Vom Mod-Ordner res_mods/PnFMods/PenLight aus: PnFMods, res_mods, <Build>, bin, Spielverzeichnis.
 SETTINGS_DIRS = ('/../../../../../ModPrefs', '')
 
-# Groesse der Greifflaeche bei Skalierung 1: Granate | Schild (2 x 29 px + 4 px Abstand)
+# Groesse der Greifflaeche bei Skalierung 1: Granate | Schild (2 x 29 px + 4 px Abstand),
+# dazu ein Rand (links, oben, rechts, unten) wie dragPad* in PenLight.unbound
 HANDLE_SIZE = (62, 29)
+HANDLE_PAD = (4, 12, 12, 10)
 
 _state = {'data': None, 'disabled': False, 'results': None, 'log': [], 'ui_id': None,
           'settings': None, 'in_battle': False, 'ttaro': None,
@@ -337,9 +339,11 @@ def _update_handle():
     if flash is None:
         return
     s = _settings()
+    left, top, right, bottom = HANDLE_PAD
     try:
-        flash.call('omSetHandle', [s['x'], s['y'], HANDLE_SIZE[0] * s['scale'],
-                                   HANDLE_SIZE[1] * s['scale'],
+        flash.call('omSetHandle', [s['x'] - left * s['scale'], s['y'] - top * s['scale'],
+                                   (HANDLE_SIZE[0] + left + right) * s['scale'],
+                                   (HANDLE_SIZE[1] + top + bottom) * s['scale'],
                                    bool(_state['in_battle']) and not ttaro_installed()])
     except Exception as e:
         _log('flash handle update failed: %r' % (e,))
@@ -347,7 +351,10 @@ def _update_handle():
 
 def _dragged(args):
     settings = _settings()
-    settings['x'], settings['y'] = int(round(float(args[0]))), int(round(float(args[1])))
+    # Flash meldet die linke obere Ecke der Greifflaeche; die Anzeige liegt um den Rand versetzt
+    x = float(args[0]) + HANDLE_PAD[0] * settings['scale']
+    y = float(args[1]) + HANDLE_PAD[1] * settings['scale']
+    settings['x'], settings['y'] = int(round(x)), int(round(y))
     _publish(_state['results'] or {})
     return settings
 

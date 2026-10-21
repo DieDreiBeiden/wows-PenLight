@@ -42,6 +42,12 @@
 	# Zusatzplakette IFHE (tag_ifhe.png) links unten an der HE-Granate, wenn IFHE erkannt ist
 	badgeOffsetX: -3,
 	badgeOffsetY: 22,
+	# Rand der Greifflaeche um Granate | Schild (px bei Skalierung 1); links schmal wegen Zahnrad.
+	# Ohne TTaro gilt HANDLE_PAD in Main.py (Flash-Griff), Werte gleich halten.
+	dragPadLeft: 4,
+	dragPadTop: 12,
+	dragPadRight: 12,
+	dragPadBottom: 10,
 	# senkrechter Abstand zwischen den beiden Detail-Schiffen (Alt, Target oben, Me unten)
 	shipGap: 6,
 	# Groesse der Detail-Schiffe (Bilder werden in dieser Groesse erzeugt, tools/make_detail_icons.py)

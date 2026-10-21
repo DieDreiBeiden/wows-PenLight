@@ -70,11 +70,14 @@
 				(top = 0px)
 			)
 		)
-		# Greifflaeche ueber Granate | Schild (2 x iconSize + iconGap), wie BuildViewer
+		# Greifflaeche ueber Granate | Schild mit Rand (dragPad*), damit sie leicht zu treffen ist
 		(block
 			(style
-				(bind width "PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap")
-				(bind height "PENLIGHT_SETTINGS.iconSize")
+				(position = "absolute")
+				(bind left "0 - PENLIGHT_SETTINGS.dragPadLeft")
+				(bind top "0 - PENLIGHT_SETTINGS.dragPadTop")
+				(bind width "PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap + PENLIGHT_SETTINGS.dragPadLeft + PENLIGHT_SETTINGS.dragPadRight")
+				(bind height "PENLIGHT_SETTINGS.iconSize + PENLIGHT_SETTINGS.dragPadTop + PENLIGHT_SETTINGS.dragPadBottom")
 				(backgroundColor = 0x00FFFFFF)
 				(bind hitTest "!isPositionLocked")
 			)

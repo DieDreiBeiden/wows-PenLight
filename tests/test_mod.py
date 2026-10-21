@@ -170,20 +170,23 @@ class ModTest(unittest.TestCase):
 
     def test_drag_moves_live_and_saves_on_release(self):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
-        # Greifflaeche im Gefecht aktiv, an der Standardposition, Groesse der Symbole
-        self.assertEqual(self.flash_calls[-1], ('omSetHandle', [30, 8, 62.0, 29.0, True]))
-        self.flash_callbacks['omDragMove'](120.4, -50)
+        # Greifflaeche im Gefecht aktiv: Symbole (62 x 29) plus Rand 4/12/12/10 um die Standardposition
+        self.assertEqual(self.flash_calls[-1], ('omSetHandle', [26.0, -4.0, 78.0, 51.0, True]))
+        # Flash meldet die Ecke der Greifflaeche, gespeichert wird die Position der Symbole
+        self.flash_callbacks['omDragMove'](116.4, -62)
         self.assertEqual(self.ui_data[-1][1]['settings']['x'], 120)
         self.assertFalse(os.path.exists(os.path.join(self.mod_dir, 'diedreibeiden-penlight.json')))
-        self.flash_callbacks['omDragEnd'](130, -40)
+        self.flash_callbacks['omDragEnd'](126, -52)
         self.assertEqual((self.saved()['x'], self.saved()['y']), (130, -40))
 
     def test_handle_follows_scale_and_battle_end(self):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
         self.key(13)                  # +: Groesse 1,1 -> Greifflaeche waechst mit
         name, args = self.flash_calls[-1]
-        self.assertEqual((name, args[:2], args[4]), ('omSetHandle', [30, 8], True))
-        self.assertAlmostEqual(args[2], 62 * 1.1)
+        self.assertEqual((name, args[4]), ('omSetHandle', True))
+        self.assertAlmostEqual(args[0], 30 - 4 * 1.1)
+        self.assertAlmostEqual(args[1], 8 - 12 * 1.1)
+        self.assertAlmostEqual(args[2], 78 * 1.1)
         self.handlers['quit']()
         self.assertFalse(self.flash_calls[-1][1][4])
 
