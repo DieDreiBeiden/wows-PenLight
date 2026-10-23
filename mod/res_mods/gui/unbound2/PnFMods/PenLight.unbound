@@ -300,8 +300,20 @@
 		# Alt-Ansicht der Kapseln: Werte aus Main.py (logic.numbers), -1 = unbekannt
 		(var nums:array = "verdict.length >= 6 ? verdict[5] : [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1]")
 		(var targetName:str = "targetNameIDS != '' ? toUpper(tr(targetNameIDS)) : ''")
-		(var attackLine:str = "ammo == 'ap' ? subst('%d mm  |  OM up to %d mm  |  ', [nums[6], nums[7]]) + targetName : subst('%d mm penetration  |  ', [nums[6]]) + targetName")
-		(var defenseLine:str = "nums[8] > 0 ? subst('Enemy AP %d mm  |  OM up to %d mm', [nums[8], nums[9]]) : 'Not rated for this pairing'")
+		# Texte der Alt-Ansicht in der Client-Sprache (texts/<sprache>/penlight.mo, tools/make_texts.py).
+		# tr() kennt eigene Kataloge nur mit LocalizationLoader (AndrewTaro); sonst liefert es den Schluessel
+		# zurueck, dann gilt der englische Text.
+		(var txtBowStern:str = "tr('IDS_PENLIGHT_BOW_STERN') != 'IDS_PENLIGHT_BOW_STERN' && tr('IDS_PENLIGHT_BOW_STERN') != '' ? tr('IDS_PENLIGHT_BOW_STERN') : 'Bow/Stern'")
+		(var txtMidship:str = "tr('IDS_PENLIGHT_MIDSHIP') != 'IDS_PENLIGHT_MIDSHIP' && tr('IDS_PENLIGHT_MIDSHIP') != '' ? tr('IDS_PENLIGHT_MIDSHIP') : 'Midship'")
+		(var txtDeck:str = "tr('IDS_PENLIGHT_DECK') != 'IDS_PENLIGHT_DECK' && tr('IDS_PENLIGHT_DECK') != '' ? tr('IDS_PENLIGHT_DECK') : 'Deck'")
+		(var txtMm:str = "tr('IDS_PENLIGHT_MM') != 'IDS_PENLIGHT_MM' && tr('IDS_PENLIGHT_MM') != '' ? tr('IDS_PENLIGHT_MM') : '%d mm'")
+		(var txtPen:str = "tr('IDS_PENLIGHT_PEN') != 'IDS_PENLIGHT_PEN' && tr('IDS_PENLIGHT_PEN') != '' ? tr('IDS_PENLIGHT_PEN') : '%d mm penetration'")
+		(var txtOmUpTo:str = "tr('IDS_PENLIGHT_OM_UPTO') != 'IDS_PENLIGHT_OM_UPTO' && tr('IDS_PENLIGHT_OM_UPTO') != '' ? tr('IDS_PENLIGHT_OM_UPTO') : 'OM up to %d mm'")
+		(var txtEnemyAp:str = "tr('IDS_PENLIGHT_ENEMY_AP') != 'IDS_PENLIGHT_ENEMY_AP' && tr('IDS_PENLIGHT_ENEMY_AP') != '' ? tr('IDS_PENLIGHT_ENEMY_AP') : 'Enemy AP'")
+		(var txtNotRated:str = "tr('IDS_PENLIGHT_NOT_RATED') != 'IDS_PENLIGHT_NOT_RATED' && tr('IDS_PENLIGHT_NOT_RATED') != '' ? tr('IDS_PENLIGHT_NOT_RATED') : 'Not rated for this pairing'")
+		(var attackLine:str = "ammo == 'ap' ? subst(txtMm, [nums[6]]) + '  |  ' + subst(txtOmUpTo, [nums[7]]) + '  |  ' + targetName : subst(txtPen, [nums[6]]) + '  |  ' + targetName")
+		(var defenseLine:str = "nums[8] > 0 ? txtEnemyAp + ' ' + subst(txtMm, [nums[8]]) + '  |  ' + subst(txtOmUpTo, [nums[9]]) : txtNotRated")
+		(var zoneNames:array = "[txtBowStern, txtMidship, txtDeck]")
 		(var attackState:str = "attackBits == '111' ? 'green' : (attackBits == '000' ? 'red' : 'yellow')")
 		(var defenseState:str = "defenseBits == '111' ? 'red' : (defenseBits == '000' ? 'green' : 'yellow')")
 		(var altAmmoLabel:str = "toUpper(ammo)")
@@ -349,9 +361,11 @@
 			(bind visible "showAltCapsules")
 			(style (position = "absolute") (left = 0) (top = 0))
 			(element PenLightAltPanel _kind="'atk'" _state="attackState" _z="[detail[0] == 1 ? 1 : 0, aMid, detail[2] == 1 ? 1 : 0]"
-				_line="attackLine" _label="altAmmoLabel" _values="[nums[0], nums[1], nums[2]]" _cb="isColorBlind" _pulseKey="targetKey")
+				_line="attackLine" _label="altAmmoLabel" _values="[nums[0], nums[1], nums[2]]" _cb="isColorBlind" _pulseKey="targetKey"
+				_names="zoneNames" _mmFmt="txtMm")
 			(element PenLightAltPanel _kind="'def'" _state="defenseState" _z="[detail[3] == 1 ? 1 : 0, dMid, detail[5] == 1 ? 1 : 0]"
-				_line="defenseLine" _label="''" _values="[nums[3], nums[4], nums[5]]" _cb="isColorBlind" _pulseKey="targetKey")
+				_line="defenseLine" _label="''" _values="[nums[3], nums[4], nums[5]]" _cb="isColorBlind" _pulseKey="targetKey"
+				_names="zoneNames" _mmFmt="txtMm")
 		)
 		# absolut an derselben Stelle wie die Symbole, damit nichts springt
 		(block
@@ -635,7 +649,7 @@
 # Schild, Erklaerung) und drei Zonen (Punkt, Name, Plattendicke). Randfaelle mit Rahmen und
 # Leuchtring, der wie bei den Kapseln beim Aufschalten pulsiert.
 (def element PenLightAltPanel(_kind:str, _state:str, _z:array, _line:str, _label:str, _values:array,
-		_cb:bool = false, _pulseKey:str = '') layout=true
+		_cb:bool = false, _pulseKey:str = '', _names:array = ['Bow/Stern', 'Midship', 'Deck'], _mmFmt:str = '%d mm') layout=true
 	(scope
 		(var path:str = "PENLIGHT_ICON_PATH + 'capsule/alt/'")
 		(var cbSuffix:str = "_cb ? '_cb' : ''")
@@ -702,18 +716,18 @@
 			(bind text "_line")
 		)
 	)
-	(element PenLightAltZone _i="0" _name="'Bow/Stern'" _z="_z" _values="_values" _state="_state" _pal="pal" _nowhere="nowhere" _path="path")
-	(element PenLightAltZone _i="1" _name="'Midship'" _z="_z" _values="_values" _state="_state" _pal="pal" _nowhere="nowhere" _path="path")
-	(element PenLightAltZone _i="2" _name="'Deck'" _z="_z" _values="_values" _state="_state" _pal="pal" _nowhere="nowhere" _path="path")
+	(element PenLightAltZone _i="0" _name="_names[0]" _z="_z" _values="_values" _state="_state" _pal="pal" _nowhere="nowhere" _path="path" _mmFmt="_mmFmt")
+	(element PenLightAltZone _i="1" _name="_names[1]" _z="_z" _values="_values" _state="_state" _pal="pal" _nowhere="nowhere" _path="path" _mmFmt="_mmFmt")
+	(element PenLightAltZone _i="2" _name="_names[2]" _z="_z" _values="_values" _state="_state" _pal="pal" _nowhere="nowhere" _path="path" _mmFmt="_mmFmt")
 )
 
 # Eine Zone der Alt-Ansicht: Punkt (gefuellt / umrandet), darunter Name und Plattendicke.
 (def element PenLightAltZone(_i:number, _name:str, _z:array, _values:array, _state:str, _pal:str, _nowhere:bool,
-		_path:str) layout=true
+		_path:str, _mmFmt:str = '%d mm') layout=true
 	(scope
 		(var on:bool = "_z[_i] == 1")
 		(var dotUrl:str = "_path + (on ? 'dot_fill_' + _pal + _state : (_nowhere ? 'dot_ring_' + _pal + _state : 'dot_ring_grey')) + '.png'")
-		(var valueText:str = "_values[_i] >= 0 ? subst('%d mm', [_values[_i]]) : '-'")
+		(var valueText:str = "_values[_i] >= 0 ? subst(_mmFmt, [_values[_i]]) : '-'")
 		(var x:number = "18 + _i * PENLIGHT_SETTINGS.altZoneStep")
 	)
 	(style (position = "absolute") (left = 0) (top = 0))
