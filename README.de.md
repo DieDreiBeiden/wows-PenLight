@@ -276,7 +276,7 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 | Texte der TTaro-Optionsseite | `python3 -I tools/make_texts.py` |
 | Flash-Teil `Main.swf` (`main-standalone`) | `tools/build_flash.py`, Voraussetzungen siehe Dateikopf |
 | To-Do-Liste | [`docs/TODO.md`](docs/TODO.md) |
-| Release mit beiden Zips | `version` in `ForgeBlueprints/PenLightContainer.xml` auf beiden Branches erhöhen, dann GitHub: Actions → Release → Run workflow (auf `main`). Neuerungen = „Unreleased“ in `docs/CHANGELOG.md`, Rahmen in `docs/RELEASE_NOTES.md` |
+| Release mit beiden Zips | GitHub: Actions → Release → Run workflow (auf `main`). Version = nächste Patch-Version, sofern nicht angegeben; der Workflow schreibt sie auf beiden Branches in `ForgeBlueprints/PenLightContainer.xml`, ModForge sieht also immer die Release-Version. Neuerungen = „Unreleased“ in `docs/CHANGELOG.md`, Rahmen in `docs/RELEASE_NOTES.md` |
 
 - Die Spiel-Logik (`src/penlight/logic.py`) läuft unter Python 2.7 (Client) und 3.x (Tests).
 - `mod/res_mods/PnFMods/PenLight/Main.py` ist generiert – Änderungen in `src/penlight/`.
