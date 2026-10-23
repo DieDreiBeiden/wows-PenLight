@@ -1,0 +1,137 @@
+# -*- coding: utf-8 -*-
+"""Zeichnet das Symbol-Set "Status-Kapseln" (Entwurf 1, Probe im Branch Test).
+
+    python3 -I tools/make_capsule_icons.py
+
+Zwei Kapseln uebereinander: oben ich -> Ziel (Munition AP/HE/SAP, HE optional mit IFHE-Marke),
+unten Ziel -> ich (Schild, AP des Ziels). Drei Punkte = Bug/Heck, Mitte, Deck; gefuellt = kommt durch.
+Farbe nur fuer die Aussage: Text und Symbol weiss, Punkte in der Zustandsfarbe; nur die Extremfaelle
+(ich ueberall durch / Ziel ueberall durch) faerben auch Text bzw. Symbol und bekommen einen Rahmen.
+"Nirgends" zeigt die leeren Punkte in der Zustandsfarbe umrandet, damit es sich von "kein Ziel" abhebt.
+
+Ausgabe: mod/res_mods/PnFMods/PenLight/capsule/
+  atk_<ap|he|he_if|sap>_<palette><bug><mitte><deck>.png   z. B. atk_he_cb_101.png
+  atk_<...>_grey.png, def_<palette><bug><mitte><deck>.png, def_grey.png
+"""
+import itertools
+import os
+import sys
+
+from PIL import Image, ImageDraw, ImageFont
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from make_ampel_icons import AMPEL, AMPEL_CB, ROOT  # noqa: E402
+
+TARGET_DIR = os.path.join(ROOT, 'mod', 'res_mods', 'PnFMods', 'PenLight', 'capsule')
+SS = 4
+HEIGHT = 18
+WIDTH = {'atk': 62, 'atk_if': 72, 'def': 62}
+FONT_BOLD = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'  # DejaVu-Lizenz, frei
+WHITE = (236, 238, 240)
+# Kontrast (WCAG 1.4.11, >= 3:1) auch auf heller Gischt/Himmel: Grund 84 % deckend, Grau aufgehellt
+DIM = (140, 144, 148)
+PANEL = (14, 16, 18, 215)
+RIM = (255, 255, 255, 46)   # feine helle Kante, damit die Kapsel sich auf dunklem Wasser abhebt
+PALETTES = {'': AMPEL, 'cb_': AMPEL_CB}
+DOT_R, DOT_STEP = 3.4, 10
+
+
+def attack_state(zones):
+    if zones is None:
+        return 'grey'
+    return 'green' if all(zones) else ('red' if not any(zones) else 'yellow')
+
+
+def defense_state(zones):
+    """Gut fuer mich: Ziel kommt nirgends durch = gruen, ueberall = rot."""
+    if zones is None:
+        return 'grey'
+    return 'red' if all(zones) else ('green' if not any(zones) else 'yellow')
+
+
+def _font(px):
+    return ImageFont.truetype(FONT_BOLD, int(px * SS))
+
+
+def _shield(d, x, y, s, col, width):
+    k = SS
+    pts = [(0.5, 0.06), (0.88, 0.20), (0.84, 0.56), (0.5, 0.94), (0.16, 0.56), (0.12, 0.20), (0.5, 0.06)]
+    d.line([((x + px * s) * k, (y + py * s) * k) for px, py in pts], fill=col, width=int(width * k), joint='curve')
+    d.line([((x + 0.5 * s) * k, (y + 0.28 * s) * k), ((x + 0.5 * s) * k, (y + 0.72 * s) * k)], fill=col, width=int(width * k))
+
+
+def _shield_filled(d, x, y, s, col):
+    k = SS
+    pts = [(0.5, 0.06), (0.88, 0.20), (0.84, 0.56), (0.5, 0.94), (0.16, 0.56), (0.12, 0.20)]
+    d.polygon([((x + px * s) * k, (y + py * s) * k) for px, py in pts], fill=col)
+    d.line([((x + 0.5 * s) * k, (y + 0.24 * s) * k), ((x + 0.5 * s) * k, (y + 0.58 * s) * k)], fill=PANEL[:3], width=int(1.8 * k))
+    r = 0.075 * s
+    cx, cy = x + 0.5 * s, y + 0.74 * s
+    d.ellipse([(cx - r) * k, (cy - r) * k, (cx + r) * k, (cy + r) * k], fill=PANEL[:3])
+
+
+def capsule(kind, zones, palette, ammo='AP', ifhe=False):
+    """kind 'atk' oder 'def'; zones (bug, mitte, deck) mit 1/0 oder None (kein Ziel)."""
+    w = WIDTH['atk_if' if ifhe else kind]
+    im = Image.new('RGBA', (w * SS, HEIGHT * SS), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle([0, 0, w * SS - 1, HEIGHT * SS - 1], radius=HEIGHT * SS // 2, fill=PANEL,
+                        outline=RIM, width=int(0.8 * SS))
+    state = attack_state(zones) if kind == 'atk' else defense_state(zones)
+    col = DIM if state == 'grey' else palette[state]
+    extreme = (kind == 'atk' and state == 'green') or (kind == 'def' and state == 'red')
+    label = col if extreme else (DIM if state == 'grey' else WHITE)
+    if kind == 'atk':
+        small = len(ammo) > 2
+        d.text((7 * SS, (3.4 if small else 2.2) * SS), ammo, font=_font(8.5 if small else 10.5), fill=label)
+        if ifhe:   # hochgestelltes "IF" ohne Kasten, in 1x noch lesbar
+            d.text((25.5 * SS, 1.0 * SS), 'IF', font=_font(8), fill=label)
+    else:
+        if extreme:   # Ziel kommt ueberall durch: Schild gefuellt mit "!" (Hinweis auch ohne Farbe)
+            _shield_filled(d, 6, 2.5, 13, label)
+        else:
+            _shield(d, 6, 2.5, 13, label, 1.5)
+    nowhere = zones is not None and not any(zones)
+    x0 = w - 3 * DOT_STEP + 3
+    for i in range(3):
+        cx, cy = x0 + i * DOT_STEP, HEIGHT / 2
+        box = [(cx - DOT_R) * SS, (cy - DOT_R) * SS, (cx + DOT_R) * SS, (cy + DOT_R) * SS]
+        if zones is not None and zones[i]:
+            d.ellipse(box, fill=col)
+        else:
+            ring = col if nowhere else DIM
+            d.ellipse(box, outline=ring + (255,), width=int(1.2 * SS))
+    if extreme:
+        d.rounded_rectangle([0, 0, w * SS - 1, HEIGHT * SS - 1], radius=HEIGHT * SS // 2,
+                            outline=col + (255,), width=int(1.3 * SS))
+    return im.reduce(SS)
+
+
+def icon_set():
+    """{dateiname: bild} fuer alle Kombinationen."""
+    out = {}
+    combos = list(itertools.product((1, 0), repeat=3))
+    attacks = [('ap', 'AP', False), ('he', 'HE', False), ('he_if', 'HE', True), ('sap', 'SAP', False)]
+    for name, ammo, ifhe in attacks:
+        out['atk_%s_grey.png' % name] = capsule('atk', None, AMPEL, ammo, ifhe)
+        for prefix, palette in sorted(PALETTES.items()):
+            for z in combos:
+                out['atk_%s_%s%s.png' % (name, prefix, ''.join(map(str, z)))] = capsule('atk', z, palette, ammo, ifhe)
+    out['def_grey.png'] = capsule('def', None, AMPEL)
+    for prefix, palette in sorted(PALETTES.items()):
+        for z in combos:
+            out['def_%s%s.png' % (prefix, ''.join(map(str, z)))] = capsule('def', z, palette)
+    return out
+
+
+def main():
+    os.makedirs(TARGET_DIR, exist_ok=True)
+    icons = icon_set()
+    for name, im in sorted(icons.items()):
+        im.save(os.path.join(TARGET_DIR, name))
+    print('%d Kapseln in %s' % (len(icons), TARGET_DIR))
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
