@@ -42,6 +42,20 @@
 	# Zusatzplakette IFHE (tag_ifhe.png) links unten an der HE-Granate, wenn IFHE erkannt ist
 	badgeOffsetX: -3,
 	badgeOffsetY: 22,
+	# Probe (Branch Test): Status-Kapseln statt Granate | Schild (capsule/*.png, tools/make_capsule_icons.py).
+	# Oben ich -> Ziel, unten Ziel -> ich; drei Punkte = Bug/Heck, Mitte, Deck. false = bisherige Symbole.
+	useCapsules: true,
+	capsuleHeight: 18,
+	capsuleGap: 4,
+	capsuleWidth: 72,
+	# Leuchtring der Randfaelle (glow_*.png, GLOW_PAD px um die Kapsel): Pulse beim Aufschalten bzw.
+	# sobald ein Randfall eintritt (Dauer je Puls in s, Anzahl), danach dauerhaft schwach sichtbar
+	glowPad: 5,
+	glowPulse: 0.25,
+	glowPulseCount: 4,
+	glowRestAlpha: 0.45,
+	# Wechsel des Kapsel-Inhalts kurz einblenden (s)
+	capsuleFade: 0.15,
 	# Rand der Greifflaeche um Granate | Schild (px bei Skalierung 1); links schmal wegen Zahnrad
 	dragPadLeft: 4,
 	dragPadTop: 12,
@@ -262,6 +276,18 @@
 		# Mini-Icons der Beschriftung in der Ampelfarbe von Granate bzw. Schild
 		(var targetLabel:str = "PENLIGHT_ICON_PATH + 'label_target_' + (ammo == 'ap' ? '' : ammo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
 		(var ownLabel:str = "PENLIGHT_ICON_PATH + 'label_me_' + palettePrefix + (hasVerdict ? verdict[1] : 'grey') + '.png'")
+		# Status-Kapseln: Zonen als Bits (Bug/Heck, Mitte, Deck); Mitte unbekannt (-1) zaehlt wie
+		# "Bug/Heck und Deck" (wie in der Overmatch-Logik ohne Mittelwert)
+		(var aMid:number = "detail[1] == -1 ? (detail[0] == 1 && detail[2] == 1 ? 1 : 0) : detail[1]")
+		(var dMid:number = "detail[4] == -1 ? (detail[3] == 1 && detail[5] == 1 ? 1 : 0) : detail[4]")
+		(var attackBits:str = "(detail[0] == 1 ? '1' : '0') + (aMid == 1 ? '1' : '0') + (detail[2] == 1 ? '1' : '0')")
+		(var defenseBits:str = "(detail[3] == 1 ? '1' : '0') + (dMid == 1 ? '1' : '0') + (detail[5] == 1 ? '1' : '0')")
+		(var capsuleAmmo:str = "hasIfhe ? 'he_if' : ammo")
+		(var attackCapsule:str = "PENLIGHT_ICON_PATH + 'capsule/atk_' + capsuleAmmo + '_' + (hasVerdict ? palettePrefix + attackBits : 'grey') + '.png'")
+		(var defenseCapsule:str = "PENLIGHT_ICON_PATH + 'capsule/def_' + (hasVerdict ? palettePrefix + defenseBits : 'grey') + '.png'")
+		# Randfaelle: ich komme ueberall durch / Ziel kommt ueberall durch
+		(var attackGlow:str = "hasVerdict && attackBits == '111' ? PENLIGHT_ICON_PATH + 'capsule/glow_atk' + (hasIfhe ? '_if' : '') + (isColorBlind ? '_cb' : '') + '.png' : ''")
+		(var defenseGlow:str = "hasVerdict && defenseBits == '111' ? PENLIGHT_ICON_PATH + 'capsule/glow_def' + (isColorBlind ? '_cb' : '') + '.png' : ''")
 	)
 
 	(controller $Repeat renderer='PenLightTargetTracker'
@@ -291,9 +317,14 @@
 			)
 		)
 		(hblock
-			(bind visible "!showDetail")
+			(bind visible "!showDetail && !PENLIGHT_SETTINGS.useCapsules")
 			(element PenLightIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey" _tag="attackTag" _badge="attackBadge")
 			(element PenLightIcon _url="defenseIcon" _mark="defenseMark" _pulseKey="targetKey")
+		)
+		(vblock
+			(bind visible "!showDetail && PENLIGHT_SETTINGS.useCapsules")
+			(element PenLightCapsule _url="attackCapsule" _glow="attackGlow" _pulseKey="targetKey")
+			(element PenLightCapsule _url="defenseCapsule" _glow="defenseGlow" _pulseKey="targetKey")
 		)
 		# absolut an derselben Stelle wie die Symbole, damit nichts springt
 		(block
@@ -320,8 +351,8 @@
 				(position = "absolute")
 				(bind left "0 - PENLIGHT_SETTINGS.dragPadLeft")
 				(bind top "0 - PENLIGHT_SETTINGS.dragPadTop")
-				(bind width "PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap + PENLIGHT_SETTINGS.dragPadLeft + PENLIGHT_SETTINGS.dragPadRight")
-				(bind height "PENLIGHT_SETTINGS.iconSize + PENLIGHT_SETTINGS.dragPadTop + PENLIGHT_SETTINGS.dragPadBottom")
+				(bind width "(PENLIGHT_SETTINGS.useCapsules ? PENLIGHT_SETTINGS.capsuleWidth : PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap) + PENLIGHT_SETTINGS.dragPadLeft + PENLIGHT_SETTINGS.dragPadRight")
+				(bind height "(PENLIGHT_SETTINGS.useCapsules ? PENLIGHT_SETTINGS.capsuleHeight * 2 + PENLIGHT_SETTINGS.capsuleGap : PENLIGHT_SETTINGS.iconSize) + PENLIGHT_SETTINGS.dragPadTop + PENLIGHT_SETTINGS.dragPadBottom")
 				(backgroundColor = 0x00FFFFFF)
 				(bind hitTest "!isPositionLocked")
 			)
@@ -530,5 +561,43 @@
 	)
 	(dispatch evTargetChanged args="{entity: trackedEntity}" dir="EventDirection.UP" on='addedToStage'
 		(bind enabled "isTargetLocked")
+	)
+)
+
+
+# Status-Kapsel (Probe): Bild in eigener Breite, darunter ein Leuchtring fuer die Randfaelle.
+# Animationen wie bei Stern/Warndreieck im main-Branch: der Leuchtring pulsiert beim Aufschalten
+# (neues Ziel) und sobald ein Randfall eintritt (hell -> schwach), danach bleibt er schwach sichtbar; jeder
+# Inhaltswechsel der Kapsel wird kurz eingeblendet.
+(def element PenLightCapsule(_url:str, _glow:str = '', _pulseKey:str = '') layout=true
+	(style
+		(bind height "PENLIGHT_SETTINGS.capsuleHeight")
+		(bind marginBottom "PENLIGHT_SETTINGS.capsuleGap")
+	)
+	(block
+		(bind visible "_glow != ''")
+		(style
+			(position = "absolute")
+			(bind left "0 - PENLIGHT_SETTINGS.glowPad")
+			(bind top "0 - PENLIGHT_SETTINGS.glowPad")
+			(backgroundSize = "autosize")
+			(bind backgroundImage "_glow")
+			(bind alpha "PENLIGHT_SETTINGS.glowRestAlpha")
+		)
+		(controller $Animation
+			(bindcall play duration="PENLIGHT_SETTINGS.glowPulse" from="{alpha: 1}" to="{alpha: PENLIGHT_SETTINGS.glowRestAlpha}"
+				repeatCount="PENLIGHT_SETTINGS.glowPulseCount" action="killAll" easing="Easing.quad_out"
+				init=false (bind trigger "_pulseKey + _glow"))
+		)
+	)
+	(block
+		(style
+			(backgroundSize = "autosize")
+			(bind backgroundImage "_url")
+		)
+		(controller $Animation
+			(bindcall play duration="PENLIGHT_SETTINGS.capsuleFade" from="{alpha: 0.35}" to="{alpha: 1}"
+				action="killAll" easing="Easing.quad_out" init=false (bind trigger "_url"))
+		)
 	)
 )

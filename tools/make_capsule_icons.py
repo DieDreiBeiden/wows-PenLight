@@ -12,6 +12,7 @@ Farbe nur fuer die Aussage: Text und Symbol weiss, Punkte in der Zustandsfarbe; 
 Ausgabe: mod/res_mods/PnFMods/PenLight/capsule/
   atk_<ap|he|he_if|sap>_<palette><bug><mitte><deck>.png   z. B. atk_he_cb_101.png
   atk_<...>_grey.png, def_<palette><bug><mitte><deck>.png, def_grey.png
+  glow_atk[_if][_cb].png, glow_def[_cb].png: Leuchtring der Randfaelle (GLOW_PAD px groesser)
 """
 import itertools
 import os
@@ -107,6 +108,26 @@ def capsule(kind, zones, palette, ammo='AP', ifhe=False):
     return im.reduce(SS)
 
 
+GLOW_PAD = 5   # px Rand rund um die Kapsel fuer den Leuchtring
+
+
+def glow(kind, palette, ifhe=False):
+    """Weicher Leuchtring in Zustandsfarbe um die Kapsel (Randfaelle; pulsiert in der Anzeige)."""
+    from PIL import ImageFilter
+    w = WIDTH['atk_if' if ifhe else kind]
+    color = palette['green' if kind == 'atk' else 'red']
+    W2, H2 = (w + 2 * GLOW_PAD) * SS, (HEIGHT + 2 * GLOW_PAD) * SS
+    mask = Image.new('L', (W2, H2), 0)
+    md = ImageDraw.Draw(mask)
+    p = GLOW_PAD * SS
+    md.rounded_rectangle([p - 1.5 * SS, p - 1.5 * SS, W2 - p + 1.5 * SS, H2 - p + 1.5 * SS], radius=(HEIGHT / 2 + 1.5) * SS,
+                         outline=255, width=int(2.2 * SS))
+    mask = mask.filter(ImageFilter.GaussianBlur(1.6 * SS))
+    im = Image.new('RGBA', (W2, H2), color + (0,))
+    im.putalpha(mask.point(lambda v: min(255, int(v * 1.6))))
+    return im.reduce(SS)
+
+
 def icon_set():
     """{dateiname: bild} fuer alle Kombinationen."""
     out = {}
@@ -117,6 +138,10 @@ def icon_set():
         for prefix, palette in sorted(PALETTES.items()):
             for z in combos:
                 out['atk_%s_%s%s.png' % (name, prefix, ''.join(map(str, z)))] = capsule('atk', z, palette, ammo, ifhe)
+    for prefix, palette in sorted(PALETTES.items()):
+        out['glow_atk%s.png' % ('_cb' if prefix else '')] = glow('atk', palette)
+        out['glow_atk_if%s.png' % ('_cb' if prefix else '')] = glow('atk', palette, ifhe=True)
+        out['glow_def%s.png' % ('_cb' if prefix else '')] = glow('def', palette)
     out['def_grey.png'] = capsule('def', None, AMPEL)
     for prefix, palette in sorted(PALETTES.items()):
         for z in combos:
