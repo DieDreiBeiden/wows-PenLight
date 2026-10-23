@@ -276,6 +276,9 @@ The ship silhouettes come from the game itself and follow every patch automatica
 | Flash part `Main.swf` (`main-standalone`) | `tools/build_flash.py`, requirements in the file header |
 | To-do list | [`docs/TODO.md`](docs/TODO.md) |
 | Release with both zips | GitHub: Actions → Release → Run workflow (on `main`). Version = next patch unless given; the workflow writes it into `ForgeBlueprints/PenLightContainer.xml` on both branches, so ModForge always sees the release version. What's new = "Unreleased" in `docs/CHANGELOG.md`, frame in `docs/RELEASE_NOTES.md` |
+| Release preview | Same workflow with `dry_run`: notes in the run summary, zips as download on the run, nothing pushed or published |
+| Checks on every push | Workflow Check: tests, `Main.py` up to date, Python 2.7 syntax; on `main`/`main-standalone` also: shared files identical (intended differences in `.github/edition-files.txt`) |
+| Probe build from `Test` | Workflow Check after each push to `Test`: `res_mods` as download on the run (14 days), no release |
 
 - The game logic (`src/penlight/logic.py`) runs on Python 2.7 (client) and 3.x (tests).
 - `mod/res_mods/PnFMods/PenLight/Main.py` is generated – edit `src/penlight/` instead.
