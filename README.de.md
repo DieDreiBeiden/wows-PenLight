@@ -277,6 +277,9 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 | Flash-Teil `Main.swf` (`main-standalone`) | `tools/build_flash.py`, Voraussetzungen siehe Dateikopf |
 | To-Do-Liste | [`docs/TODO.md`](docs/TODO.md) |
 | Release mit beiden Zips | GitHub: Actions → Release → Run workflow (auf `main`). Version = nächste Patch-Version, sofern nicht angegeben; der Workflow schreibt sie auf beiden Branches in `ForgeBlueprints/PenLightContainer.xml`, ModForge sieht also immer die Release-Version. Neuerungen = „Unreleased“ in `docs/CHANGELOG.md`, Rahmen in `docs/RELEASE_NOTES.md` |
+| Release-Vorschau | Gleicher Workflow mit `dry_run`: Text in der Zusammenfassung des Laufs, Zips als Download am Lauf, nichts gepusht oder veröffentlicht |
+| Prüfung bei jedem Push | Workflow Check: Tests, `Main.py` aktuell, Python-2.7-Syntax; auf `main`/`main-standalone` zusätzlich: gemeinsame Dateien gleich (gewollte Unterschiede in `.github/edition-files.txt`) |
+| Probe-Build aus `Test` | Workflow Check nach jedem Push auf `Test`: `res_mods` als Download am Lauf (14 Tage), kein Release |
 
 - Die Spiel-Logik (`src/penlight/logic.py`) läuft unter Python 2.7 (Client) und 3.x (Tests).
 - `mod/res_mods/PnFMods/PenLight/Main.py` ist generiert – Änderungen in `src/penlight/`.

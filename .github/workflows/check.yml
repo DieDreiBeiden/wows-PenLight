@@ -1,0 +1,89 @@
+# Pruefung bei jedem Push (gleiche Datei auf main, main-standalone und Test):
+# - Tests und Main.py aktuell (Python 3)
+# - Main.py und PnFModsLoader.py kompilieren mit Python 2.7 (Spiel-Client, ModsAPI v1.0)
+# - main / main-standalone: gemeinsame Dateien gleich (Ausnahmen in .github/edition-files.txt)
+# - Test: Probe-Paket res_mods als Download am Lauf (14 Tage), kein Release
+name: Check
+
+on:
+  push:
+    branches: [main, main-standalone, Test]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tests und Main.py
+        run: |
+          python3 -m unittest discover -s tests
+          python3 -I tools/build_mod.py
+          git diff --exit-code -- mod/res_mods/PnFMods/PenLight/Main.py
+
+  python27:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax Python 2.7
+        run: |
+          docker run --rm -v "$PWD:/w:ro" -w /w python:2.7.18-slim python -c "
+          import sys, os
+          bad = 0
+          for root, dirs, files in os.walk('mod/res_mods'):
+              for name in sorted(files):
+                  if name.endswith('.py'):
+                      path = os.path.join(root, name)
+                      try:
+                          compile(open(path).read(), path, 'exec')
+                          print('ok   ' + path)
+                      except SyntaxError as e:
+                          bad += 1
+                          print('::error file=%s,line=%s::Python 2.7: %s' % (path, e.lineno, e.msg))
+          sys.exit(1 if bad else 0)
+          "
+
+  editions:
+    if: github.ref_name == 'main' || github.ref_name == 'main-standalone'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Gemeinsame Dateien main / main-standalone
+        run: |
+          allowed=$(grep -v '^\s*\(#\|$\)' .github/edition-files.txt | sort -u)
+          diff=$(git diff --name-only origin/main origin/main-standalone | sort -u)
+          unexpected=$(comm -23 <(echo "$diff") <(echo "$allowed") | grep . || true)
+          if [ -n "$unexpected" ]; then
+            echo "Unterschiede ausserhalb von .github/edition-files.txt:"
+            for f in $unexpected; do
+              echo "::error file=$f::$f unterscheidet sich zwischen main und main-standalone"
+            done
+            echo "Uebernehmen (Cherry-Pick) oder, falls gewollt, in .github/edition-files.txt eintragen."
+            exit 1
+          fi
+          echo "$(echo "$diff" | grep -c . || true) gewollte Unterschiede, sonst gleich"
+
+  probe:
+    if: github.ref_name == 'Test'
+    needs: [tests, python27]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Paket auspacken
+        run: |
+          mkdir -p dist
+          git archive HEAD:mod res_mods | tar -x -C dist
+          echo "SHORT=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PenLight-Test-${{ env.SHORT }}
+          path: dist
+          retention-days: 14
