@@ -13,6 +13,7 @@ Ausgabe: mod/res_mods/PnFMods/PenLight/capsule/
   atk_<ap|he|he_if|sap>_<palette><bug><mitte><deck>.png   z. B. atk_he_cb_101.png
   atk_<...>_grey.png, def_<palette><bug><mitte><deck>.png, def_grey.png
   glow_atk[_if][_cb].png, glow_def[_cb].png: Leuchtring der Randfaelle (GLOW_PAD px groesser)
+  alt/: Teile der Alt-Ansicht (ausgeklappte Kapseln): panel*, glow_*, dot_fill_*/dot_ring_*, shield*
 """
 import itertools
 import os
@@ -111,21 +112,79 @@ def capsule(kind, zones, palette, ammo='AP', ifhe=False):
 GLOW_PAD = 5   # px Rand rund um die Kapsel fuer den Leuchtring
 
 
-def glow(kind, palette, ifhe=False):
-    """Weicher Leuchtring in Zustandsfarbe um die Kapsel (Randfaelle; pulsiert in der Anzeige)."""
+def glow(kind, palette, ifhe=False, size=None, radius=None):
+    """Weicher Leuchtring in Zustandsfarbe um eine Flaeche (Randfaelle; pulsiert in der Anzeige)."""
     from PIL import ImageFilter
-    w = WIDTH['atk_if' if ifhe else kind]
+    w, h = size or (WIDTH['atk_if' if ifhe else kind], HEIGHT)
+    r = radius if radius is not None else h / 2
     color = palette['green' if kind == 'atk' else 'red']
-    W2, H2 = (w + 2 * GLOW_PAD) * SS, (HEIGHT + 2 * GLOW_PAD) * SS
+    W2, H2 = (w + 2 * GLOW_PAD) * SS, (h + 2 * GLOW_PAD) * SS
     mask = Image.new('L', (W2, H2), 0)
     md = ImageDraw.Draw(mask)
     p = GLOW_PAD * SS
-    md.rounded_rectangle([p - 1.5 * SS, p - 1.5 * SS, W2 - p + 1.5 * SS, H2 - p + 1.5 * SS], radius=(HEIGHT / 2 + 1.5) * SS,
+    md.rounded_rectangle([p - 1.5 * SS, p - 1.5 * SS, W2 - p + 1.5 * SS, H2 - p + 1.5 * SS], radius=(r + 1.5) * SS,
                          outline=255, width=int(2.2 * SS))
     mask = mask.filter(ImageFilter.GaussianBlur(1.6 * SS))
     im = Image.new('RGBA', (W2, H2), color + (0,))
     im.putalpha(mask.point(lambda v: min(255, int(v * 1.6))))
     return im.reduce(SS)
+
+
+# ---------------------------------------------------------------- Alt-Ansicht (Variante A)
+# Ausgeklappte Kapseln: Flaeche, Punkte und Schild als Bilder; Munition, Zonen-Namen, mm-Werte und
+# Schiffsname setzt die Anzeige als Text darauf (englisch, siehe PenLight.unbound).
+ALT_W, ALT_H, ALT_R = 186, 42, 12   # Breite wie die Spiel-Silhouetten der bisherigen Alt-Ansicht
+DOT_PX = 8
+
+
+def alt_panel(kind=None, palette=None):
+    """Grundflaeche; kind gesetzt = Randfall mit Rahmen in Zustandsfarbe."""
+    im = Image.new('RGBA', (ALT_W * SS, ALT_H * SS), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    box = [0, 0, ALT_W * SS - 1, ALT_H * SS - 1]
+    d.rounded_rectangle(box, radius=ALT_R * SS, fill=PANEL, outline=RIM, width=int(0.8 * SS))
+    if kind:
+        col = palette['green' if kind == 'atk' else 'red']
+        d.rounded_rectangle(box, radius=ALT_R * SS, outline=col + (255,), width=int(1.3 * SS))
+    return im.reduce(SS)
+
+
+def alt_dot(color, filled):
+    im = Image.new('RGBA', (DOT_PX * SS, DOT_PX * SS), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    c, r = DOT_PX / 2, DOT_R
+    box = [(c - r) * SS, (c - r) * SS, (c + r) * SS, (c + r) * SS]
+    if filled:
+        d.ellipse(box, fill=color + (255,))
+    else:
+        d.ellipse(box, outline=color + (255,), width=int(1.2 * SS))
+    return im.reduce(SS)
+
+
+def alt_shield(color, warn=False):
+    im = Image.new('RGBA', (14 * SS, 14 * SS), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    if warn:
+        _shield_filled(d, 0.5, 0.5, 13, color)
+    else:
+        _shield(d, 0.5, 0.5, 13, color, 1.5)
+    return im.reduce(SS)
+
+
+def alt_set():
+    out = {'alt/panel.png': alt_panel(), 'alt/dot_ring_grey.png': alt_dot(DIM, False),
+           'alt/shield.png': alt_shield(WHITE), 'alt/shield_grey.png': alt_shield(DIM)}
+    for prefix, palette in sorted(PALETTES.items()):
+        cb = '_cb' if prefix else ''
+        out['alt/panel_atk_ext%s.png' % cb] = alt_panel('atk', palette)
+        out['alt/panel_def_ext%s.png' % cb] = alt_panel('def', palette)
+        out['alt/glow_atk%s.png' % cb] = glow('atk', palette, size=(ALT_W, ALT_H), radius=ALT_R)
+        out['alt/glow_def%s.png' % cb] = glow('def', palette, size=(ALT_W, ALT_H), radius=ALT_R)
+        out['alt/shield_warn%s.png' % cb] = alt_shield(palette['red'], warn=True)
+        for state, color in sorted(palette.items()):
+            out['alt/dot_fill_%s%s.png' % (prefix, state)] = alt_dot(color, True)
+            out['alt/dot_ring_%s%s.png' % (prefix, state)] = alt_dot(color, False)
+    return out
 
 
 def icon_set():
@@ -146,11 +205,12 @@ def icon_set():
     for prefix, palette in sorted(PALETTES.items()):
         for z in combos:
             out['def_%s%s.png' % (prefix, ''.join(map(str, z)))] = capsule('def', z, palette)
+    out.update(alt_set())
     return out
 
 
 def main():
-    os.makedirs(TARGET_DIR, exist_ok=True)
+    os.makedirs(os.path.join(TARGET_DIR, 'alt'), exist_ok=True)
     icons = icon_set()
     for name, im in sorted(icons.items()):
         im.save(os.path.join(TARGET_DIR, name))
