@@ -1,0 +1,22 @@
+# Dateien, die sich zwischen main (TTaro) und main-standalone unterscheiden duerfen.
+# Alles andere muss gleich sein (Workflow Check, Job editions). Gleiche Datei auf beiden Branches.
+
+# Fassungsspezifisch
+docs/KONZEPT.md
+mod/README.md
+mod/res_mods/ForgeBlueprints/PenLightContainer.xml
+mod/res_mods/PnFMods/PenLight/Main.py
+mod/res_mods/PnFMods/PenLight/Main.swf
+mod/res_mods/gui/unbound2/PnFMods/PenLight.unbound
+mod/res_mods/gui/unbound2/PnFMods/PenLightTTaro.unbound
+src/as3/Main.as
+src/penlight/mod_main.py
+tests/test_mod.py
+tools/build_flash.py
+
+# Nur auf main (Release)
+.github/workflows/release.yml
+docs/CHANGELOG.md
+docs/RELEASE_NOTES.md
+tests/test_release_notes.py
+tools/release_notes.py
