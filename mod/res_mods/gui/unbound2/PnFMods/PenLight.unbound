@@ -56,6 +56,15 @@
 	glowRestAlpha: 0.45,
 	# Wechsel des Kapsel-Inhalts kurz einblenden (s)
 	capsuleFade: 0.15,
+	# Alt-Ansicht der Kapseln (Variante A, englisch): ausgeklappte Flaechen 186 x 42 (capsule/alt/*.png),
+	# Texte in der Spielschrift (12 px, verkleinert auf altTextScale)
+	altWidth: 186,
+	altHeight: 42,
+	altGap: 4,
+	altTextScale: 0.7,
+	# Kopfzeile etwas kleiner, damit Kaliber, Overmatch-Grenze (OM) und Schiffsname hineinpassen
+	altHeadScale: 0.62,
+	altZoneStep: 60,
 	# Rand der Greifflaeche um Granate | Schild (px bei Skalierung 1); links schmal wegen Zahnrad
 	dragPadLeft: 4,
 	dragPadTop: 12,
@@ -288,6 +297,15 @@
 		# Randfaelle: ich komme ueberall durch / Ziel kommt ueberall durch
 		(var attackGlow:str = "hasVerdict && attackBits == '111' ? PENLIGHT_ICON_PATH + 'capsule/glow_atk' + (hasIfhe ? '_if' : '') + (isColorBlind ? '_cb' : '') + '.png' : ''")
 		(var defenseGlow:str = "hasVerdict && defenseBits == '111' ? PENLIGHT_ICON_PATH + 'capsule/glow_def' + (isColorBlind ? '_cb' : '') + '.png' : ''")
+		# Alt-Ansicht der Kapseln: Werte aus Main.py (logic.numbers), -1 = unbekannt
+		(var nums:array = "verdict.length >= 6 ? verdict[5] : [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1]")
+		(var targetName:str = "targetNameIDS != '' ? toUpper(tr(targetNameIDS)) : ''")
+		(var attackLine:str = "ammo == 'ap' ? subst('%d mm  |  OM up to %d mm  |  ', [nums[6], nums[7]]) + targetName : subst('%d mm penetration  |  ', [nums[6]]) + targetName")
+		(var defenseLine:str = "nums[8] > 0 ? subst('Enemy AP %d mm  |  OM up to %d mm', [nums[8], nums[9]]) : 'Not rated for this pairing'")
+		(var attackState:str = "attackBits == '111' ? 'green' : (attackBits == '000' ? 'red' : 'yellow')")
+		(var defenseState:str = "defenseBits == '111' ? 'red' : (defenseBits == '000' ? 'green' : 'yellow')")
+		(var altAmmoLabel:str = "toUpper(ammo)")
+		(var showAltCapsules:bool = "showDetail && PENLIGHT_SETTINGS.useCapsules")
 	)
 
 	(controller $Repeat renderer='PenLightTargetTracker'
@@ -326,9 +344,18 @@
 			(element PenLightCapsule _url="attackCapsule" _glow="attackGlow" _pulseKey="targetKey")
 			(element PenLightCapsule _url="defenseCapsule" _glow="defenseGlow" _pulseKey="targetKey")
 		)
+		# Alt-Ansicht der Kapseln (Variante A): an derselben Stelle, oben ich -> Ziel, unten Ziel -> ich
+		(vblock
+			(bind visible "showAltCapsules")
+			(style (position = "absolute") (left = 0) (top = 0))
+			(element PenLightAltPanel _kind="'atk'" _state="attackState" _z="[detail[0] == 1 ? 1 : 0, aMid, detail[2] == 1 ? 1 : 0]"
+				_line="attackLine" _label="altAmmoLabel" _values="[nums[0], nums[1], nums[2]]" _cb="isColorBlind" _pulseKey="targetKey")
+			(element PenLightAltPanel _kind="'def'" _state="defenseState" _z="[detail[3] == 1 ? 1 : 0, dMid, detail[5] == 1 ? 1 : 0]"
+				_line="defenseLine" _label="''" _values="[nums[3], nums[4], nums[5]]" _cb="isColorBlind" _pulseKey="targetKey")
+		)
 		# absolut an derselben Stelle wie die Symbole, damit nichts springt
 		(block
-			(bind visible "showDetail && !showSilhouettes")
+			(bind visible "showDetail && !showSilhouettes && !PENLIGHT_SETTINGS.useCapsules")
 			(style (position = "absolute") (left = 0) (top = 0))
 			# untereinander: oben Target (gehoert zur Granate), unten Me (gehoert zum Schild)
 			(element PenLightShip _url="attackDetail")
@@ -336,7 +363,7 @@
 		)
 		# Prototyp: dieselbe Stelle, Spiel-Silhouetten statt gezeichneter Schiffe
 		(block
-			(bind visible "showSilhouettes")
+			(bind visible "showSilhouettes && !PENLIGHT_SETTINGS.useCapsules")
 			(style (position = "absolute") (left = 0) (top = 0))
 			(element PenLightSilhouetteShip _shortName="targetShortName" _label="targetLabel" _nameIDS="targetNameIDS"
 				_bow="tBow" _mid="tMid" _deck="tDeck" _palette="palette")
@@ -598,6 +625,121 @@
 		(controller $Animation
 			(bindcall play duration="PENLIGHT_SETTINGS.capsuleFade" from="{alpha: 0.35}" to="{alpha: 1}"
 				action="killAll" easing="Easing.quad_out" init=false (bind trigger "_url"))
+		)
+	)
+)
+
+
+
+# Alt-Ansicht der Status-Kapseln (Variante A): ausgeklappte Flaeche mit Kopfzeile (Munition bzw.
+# Schild, Erklaerung) und drei Zonen (Punkt, Name, Plattendicke). Randfaelle mit Rahmen und
+# Leuchtring, der wie bei den Kapseln beim Aufschalten pulsiert.
+(def element PenLightAltPanel(_kind:str, _state:str, _z:array, _line:str, _label:str, _values:array,
+		_cb:bool = false, _pulseKey:str = '') layout=true
+	(scope
+		(var path:str = "PENLIGHT_ICON_PATH + 'capsule/alt/'")
+		(var cbSuffix:str = "_cb ? '_cb' : ''")
+		(var pal:str = "_cb ? 'cb_' : ''")
+		(var extreme:bool = "(_kind == 'atk' && _state == 'green') || (_kind == 'def' && _state == 'red')")
+		(var nowhere:bool = "_z[0] == 0 && _z[1] == 0 && _z[2] == 0")
+		(var panelUrl:str = "path + (extreme ? 'panel_' + _kind + '_ext' + cbSuffix : 'panel') + '.png'")
+		(var glowUrl:str = "extreme ? path + 'glow_' + _kind + cbSuffix + '.png' : ''")
+		(var shieldUrl:str = "path + (extreme ? 'shield_warn' + cbSuffix : 'shield') + '.png'")
+	)
+	(style
+		(bind width "PENLIGHT_SETTINGS.altWidth")
+		(bind height "PENLIGHT_SETTINGS.altHeight")
+		(bind marginBottom "PENLIGHT_SETTINGS.altGap")
+	)
+	(block
+		(bind visible "glowUrl != ''")
+		(style
+			(position = "absolute")
+			(bind left "0 - PENLIGHT_SETTINGS.glowPad")
+			(bind top "0 - PENLIGHT_SETTINGS.glowPad")
+			(backgroundSize = "autosize")
+			(bind backgroundImage "glowUrl")
+			(bind alpha "PENLIGHT_SETTINGS.glowRestAlpha")
+		)
+		(controller $Animation
+			(bindcall play duration="PENLIGHT_SETTINGS.glowPulse" from="{alpha: 1}" to="{alpha: PENLIGHT_SETTINGS.glowRestAlpha}"
+				repeatCount="PENLIGHT_SETTINGS.glowPulseCount" action="killAll" easing="Easing.quad_out"
+				init=false (bind trigger "_pulseKey + glowUrl"))
+		)
+	)
+	(block
+		(style
+			(position = "absolute") (left = 0) (top = 0)
+			(backgroundSize = "autosize")
+			(bind backgroundImage "panelUrl")
+		)
+	)
+	# Kopfzeile: Munitionskuerzel (oben) bzw. Schild (unten), daneben die Erklaerung
+	(block
+		(bind visible "_kind == 'atk'")
+		(style (position = "absolute") (left = 8) (top = 2))
+		(tf
+			(class $TextDefaultBold17NM)
+			(bind text "_label")
+		)
+	)
+	(block
+		(bind visible "_kind == 'def'")
+		(style
+			(position = "absolute") (left = 7) (top = 4)
+			(backgroundSize = "autosize")
+			(bind backgroundImage "shieldUrl")
+		)
+	)
+	(block
+		(style
+			(position = "absolute") (left = 34) (top = 6)
+			(bind scaleX "PENLIGHT_SETTINGS.altHeadScale") (bind scaleY "PENLIGHT_SETTINGS.altHeadScale")
+		)
+		(tf
+			(class $TextDefault12NM)
+			(class $FontEnableReadability)
+			(bind text "_line")
+		)
+	)
+	(element PenLightAltZone _i="0" _name="'Bow/Stern'" _z="_z" _values="_values" _state="_state" _pal="pal" _nowhere="nowhere" _path="path")
+	(element PenLightAltZone _i="1" _name="'Midship'" _z="_z" _values="_values" _state="_state" _pal="pal" _nowhere="nowhere" _path="path")
+	(element PenLightAltZone _i="2" _name="'Deck'" _z="_z" _values="_values" _state="_state" _pal="pal" _nowhere="nowhere" _path="path")
+)
+
+# Eine Zone der Alt-Ansicht: Punkt (gefuellt / umrandet), darunter Name und Plattendicke.
+(def element PenLightAltZone(_i:number, _name:str, _z:array, _values:array, _state:str, _pal:str, _nowhere:bool,
+		_path:str) layout=true
+	(scope
+		(var on:bool = "_z[_i] == 1")
+		(var dotUrl:str = "_path + (on ? 'dot_fill_' + _pal + _state : (_nowhere ? 'dot_ring_' + _pal + _state : 'dot_ring_grey')) + '.png'")
+		(var valueText:str = "_values[_i] >= 0 ? subst('%d mm', [_values[_i]]) : '-'")
+		(var x:number = "18 + _i * PENLIGHT_SETTINGS.altZoneStep")
+	)
+	(style (position = "absolute") (left = 0) (top = 0))
+	(block
+		(style
+			(position = "absolute") (bind left "x") (top = 24)
+			(backgroundSize = "autosize")
+			(bind backgroundImage "dotUrl")
+		)
+	)
+	(block
+		(style
+			(position = "absolute") (bind left "x + 11") (top = 21)
+			(bind scaleX "PENLIGHT_SETTINGS.altTextScale") (bind scaleY "PENLIGHT_SETTINGS.altTextScale")
+		)
+		(vblock
+			(tf
+				(class $TextDefault12NM)
+				(class $FontEnableReadability)
+				(bind text "_name")
+			)
+			(tf
+				(class $TextDefaultBold12NM)
+				(class $FontEnableReadability)
+				(bind text "valueText")
+			)
 		)
 	)
 )

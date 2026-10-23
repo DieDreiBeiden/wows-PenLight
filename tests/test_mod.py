@@ -108,8 +108,11 @@ class ModTest(unittest.TestCase):
         self.assertEqual(self.ui_data[-1], ('update', {
             'ammo': 'ap', 'ifhe': False,
             # Detail: ich->Ziel [Bug, Mitte, Deck], Ziel->ich [Bug, Mitte, Deck]
-            'byId': {'10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r']},
-            'byName': {'bot10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r']},
+            # Werte: Ziel 32/32/57, ich 27/28/36, mein Kaliber 127 (Overmatch bis 8), Ziel 460 (bis 32)
+            'byId': {'10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r',
+                            [32, 32, 57, 27, 28, 36, 127, 8, 460, 32]]},
+            'byName': {'bot10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r',
+                                 [32, 32, 57, 27, 28, 36, 127, 8, 460, 32]]},
         }))
 
     def test_he_rates_destroyer(self):
@@ -164,7 +167,8 @@ class ModTest(unittest.TestCase):
         self.run_mod('PASC720_Hawaii', ['PBSC110_Minotaur'])  # Minotaur ohne Mitte-Wert
         entry = self.ui_data[-1][1]['byId']['10']
         self.assertEqual(entry[2], [0, -1, 0, 0, 0, 0])
-        self.assertEqual(entry[3:], ['', 'detail_me_r_r_r'])  # Granate ohne Bild, Schild: nirgends Overmatch
+        self.assertEqual(entry[3:5], ['', 'detail_me_r_r_r'])  # Granate ohne Bild, Schild: nirgends Overmatch
+        self.assertEqual(entry[5][:3], [16, -1, 16])         # Werte: Mitte unbekannt = -1
 
     def test_version_mismatch_disables(self):
         lines = self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'], data_version='15,8,0,1')

@@ -122,6 +122,29 @@ def pen_state(pen_mm, ship):
     return 'deck' if deck else RED
 
 
+def overmatch_limit(caliber_mm):
+    """Dickste Platte in ganzen mm, die dieses Kaliber noch overmatcht; ohne Kaliber -1."""
+    if not caliber_mm:
+        return -1
+    x = caliber_mm / OVERMATCH_RATIO
+    n = int(x)
+    return n - 1 if n == x else n
+
+
+def _mm(value):
+    return -1 if value is None else int(value)
+
+
+def numbers(me, enemy, he, pen_mm, ap_rated):
+    """Werte fuer die Alt-Ansicht: [Ziel bug, mitte, deck, ich bug, mitte, deck,
+    meine Granate (Kaliber bzw. Durchschlag), meine Overmatch-Grenze (nur AP, sonst -1),
+    Kaliber des Ziels, Overmatch-Grenze des Ziels] in ganzen mm, unbekannt -1."""
+    zones = ('bow', 'mid', 'deck')
+    shot = [int(pen_mm), -1] if he else [_mm(me['caliber']), overmatch_limit(me['caliber'])]
+    enemy_gun = [_mm(enemy['caliber']), overmatch_limit(enemy['caliber'])] if ap_rated else [-1, -1]
+    return [_mm(enemy.get(z)) for z in zones] + [_mm(me.get(z)) for z in zones] + shot + enemy_gun
+
+
 def evaluate(me, enemy, ammo='ap', pen_mm=None):
     """me/enemy: dict mit 'class', 'caliber', 'bow', 'deck', optional 'mid' (mm).
 
@@ -142,6 +165,7 @@ def evaluate(me, enemy, ammo='ap', pen_mm=None):
         'defense': defense_color(enemy['caliber'], me) if ap_rated else GREY,
         'detail': (pen_detail(pen_mm, enemy) if he else zone_detail(me['caliber'], enemy))
         + (zone_detail(enemy['caliber'], me) if ap_rated else [-1, -1, -1]),
+        'numbers': numbers(me, enemy, he, pen_mm, ap_rated),
     }
 
 
@@ -326,13 +350,14 @@ def ui_payload(results):
     """Daten fuer PenLight.unbound: Schluessel = Avatar-ID (als Text) bzw. Spielername.
 
     Wert: [granate, schild, [ich->ziel bug, mitte, deck, ziel->ich bug, mitte, deck],
-           bild_granate, bild_schild]  (Bildnamen ohne .png, '' = keine Daten)
+           bild_granate, bild_schild, werte]  (Bildnamen ohne .png, '' = keine Daten;
+           werte = logic.numbers, mm fuer die Alt-Ansicht der Status-Kapseln)
     Granate und Ziel-Teil gelten fuer die geladene Munition ('ammo': ap / he / sap); bei HE/SAP
     ist die Granate green / bow / deck / red und der Ziel-Teil der Durchschlag statt Overmatch.
     """
     by_id, by_name = {}, {}
     for pid, r in results.items():
-        pair = [r['attack'], r['defense'], r['detail']] + list(detail_icons(r['detail']))
+        pair = [r['attack'], r['defense'], r['detail']] + list(detail_icons(r['detail'])) + [r['numbers']]
         by_id[str(pid)] = pair
         if r.get('player'):
             by_name[r['player']] = pair
