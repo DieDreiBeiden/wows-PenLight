@@ -93,6 +93,19 @@ class GameParamsTest(unittest.TestCase):
         }, '15,9,0,1')['ships']
         self.assertEqual(sorted(table), ['PASD013_Gearing_1945', 'PJSA718_Akagi'])
 
+    def test_deck_hangar(self):
+        # US-Hybride: duennes SSC_Deck, Deck im Spiel = Hangar/Flugdeck
+        louisiana = {'Cas_Deck': 38.0, 'SSC_Deck': 6.0, 'SSC_Hang': 38.0, 'SSC_Fdck': 38.0}
+        self.assertEqual(gameparams.deck_mm(louisiana, 'Battleship'), 38.0)
+        # Hangar duenner als SSC_Deck: unveraendert (Hildebrand)
+        hildebrand = {'Cas_Deck': 30.0, 'SSC_Deck': 30.0, 'SSC_Hang': 19.0, 'SSC_Fdck': 30.0}
+        self.assertEqual(gameparams.deck_mm(hildebrand, 'Cruiser'), 30.0)
+        # Traeger mit gepanzertem Flugdeck: SSC_Deck zaehlt weiter
+        hakuryu = {'SSC_Deck': 19.0, 'SSC_Fdck': 95.0}
+        self.assertEqual(gameparams.deck_mm(hakuryu, 'AirCarrier'), 19.0)
+        # ohne Hangar: duennste Deckplatte wie bisher
+        self.assertEqual(gameparams.deck_mm({'SSC_Deck': 6.0}, 'Cruiser'), 6.0)
+
     def test_final_hull_is_used(self):
         ships = gameparams.extract(gameparams.load(self.path))
         self.assertEqual(ships['PXSC001_Test']['hull'], 'B_Hull')
