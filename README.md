@@ -274,6 +274,7 @@ The ship silhouettes come from the game itself and follow every patch automatica
 | README images | `python3 -I tools/make_readme_images.py` |
 | Texts of the TTaro options page | `python3 -I tools/make_texts.py` |
 | Flash part `Main.swf` (`main-standalone`) | `tools/build_flash.py`, requirements in the file header |
+| To-do list | [`docs/TODO.md`](docs/TODO.md) |
 | Release with both zips | GitHub: Actions → Release → Run workflow (on `main`); text in `docs/RELEASE_NOTES.md` |
 
 - The game logic (`src/penlight/logic.py`) runs on Python 2.7 (client) and 3.x (tests).
