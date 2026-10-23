@@ -6,6 +6,8 @@
 # Danach prueft er beide Fassungen (Tests, Main.py aktuell), baut die Zips aus diesen Commits und legt
 # Tag v<Version> samt Release an. Release-Text: Vorlage docs/RELEASE_NOTES.md mit den Eintraegen aus
 # docs/CHANGELOG.md und einem Vergleichslink zum vorherigen Release.
+# Probelauf (dry_run): alles wie oben, aber ohne Push und ohne Release; Zips und Release-Text liegen
+# dann als Download am Lauf (7 Tage), der Text steht zusaetzlich in der Zusammenfassung des Laufs.
 name: Release
 
 on:
@@ -23,6 +25,10 @@ on:
         description: 'Bestehenden Release und Tag dieser Version loeschen und neu anlegen'
         type: boolean
         default: false
+      dry_run:
+        description: 'Probelauf: nichts pushen, nichts veroeffentlichen'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -34,6 +40,7 @@ jobs:
       REQUESTED: ${{ inputs.version }}
       PRERELEASE: ${{ inputs.prerelease }}
       REPLACE: ${{ inputs.replace }}
+      DRY_RUN: ${{ inputs.dry_run }}
       MANIFEST: mod/res_mods/ForgeBlueprints/PenLightContainer.xml
     steps:
       - uses: actions/checkout@v4
@@ -57,6 +64,12 @@ jobs:
           python3 -I tools/release_notes.py notes "$VERSION" "$PREVIOUS" "$GITHUB_REPOSITORY" > dist/notes.md
           echo "Version $VERSION, vorheriger Release ${PREVIOUS:-keiner}"
           cat dist/notes.md
+          {
+            if [ "$DRY_RUN" = "true" ]; then echo "> Probelauf, nichts veroeffentlicht"; echo; fi
+            echo "# PenLight $VERSION"
+            echo
+            cat dist/notes.md
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Version und Changelog committen
         run: |
@@ -71,6 +84,10 @@ jobs:
           fi
           if ! git -C ../standalone diff --quiet; then
             git -C ../standalone commit -m "Release $VERSION: Version" -- "$MANIFEST"
+          fi
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "Probelauf: Commits nur lokal im Lauf, kein Push"
+            exit 0
           fi
           git -C ../standalone push origin HEAD:main-standalone
           git push origin HEAD:main
@@ -98,7 +115,18 @@ jobs:
               || { echo "::error::$z meldet nicht Version $VERSION"; exit 1; }
           done
 
+      - name: Probelauf hochladen
+        if: inputs.dry_run
+        uses: actions/upload-artifact@v4
+        with:
+          name: PenLight-${{ env.VERSION }}-probelauf
+          path: |
+            dist/notes.md
+            dist/PenLight-*.zip
+          retention-days: 7
+
       - name: Release anlegen
+        if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
