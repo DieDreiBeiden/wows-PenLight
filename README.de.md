@@ -38,6 +38,7 @@ normalen Außenperspektive ist sie ausgeblendet.
 - [Entwicklung](#entwicklung)
 - [Projektstruktur](#projektstruktur)
 - [Datenquellen und Danksagungen](#datenquellen-und-danksagungen)
+- [Autoren](#autoren)
 
 ---
 
@@ -314,3 +315,10 @@ docs/                             Konzept, Abbildungen
 
 PenLight nutzt ausschließlich die offizielle ModsAPI bzw. die veröffentlichten Schnittstellen
 der genannten Mods. Eine Lizenz für dieses Repository ist noch nicht festgelegt.
+
+---
+
+## Autoren
+
+- [DieDreiBeiden](https://github.com/DieDreiBeiden) – Idee, Gestaltungsentscheidungen, Tests im Spiel
+- Claude (Anthropic) – Umsetzung, als Mitautor der Commits

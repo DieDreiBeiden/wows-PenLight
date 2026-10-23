@@ -38,6 +38,7 @@ third-person view it is hidden.
 - [Development](#development)
 - [Repository layout](#repository-layout)
 - [Data sources and credits](#data-sources-and-credits)
+- [Authors](#authors)
 
 ---
 
@@ -313,3 +314,10 @@ docs/                             concept, images
 
 PenLight only uses the official ModsAPI and the published interfaces of the mods above.
 A licence for this repository has not been chosen yet.
+
+---
+
+## Authors
+
+- [DieDreiBeiden](https://github.com/DieDreiBeiden) – idea, design decisions, in-game testing
+- Claude (Anthropic) – implementation, as co-author of the commits
