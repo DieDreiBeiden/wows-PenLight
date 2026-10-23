@@ -54,8 +54,23 @@ class ReleaseNotesTest(unittest.TestCase):
         self.assertEqual(rn.finalize(done, '0.3.2', '2026-10-25'), done)
 
     def test_container_version(self):
-        xml = '<mod name="PenLightContainer" version="0.3.2" priority="0">'
+        xml = '<mod name="PenLightContainer" version="0.3.2" priority="0">\n  <requires installer="&gt;=1.0.0"/>'
         self.assertEqual(rn.container_version(xml), '0.3.2')
+        done = rn.set_container_version(xml, '0.4.0')
+        self.assertEqual(rn.container_version(done), '0.4.0')
+        self.assertIn('installer="&gt;=1.0.0"', done)
+
+    def test_pick_version(self):
+        tags = ['v0.3.0', 'v0.3.1', 'v0.3.2', 'test-x']
+        self.assertEqual(rn.pick_version('', False, tags), ('0.3.3', 'v0.3.2'))     # naechster Patch
+        self.assertEqual(rn.pick_version('', True, tags), ('0.3.2', 'v0.3.1'))      # neuesten ersetzen
+        self.assertEqual(rn.pick_version('0.4.0', False, tags), ('0.4.0', 'v0.3.2'))
+        self.assertEqual(rn.pick_version('0.3.1', True, tags), ('0.3.1', 'v0.3.0'))
+        self.assertEqual(rn.pick_version('0.1.0', False, []), ('0.1.0', ''))
+        for requested, replace, known in (('0.3.2', False, tags), ('0.3.0.1', False, tags), ('v0.4.0', False, tags),
+                                          ('0.2.9', False, tags), ('', False, [])):
+            with self.assertRaises(ValueError):
+                rn.pick_version(requested, replace, known)
 
     def test_repo_files(self):
         # echte Vorlage und Changelog passen zusammen

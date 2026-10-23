@@ -5,7 +5,6 @@ workflow uses them as "What's new" and then moves them under the new version.
 
 ## Unreleased
 
-- Both editions report version 0.3.2 to ModForge.
 - Fixed: Nebraska, Delaware and Louisiana now use their hangar deck (32 / 38 / 38 mm) instead of a wrong 6 mm value.
 
 ## 0.3.1 – 2026-10-21

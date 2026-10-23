@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
-"""Release-Text aus docs/CHANGELOG.md und der Vorlage docs/RELEASE_NOTES.md.
+"""Version und Release-Text fuer den Release-Workflow.
 
-    python3 -I tools/release_notes.py version mod/res_mods/ForgeBlueprints/PenLightContainer.xml
+    python3 -I tools/release_notes.py pick GEWUENSCHT REPLACE [TAG ...]   -> VERSION=… / PREVIOUS=…
+    python3 -I tools/release_notes.py set-version MANIFEST VERSION
     python3 -I tools/release_notes.py notes VERSION VORHERIGER_TAG OWNER/REPO > notes.md
     python3 -I tools/release_notes.py finalize VERSION DATUM
 
-Neue Eintraege kommen unter '## Unreleased'. 'notes' nimmt den Abschnitt '## VERSION', falls es ihn
-schon gibt (Release wird ersetzt), sonst 'Unreleased'. 'finalize' macht nach dem Release aus
-'Unreleased' den Abschnitt '## VERSION – DATUM' und legt ein leeres 'Unreleased' an.
-Vorlage: {{VERSION}}, {{CHANGES}}, {{COMPARE}}.
+Version: GEWUENSCHT (z. B. 0.4.0) oder leer = naechste Patch-Version nach dem neuesten Tag; leer mit
+REPLACE=true = neuester Tag (Release wird ersetzt). 'set-version' schreibt sie ins ModForge-Manifest,
+damit die Mod immer die Release-Version meldet.
+Release-Text: neue Eintraege kommen unter '## Unreleased' in docs/CHANGELOG.md. 'notes' nimmt den
+Abschnitt '## VERSION', falls es ihn schon gibt (Release wird ersetzt), sonst 'Unreleased'.
+'finalize' macht aus 'Unreleased' den Abschnitt '## VERSION – DATUM' und legt ein leeres
+'Unreleased' an. Vorlage docs/RELEASE_NOTES.md: {{VERSION}}, {{CHANGES}}, {{COMPARE}}.
 """
 import os
 import re
@@ -18,13 +22,51 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 CHANGELOG = os.path.join(ROOT, 'docs', 'CHANGELOG.md')
 TEMPLATE = os.path.join(ROOT, 'docs', 'RELEASE_NOTES.md')
 UNRELEASED = 'Unreleased'
+_VERSION = re.compile(r'^v?([0-9]+)\.([0-9]+)\.([0-9]+)$')
+_MANIFEST_VERSION = re.compile(r'(<mod\b[^>]*\bversion=")([0-9]+\.[0-9]+\.[0-9]+)(")')
+
+
+def _parse(text):
+    m = _VERSION.match(text.strip())
+    return tuple(int(n) for n in m.groups()) if m else None
+
+
+def _fmt(parts):
+    return '%d.%d.%d' % parts
+
+
+def pick_version(requested, replace, tags):
+    """(version, vorheriger_tag) aus Wunschversion, Ersetzen-Schalter und vorhandenen Tags."""
+    known = sorted(p for p in (_parse(t) for t in tags) if p)
+    latest = known[-1] if known else None
+    if requested.strip():
+        version = _parse(requested)
+        if not version or requested.strip().startswith('v'):
+            raise ValueError('Version "%s" hat nicht die Form 1.2.3' % requested)
+        if version in known and not replace:
+            raise ValueError('Tag v%s existiert bereits ("replace" waehlen zum Ersetzen)' % _fmt(version))
+        if version not in known and latest and version < latest:
+            raise ValueError('Version %s ist kleiner als der neueste Release v%s' % (_fmt(version), _fmt(latest)))
+    elif latest is None:
+        raise ValueError('noch kein Release-Tag: Version angeben')
+    elif replace:
+        version = latest
+    else:
+        version = (latest[0], latest[1], latest[2] + 1)
+    older = [p for p in known if p < version]
+    return _fmt(version), ('v' + _fmt(older[-1]) if older else '')
 
 
 def container_version(xml):
-    m = re.search(r'<mod\b[^>]*\bversion="([0-9]+\.[0-9]+\.[0-9]+)"', xml)
+    m = _MANIFEST_VERSION.search(xml)
     if not m:
         raise ValueError('keine Version im ModForge-Manifest')
-    return m.group(1)
+    return m.group(2)
+
+
+def set_container_version(xml, version):
+    container_version(xml)
+    return _MANIFEST_VERSION.sub(lambda m: m.group(1) + version + m.group(3), xml, count=1)
 
 
 def sections(changelog):
@@ -79,16 +121,23 @@ def _read(path):
         return f.read()
 
 
+def _write(path, text):
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(text)
+
+
 def main(argv):
+    cmd = argv[1] if len(argv) > 1 else ''
     try:
-        if argv[1:2] == ['version'] and len(argv) == 3:
-            print(container_version(_read(argv[2])))
-        elif argv[1:2] == ['notes'] and len(argv) == 5:
+        if cmd == 'pick' and len(argv) >= 4:
+            version, previous = pick_version(argv[2], argv[3] == 'true', argv[4:])
+            print('VERSION=%s\nPREVIOUS=%s' % (version, previous))
+        elif cmd == 'set-version' and len(argv) == 4:
+            _write(argv[2], set_container_version(_read(argv[2]), argv[3]))
+        elif cmd == 'notes' and len(argv) == 5:
             sys.stdout.write(build_notes(_read(TEMPLATE), _read(CHANGELOG), argv[2], argv[3], argv[4]))
-        elif argv[1:2] == ['finalize'] and len(argv) == 4:
-            text = finalize(_read(CHANGELOG), argv[2], argv[3])
-            with open(CHANGELOG, 'w', encoding='utf-8') as f:
-                f.write(text)
+        elif cmd == 'finalize' and len(argv) == 4:
+            _write(CHANGELOG, finalize(_read(CHANGELOG), argv[2], argv[3]))
         else:
             sys.stderr.write(__doc__)
             return 2
