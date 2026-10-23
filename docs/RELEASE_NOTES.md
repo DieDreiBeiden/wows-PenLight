@@ -2,6 +2,7 @@
 
 - PenLight is now shown only in the **aiming view** (binoculars / scope). In the normal third-person view it is hidden, including the gear button and the drag area.
 - Both editions report version 0.3.1 to ModForge.
+- Fixed: Nebraska, Delaware and Louisiana now use their hangar deck (32 / 38 / 38 mm) instead of a wrong 6 mm value.
 
 ## Downloads
 
@@ -14,7 +15,6 @@ Unzip into `World of Warships/bin/<highest number>/` and overwrite existing PenL
 
 ## Known issues
 
-- Nebraska, Delaware and Louisiana: deck armour is read incorrectly (6 mm), so their deck rating is unreliable.
 - IFHE detection is not yet confirmed in game.
 - Standalone without TTaro: mouse drag is not yet confirmed in game, and the invisible drag area stays active in the third-person view.
 

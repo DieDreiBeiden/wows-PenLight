@@ -164,7 +164,11 @@ Nur gegnerisches Team.
 - Panzerung: Hull-Modul `armor` = `{(lage << 16) | material_id: mm}`, Lage 1 = außen;
   Material-Namen aus wowsunpack (MIT), `tools/data/collision_materials.json`.
   - Bug/Heck = `Bow_ConstrSide` (Fallback `St_ConstrSide`)
-  - Deck = dünnste von `Cas_Deck`, `SSC_Deck`
+  - Deck = dünnste von `Cas_Deck`, `SSC_Deck`; Kreuzer/Schlachtschiffe mit Hangar (`SSC_Hang`,
+    `SSC_Fdck`), deren `SSC_Deck` dünner als der Hangar ist: `Cas_Deck`, `SSC_Hang`, `SSC_Fdck`.
+    Betrifft nur die US-Hybride Nebraska 32, Delaware 38, Louisiana 38 (vorher 6 mm aus `SSC_Deck`;
+    im Spiel heißt das Deck dort Hangar, 38 mm bei Louisiana). Träger ausgenommen, da deren Flugdeck
+    teils gepanzert ist (Hakuryu 95, Shinano 75) und `SSC_Deck` dort maßgeblich bleibt.
   - `armourDeck`/`armourExtremities` sind in 15.9 nur Platzhalter `[-1, -1]`.
 - Kaliber = größter `barrelDiameter` im Artillerie-Modul des letzten Upgrades.
 - Abgeglichen mit dem Wiki (Stand 08/2024): Yamato 32/57, North Carolina 32/38, Minotaur 16/16,
@@ -220,10 +224,9 @@ Nur gegnerisches Team.
   `camera.evIsBinocularChanged` (Muster wie TTaros SmokeMarker); in der Aussenperspektive ausgeblendet.
   Der Flash-Griff der Standalone-Fassung ohne TTaro kennt die Kameraansicht nicht und bleibt aktiv.
   Im Client bestätigt (TTaro-Fassung).
-- Bekanntes Problem: Nebraska, Delaware und Louisiana haben laut `gameparams.py` ein 6-mm-Deck
-  (dünnste `Cas_Deck`-Platte, vermutlich ein Kleinteil statt des eigentlichen Decks). Als Ziel
-  dadurch Deck für jede HE/SAP durchschlagbar und ab 86 mm AP overmatcht. In den Release-Notes als
-  Known issue geführt; Deck-Erkennung später prüfen.
+- Behoben: Nebraska, Delaware und Louisiana hatten ein 6-mm-Deck (dünne `SSC_Deck`-Platte,
+  vermutlich ein Kleinteil). Jetzt zählt der Hangar (32/38/38 mm), siehe Datenquelle oben.
+  Gegenprobe im Spiel offen: gibt es in der Panzerungsansicht eine 6-mm-Fläche?
 
 ## Offene Punkte
 

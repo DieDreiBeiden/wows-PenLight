@@ -11,7 +11,10 @@ Spielversion so, wie utils.getGameVersion() sie liefert (python.log / Probe-Dump
 Panzerung: Hull-Modul 'armor' = {(lage << 16) | material_id: mm}, Lage 1 = aussen.
 Material-Namen: tools/data/collision_materials.json.
 - Bug/Heck = Seitenbeplankung Bug ('Bow_ConstrSide'), Fallback Heck.
-- Deck     = duennste Mittschiffs-Deckplatte ('Cas_Deck', 'SSC_Deck').
+- Deck     = duennste Mittschiffs-Deckplatte ('Cas_Deck', 'SSC_Deck'). Kreuzer/Schlachtschiffe mit
+             Hangar ('SSC_Hang', 'SSC_Fdck'): ist 'SSC_Deck' duenner als der Hangar, zaehlen statt
+             seiner Hangar und Flugdeck (US-Hybride Nebraska/Delaware/Louisiana: 'SSC_Deck' 6 mm,
+             im Spiel ist das Deck dort Hangar 32/38 mm). Traeger ausgenommen (gepanzerte Flugdecks).
 - Mitte    = duennste Mittschiffs-Seitenplatte ('Cas_Belt', 'SSC_ConstrSide'), nur Detailansicht.
 Klassen: Kreuzer und Schlachtschiffe (AP-Overmatch, Schild) sowie Zerstoerer und Traeger (nur als
 HE/SAP-Ziel bzw. Schiff mit HE/SAP); Traeger haben kein Hauptkaliber. U-Boote werden nicht bewertet.
@@ -32,6 +35,7 @@ CALIBER_REQUIRED = ('Cruiser', 'Battleship')
 
 BOW_MATERIALS = ('Bow_ConstrSide', 'St_ConstrSide')
 DECK_MATERIALS = ('Cas_Deck', 'SSC_Deck')
+HANGAR_MATERIALS = ('SSC_Hang', 'SSC_Fdck')
 MID_MATERIALS = ('Cas_Belt', 'SSC_ConstrSide')
 
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'collision_materials.json')) as _f:
@@ -61,7 +65,10 @@ def _thinnest(plates, names):
     return min(values) if values else None
 
 
-def deck_mm(plates):
+def deck_mm(plates, species=None):
+    hangar = _thinnest(plates, HANGAR_MATERIALS)
+    if species != 'AirCarrier' and hangar is not None and plates.get('SSC_Deck', hangar) < hangar:
+        return _thinnest(plates, ('Cas_Deck',) + HANGAR_MATERIALS)
     return _thinnest(plates, DECK_MATERIALS)
 
 
@@ -175,7 +182,7 @@ def extract(params):
             'hull': hull_name,
             'artillery': art_name,
             'bow': bow_mm(plates),
-            'deck': deck_mm(plates),
+            'deck': deck_mm(plates, species),
             'mid': mid_mm(plates),
             'caliber': _main_caliber_mm(art),
         }

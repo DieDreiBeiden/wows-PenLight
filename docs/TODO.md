@@ -33,8 +33,8 @@ Stand: 2026-10-23. Probe-Builds entstehen im Branch `Test`, übernommen wird ers
 
 - [ ] IFHE-Erkennung im Spiel bestätigen (Logzeile `ammo he raw … mm, coeff …`)
 - [ ] Ziehen mit der Maus in der Standalone-Fassung ohne TTaro testen
-- [ ] Bekanntes Problem: Deck von Nebraska, Delaware und Louisiana (6 mm) – Deck-Erkennung in
-      `gameparams.py` prüfen
+- [x] Deck von Nebraska, Delaware und Louisiana (vorher 6 mm): Hangar zählt jetzt (32/38/38 mm)
+- [ ] Gegenprobe im Spiel: Panzerungsansicht Louisiana auf eine 6-mm-Fläche prüfen
 
 ## Veröffentlichung
 
