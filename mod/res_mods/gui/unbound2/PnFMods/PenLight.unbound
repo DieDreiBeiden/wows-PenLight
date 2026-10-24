@@ -60,19 +60,21 @@
 	capsuleFade: 0.15,
 	# Alt-Ansicht der Kapseln (Variante A): Flaechen 250 x 56 (capsule/alt/*.png), Texte in der
 	# Spielschrift 12 px ohne Skalierung (skalierte Schrift rendert im Client weich und klein).
-	# Raster: linke Spalte Kuerzel bzw. Schild, eine Textkante fuer die Kopfzeile, drei gleich breite
+	# Raster: linke Spalte (altLabelX) nur Kuerzel bzw. Schild; eine gemeinsame Textkante (altTextX)
+	# fuer Kopfzeile und erste Zone, Punkte direkt davor auf Hoehe der Werte; drei gleich breite
 	# Zonenspalten; Zonenname und Wert absolut uebereinander (gestapelt ueberlappten sie im Client).
+	# Trenner '/' statt '|' (sieht in der Spielschrift wie ein grosses I aus).
 	altWidth: 250,
 	altHeight: 56,
 	altGap: 4,
 	altLabelX: 10,
 	altTextX: 40,
 	altHeadTop: 5,
-	altZoneX: 10,
-	altZoneStep: 78,
+	altZoneX: 27,
+	altZoneStep: 74,
 	altNameTop: 23,
 	altValueTop: 37,
-	altDotTop: 35,
+	altDotTop: 37,
 	altZoneTextX: 13,
 	# Rand der Greifflaeche um Granate | Schild (px bei Skalierung 1); links schmal wegen Zahnrad
 	dragPadLeft: 4,
@@ -318,9 +320,9 @@
 		(var txtPen:str = "tr('IDS_PENLIGHT_PEN') != 'IDS_PENLIGHT_PEN' && tr('IDS_PENLIGHT_PEN') != '' ? tr('IDS_PENLIGHT_PEN') : '%d mm penetration'")
 		(var txtOmUpTo:str = "tr('IDS_PENLIGHT_OM_UPTO') != 'IDS_PENLIGHT_OM_UPTO' && tr('IDS_PENLIGHT_OM_UPTO') != '' ? tr('IDS_PENLIGHT_OM_UPTO') : 'OM up to %d mm'")
 		(var txtNotRated:str = "tr('IDS_PENLIGHT_NOT_RATED') != 'IDS_PENLIGHT_NOT_RATED' && tr('IDS_PENLIGHT_NOT_RATED') != '' ? tr('IDS_PENLIGHT_NOT_RATED') : 'Not rated for this pairing'")
-		(var attackLine:str = "ammo == 'ap' ? subst(txtMm, [nums[6]]) + '  |  ' + subst(txtOmUpTo, [nums[7]]) : subst(txtPen, [nums[6]])")
+		(var attackLine:str = "ammo == 'ap' ? subst(txtMm, [nums[6]]) + '  /  ' + subst(txtOmUpTo, [nums[7]]) : subst(txtPen, [nums[6]])")
 		# Verteidigung: das Schild links steht fuer den Gegner, daher nur 'AP' (passt in 12 px)
-		(var defenseLine:str = "nums[8] > 0 ? 'AP ' + subst(txtMm, [nums[8]]) + '  |  ' + subst(txtOmUpTo, [nums[9]]) : txtNotRated")
+		(var defenseLine:str = "nums[8] > 0 ? 'AP ' + subst(txtMm, [nums[8]]) + '  /  ' + subst(txtOmUpTo, [nums[9]]) : txtNotRated")
 		(var zoneNames:array = "[txtBowStern, txtMidship, txtDeck]")
 		(var attackState:str = "attackBits == '111' ? 'green' : (attackBits == '000' ? 'red' : 'yellow')")
 		(var defenseState:str = "defenseBits == '111' ? 'red' : (defenseBits == '000' ? 'green' : 'yellow')")
