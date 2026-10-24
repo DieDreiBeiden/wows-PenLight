@@ -58,23 +58,24 @@
 	glowRestAlpha: 0.45,
 	# Wechsel des Kapsel-Inhalts kurz einblenden (s)
 	capsuleFade: 0.15,
-	# Alt-Ansicht der Kapseln (Variante A): Flaechen 250 x 56 (capsule/alt/*.png), Texte in der
+	# Alt-Ansicht der Kapseln (Variante A): Flaechen 240 x 56 (capsule/alt/*.png), Texte in der
 	# Spielschrift 12 px ohne Skalierung (skalierte Schrift rendert im Client weich und klein).
 	# Raster: linke Spalte (altLabelX) nur Kuerzel bzw. Schild; eine gemeinsame Textkante (altTextX)
 	# fuer Kopfzeile und erste Zone, Punkte direkt davor auf Hoehe der Werte; drei gleich breite
 	# Zonenspalten; Zonenname und Wert absolut uebereinander (gestapelt ueberlappten sie im Client).
 	# Trenner '/' statt '|' (sieht in der Spielschrift wie ein grosses I aus).
-	altWidth: 250,
+	altWidth: 240,
 	altHeight: 56,
 	altGap: 4,
 	altLabelX: 10,
 	altTextX: 40,
-	altHeadTop: 5,
+	altLabelTop: 3,
+	altHeadTop: 7,
 	altZoneX: 27,
-	altZoneStep: 74,
-	altNameTop: 23,
-	altValueTop: 37,
-	altDotTop: 37,
+	altZoneStep: 78,
+	altNameTop: 25,
+	altValueTop: 39,
+	altDotTop: 39,
 	altZoneTextX: 13,
 	# Rand der Greifflaeche um Granate | Schild (px bei Skalierung 1); links schmal wegen Zahnrad
 	dragPadLeft: 4,
@@ -708,7 +709,7 @@
 	# Kopfzeile: Munitionskuerzel (oben) bzw. Schild (unten), daneben die Erklaerung
 	(block
 		(bind visible "_kind == 'atk'")
-		(style (position = "absolute") (bind left "PENLIGHT_SETTINGS.altLabelX") (top = 1))
+		(style (position = "absolute") (bind left "PENLIGHT_SETTINGS.altLabelX") (bind top "PENLIGHT_SETTINGS.altLabelTop"))
 		(tf
 			(class $TextDefaultBold17NM)
 			(bind text "_label")
@@ -717,7 +718,7 @@
 	(block
 		(bind visible "_kind == 'def'")
 		(style
-			(position = "absolute") (bind left "PENLIGHT_SETTINGS.altLabelX + 1") (top = 5)
+			(position = "absolute") (bind left "PENLIGHT_SETTINGS.altLabelX + 1") (bind top "PENLIGHT_SETTINGS.altLabelTop + 4")
 			(backgroundSize = "autosize")
 			(bind backgroundImage "shieldUrl")
 		)

@@ -133,7 +133,7 @@ def glow(kind, palette, ifhe=False, size=None, radius=None):
 # ---------------------------------------------------------------- Alt-Ansicht (Variante A)
 # Ausgeklappte Kapseln: Flaeche, Punkte und Schild als Bilder; Munition, Zonen-Namen, mm-Werte und
 # Schiffsname setzt die Anzeige als Text darauf (englisch, siehe PenLight.unbound).
-ALT_W, ALT_H, ALT_R = 250, 56, 14   # Platz fuer 12-px-Text ohne Skalierung (Kopfzeile, Zonenname und Wert)
+ALT_W, ALT_H, ALT_R = 240, 56, 14   # Platz fuer 12-px-Text ohne Skalierung (Kopfzeile, Zonenname und Wert)
 DOT_PX = 8
 
 
