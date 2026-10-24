@@ -148,6 +148,24 @@ durchschlagen, nicht, dass du die Zitadelle triffst.
 
 ---
 
+### Darstellung
+
+In TTaro Mod Config → PenLight → **Darstellung** wählst du, wie das Ergebnis erscheint:
+
+| Darstellung | Normale Ansicht | Mit Alt |
+|---|---|---|
+| **Klassisch** | Granate und Schild wie oben | Schiffe je Zone wie oben |
+| **Modern** (Standard) | zwei Status-Kapseln: oben mein Schuss → Ziel, unten AP des Ziels → ich; drei Punkte für Bug/Heck, Mitte und Deck | ausgeklappte Kapseln mit Plattendicke je Zone und dem Schuss (Durchschlag bzw. Kaliber und Overmatch-Grenze) |
+| **Nur Text** | zwei Zeilen auf dunkler Unterlage, z. B. „HE: Bug/Heck“ und „Gegner-AP: überall“, in den Ampelfarben | Kopfzeile, Zonenname und Plattendicke als Text |
+
+- Alle Darstellungen folgen dem Farbenblind-Schema. Nicht bewertete Paarungen bleiben grau.
+- „Nur Text“ ist auf Kontrast geprüft (mindestens 4,5 : 1, auch vor heller Gischt).
+- Die Texte von Modern und Nur Text folgen der Client-Sprache (20 Sprachen), wenn AndrewTaros
+  LocalizationLoader installiert ist, sonst Englisch.
+- Vorerst nur in der TTaro-Fassung (`main`); `main-standalone` folgt.
+
+---
+
 ## Fair Play
 
 PenLight ist eine Informationsanzeige. Sie beantwortet dieselbe Frage wie die Panzerungsansicht
@@ -224,7 +242,8 @@ Im Gefecht in die Zielansicht wechseln und **Strg** halten, damit der Mauszeiger
 
 - Symbole greifen und **ziehen**, um die Anzeige zu verschieben.
 - **Zahnrad** links neben der Anzeige öffnet die PenLight-Seite in TTaro Mod Config:
-  Darstellungsmodus (Detail mit Alt / immer), Farben (Standard / Farbenblind),
+  Darstellung (Klassisch / Modern / Nur Text), Darstellungsmodus (Detail mit Alt / immer),
+  Farben (Standard / Farbenblind),
   Größenskalierung, Verschieben sperren, Position zurücksetzen.
 
 ### Ohne TTaroModUtils (`main-standalone`)
@@ -272,6 +291,7 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 | `Main.py` erzeugen (aus `src/penlight/`) | `python3 -I tools/build_mod.py` |
 | Icons für Granate, Schild, HE/SAP, Plaketten und Zeichen zeichnen | `python3 -I tools/make_ampel_icons.py` |
 | Detail-Bilder, Beschriftungen, Rahmen | `python3 -I tools/make_detail_icons.py` |
+| Status-Kapseln und Alt-Flächen (Modern) | `python3 -I tools/make_capsule_icons.py` |
 | Abbildungen der README | `python3 -I tools/make_readme_images.py` |
 | Texte der TTaro-Optionsseite | `python3 -I tools/make_texts.py` |
 | Flash-Teil `Main.swf` (`main-standalone`) | `tools/build_flash.py`, Voraussetzungen siehe Dateikopf |

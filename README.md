@@ -149,6 +149,24 @@ penetrated, not that you hit the citadel.
 
 ---
 
+### Display styles
+
+In TTaro Mod Config → PenLight → **Display style** you choose how the result is shown:
+
+| Style | Normal view | With Alt |
+|---|---|---|
+| **Classic** | shell and shield as shown above | ships per zone as shown above |
+| **Modern** (default) | two status capsules: top = my shot → target, bottom = target's AP → me; three dots for bow/stern, midship and deck | expanded capsules with the plate thickness per zone and the shot (penetration, or calibre and overmatch limit) |
+| **Text only** | two lines on a dark backing, e.g. "HE: Bow/Stern" and "Enemy AP: everywhere", in the traffic-light colours | headline, zone name and plate thickness as text |
+
+- All styles follow the colour-blind scheme. Pairings that are not rated stay grey.
+- Text only was checked for contrast (at least 4.5 : 1, also in front of bright spray).
+- The texts of Modern and Text only follow the client language (20 languages) if AndrewTaro's
+  LocalizationLoader is installed, otherwise English.
+- For now only in the TTaro edition (`main`); `main-standalone` follows.
+
+---
+
 ## Fair play
 
 PenLight is an information display. It answers the same question the armour viewer in port
@@ -223,7 +241,8 @@ In battle, switch to the aiming view and hold **Ctrl** to show the mouse cursor:
 
 - Grab the icons and **drag** to move the display.
 - The **gear** to the left of the display opens the PenLight page in TTaro Mod Config:
-  display mode (detail on Alt / always), colours (standard / colour-blind),
+  display style (classic / modern / text only), display mode (detail on Alt / always),
+  colours (standard / colour-blind),
   size scale, lock dragging, reset position.
 
 ### Without TTaroModUtils (`main-standalone`)
@@ -271,6 +290,7 @@ The ship silhouettes come from the game itself and follow every patch automatica
 | Generate `Main.py` (from `src/penlight/`) | `python3 -I tools/build_mod.py` |
 | Draw shell, shield, HE/SAP icons, tags and marks | `python3 -I tools/make_ampel_icons.py` |
 | Detail images, labels, frames | `python3 -I tools/make_detail_icons.py` |
+| Status capsules and Alt panels (Modern) | `python3 -I tools/make_capsule_icons.py` |
 | README images | `python3 -I tools/make_readme_images.py` |
 | Texts of the TTaro options page | `python3 -I tools/make_texts.py` |
 | Flash part `Main.swf` (`main-standalone`) | `tools/build_flash.py`, requirements in the file header |

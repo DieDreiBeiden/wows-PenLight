@@ -5,6 +5,11 @@ workflow uses them as "What's new" and then moves them under the new version.
 
 ## Unreleased
 
+- New: display style option in TTaro Mod Config – **Classic** (shell / shield), **Modern** (status capsules, new default) and **Text only**.
+- New: Modern detail view (Alt) with the plate thickness per zone and your shot (penetration, or calibre and overmatch limit).
+- New: texts of Modern and Text only follow the client language (20 languages; needs LocalizationLoader, otherwise English).
+- The standalone edition does not have the new display styles yet; it keeps the classic display.
+
 ## 0.3.2 – 2026-10-23
 
 - Fixed: Nebraska, Delaware and Louisiana now use their hangar deck (32 / 38 / 38 mm) instead of a wrong 6 mm value.

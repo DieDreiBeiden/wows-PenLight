@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Zeichnet das Symbol-Set "Status-Kapseln" (Entwurf 1, Probe im Branch Test).
+"""Zeichnet das Symbol-Set "Status-Kapseln" (Darstellung Modern).
 
     python3 -I tools/make_capsule_icons.py
 

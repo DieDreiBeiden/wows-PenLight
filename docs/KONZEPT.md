@@ -81,7 +81,7 @@ Farbflächen hatten gegen das Metall fast keinen Helligkeitskontrast (1,0–1,3)
 - Farbsegmente auf dunklem Grund mit dunklen Trennlinien (Kontrast Grün 7,1, Orange 5,5, Rot 3,3).
 - Farbenblind-Blau kräftiger (#2B8CE8), damit es sich vom Grau abhebt.
 
-## Darstellung (Option, Probe im Branch `Test`)
+## Darstellung (Option)
 
 Option „Darstellung“ in TTaro Mod Config (`diedreibeiden.penlight.style`, Rückfall
 `PENLIGHT_SETTINGS.defaultStyle`, derzeit Modern):
