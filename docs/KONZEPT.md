@@ -220,6 +220,11 @@ Nur gegnerisches Team.
   `camera.evIsBinocularChanged` (Muster wie TTaros SmokeMarker); in der Aussenperspektive ausgeblendet.
   Der Flash-Griff der Standalone-Fassung ohne TTaro kennt die Kameraansicht nicht und bleibt aktiv.
   Im Client bestätigt (TTaro-Fassung).
+- Unbound 2 zeichnet `vblock` nicht: der Container bleibt samt Inhalt unsichtbar, ohne Eintrag im
+  python.log (Probe Status-Kapseln, 2026-10-24, eingegrenzt mit Diagnose-Plakette). Untereinander
+  stapelt ein normaler `block`, nebeneinander `hblock`. Test `tests/test_unbound.py` verbietet `vblock`.
+  Fehler in `.unbound`-Dateien erscheinen generell nicht im python.log; eingrenzen per sichtbarer
+  Diagnose (Testbild, Zustandswerte als Text) direkt in der Anzeige.
 - Bekanntes Problem: Nebraska, Delaware und Louisiana haben laut `gameparams.py` ein 6-mm-Deck
   (dünnste `Cas_Deck`-Platte, vermutlich ein Kleinteil statt des eigentlichen Decks). Als Ziel
   dadurch Deck für jede HE/SAP durchschlagbar und ab 86 mm AP overmatcht. In den Release-Notes als
