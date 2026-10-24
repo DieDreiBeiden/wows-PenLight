@@ -5,6 +5,8 @@
 
 - ampel.png:  Granate | Schild je Bedeutung (Spalten), Standard- und Farbenblind-Farben, mit Zeichen
 - ammo.png:   Granate je Munition (AP / HE / SAP) mit Plakette und Zeichen, je Zustand (Spalten)
+- styles.png: dieselbe Lage in den Darstellungen Klassisch, Modern und Nur Text (Kapseln aus
+  make_capsule_icons, Text in Ersatzschrift auf der Unterlage wie PenLightTextLine)
 - detail.png: Detailansicht wie im Spiel (Rahmen, farbige Mini-Icons, Schiffsname,
   Target oben, Me unten). Statt der Spiel-Silhouette steht das gezeichnete Schiff aus
   make_detail_icons, damit keine Spielgrafik ins Repository kommt.
@@ -121,6 +123,49 @@ def ammo():
     im.save(os.path.join(OUT, 'ammo.png'))
 
 
+CAPSULES = os.path.join(ICONS, 'capsule')
+# Nur Text: Unterlage 0xD90E1012, Textfarben wie PENLIGHT_TEXT_CT (Orange, Rot), Rand textPadX/-Y
+TEXT_PLATE = (14, 16, 18, 217)
+TEXT_COLORS = {'yellow': (255, 140, 0), 'red': (255, 112, 96)}
+
+
+def _text_line(text, color):
+    f = ImageFont.truetype(FONT, 12)
+    w = int(ImageDraw.Draw(Image.new('RGBA', (1, 1))).textlength(text, font=f))
+    im = Image.new('RGBA', (w + 10, 18), TEXT_PLATE)
+    ImageDraw.Draw(im).text((5, 1), text, font=f, fill=color)
+    return im
+
+
+def styles():
+    """Eine Lage, drei Darstellungen: HE kommt nur an Bug/Heck durch, die AP des Ziels ueberall."""
+    fs = ImageFont.truetype(FONT_REGULAR, 12)
+    f = ImageFont.truetype(FONT, 13)
+    classic = Image.new('RGBA', (80, 50), (0, 0, 0, 0))
+    classic.alpha_composite(_with_tag(_icon('he_bow.png'), 'tag_he.png', None), (0, 0))
+    classic.alpha_composite(_with_mark(_icon('shield_red.png'), 'mark_warning.png'), (38, 7))
+    modern = Image.new('RGBA', (72 + 10, 40 + 10), (0, 0, 0, 0))
+    glow = Image.open(os.path.join(CAPSULES, 'glow_def.png')).convert('RGBA')
+    glow.putalpha(glow.getchannel('A').point(lambda v: int(v * 0.45)))   # Ruhezustand nach dem Pulsieren
+    modern.alpha_composite(Image.open(os.path.join(CAPSULES, 'atk_he_100.png')).convert('RGBA'), (5, 5))
+    modern.alpha_composite(glow, (0, 22))
+    modern.alpha_composite(Image.open(os.path.join(CAPSULES, 'def_111.png')).convert('RGBA'), (5, 27))
+    text = Image.new('RGBA', (170, 42), (0, 0, 0, 0))
+    text.alpha_composite(_text_line('HE: Bow/Stern', TEXT_COLORS['yellow']), (0, 0))
+    text.alpha_composite(_text_line('Enemy AP: everywhere', TEXT_COLORS['red']), (0, 21))
+    columns = [('Classic', classic), ('Modern (default)', modern), ('Text only', text)]
+    cw = 360
+    im = Image.new('RGBA', (20 + len(columns) * cw, 160), BACKGROUND)
+    d = ImageDraw.Draw(im)
+    for i, (label, part) in enumerate(columns):
+        d.text((20 + i * cw, 10), label, font=f, fill=(236, 238, 240))
+        big = part.resize((part.width * ZOOM, part.height * ZOOM), Image.LANCZOS)
+        im.alpha_composite(big, (20 + i * cw, 36))
+    d.text((20, im.height - 22), 'same situation: my HE gets through bow/stern only  -  the target\'s AP '
+           'overmatches me everywhere', font=fs, fill=(170, 172, 174))
+    im.save(os.path.join(OUT, 'styles.png'))
+
+
 def _silhouette(combo):
     """Gezeichnetes Schiff, auf die Silhouettenflaeche 186 x 48 zugeschnitten (unten buendig)."""
     ship = detail._ship(*(detail.COLORS[c] for c in combo)).reduce(detail.SUPERSAMPLE)
@@ -174,8 +219,9 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     ampel()
     ammo()
+    styles()
     detail_view()
-    print('docs/images/ampel.png, docs/images/ammo.png, docs/images/detail.png')
+    print('docs/images/ampel.png, docs/images/ammo.png, docs/images/styles.png, docs/images/detail.png')
     return 0
 
 
