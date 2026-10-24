@@ -9,7 +9,8 @@ Spiel beenden. Ordner mit der **höchsten Nummer** unter `World_of_Warships\bin\
 | `PnFMods\PenLight\Main.py` | die Mod (generiert, siehe unten) |
 | `PnFMods\PenLight\Main.swf` | Greiffläche zum Verschieben per Maus (gebaut mit `tools/build_flash.py`) |
 | `PnFMods\PenLight\ships.json` | Panzerungs-/Kaliberdaten für genau eine Spielversion |
-| `PnFMods\PenLight\shell_*.png`, `shield_*.png` | Icons Granate/Schild (29×29) |
+| `PnFMods\PenLight\shell_*.png`, `shield_*.png` | Icons Granate/Schild (29×29), Darstellung Klassisch |
+| `PnFMods\PenLight\capsule\` | Status-Kapseln und Alt-Flächen, Darstellung Modern (`tools/make_capsule_icons.py`) |
 | `gui\unbound2\PnFMods\PenLight.unbound` | Anzeige am Fadenkreuz (ab 0.2, benötigt ModForge) |
 | `ForgeBlueprints\PenLightContainer.xml` | ModForge-Manifest für die Anzeige |
 
@@ -34,6 +35,7 @@ Ohne TTaroModUtils – Einstellungen im Gefecht mit **Strg+Alt** und:
 | Pos1 | Position zurücksetzen |
 | D | Detailansicht: mit Alt-Taste oder immer |
 | F | Farben: Standard (Grün/Orange/Rot) oder Farbenblind (Blau/Gelb/Orange) |
+| S | Darstellung: Klassisch → Modern → Nur Text |
 | + / − | Größe 0,5–2,0 |
 
 Gespeichert wird in `(wows)/ModPrefs/diedreibeiden-penlight.json`.

@@ -1,6 +1,6 @@
 # PenLight – To-Do
 
-Stand: 2026-10-23. Probe-Builds entstehen im Branch `Test`, übernommen wird erst nach Freigabe.
+Stand: 2026-10-24. Probe-Builds entstehen im Branch `Test`, übernommen wird erst nach Freigabe.
 
 ## Neue Funktionen
 
@@ -19,15 +19,17 @@ Stand: 2026-10-23. Probe-Builds entstehen im Branch `Test`, übernommen wird ers
   - Zu klären: was bewertet wird (Bomben, Raketen, Torpedos bzw. Durchschlag gegen Deck und
     Seite) und wie die Anzeige im Flugzeugmodus aussieht.
 
-## Branch `Test` (Probe, noch nicht übernommen)
+## Darstellungen (Klassisch / Modern / Nur Text)
 
-- [ ] Status-Kapseln mit Animationen im Spiel testen
-- [ ] Alt-Ansicht Variante A (ausgeklappte Kapseln) im Spiel testen, Textgrößen feinjustieren
-- [ ] Texte in der Client-Sprache: mit und ohne LocalizationLoader prüfen; Übersetzungen für
+- [x] Status-Kapseln mit Animationen, Alt-Ansicht Variante A, Option Darstellung, Nur Text mit
+      Unterlage – im Spiel getestet, nach `main` übernommen (2026-10-24)
+- [ ] Übernahme nach `main-standalone` (Probe im Branch `Test`): Darstellung per Strg+Alt+S ohne
+      TTaro, Flash-Greiffläche je Darstellung; im Spiel testen, mit und ohne TTaroModUtils
+- [ ] Texte in der Client-Sprache mit LocalizationLoader im Spiel prüfen; Übersetzungen für
       Thai, Koreanisch und Türkisch von Muttersprachlern prüfen lassen
 - [ ] Munitionskürzel in den Kapseln lokalisieren (spieleigene `IDS_AMMOTYPE_*`), optional
-- [ ] Nach Freigabe: Übernahme nach `main` und `main-standalone` (Standalone: Flash-Greiffläche
-      an die Kapseln anpassen), Doku und README-Bilder
+- [ ] README-Bilder für Modern und Nur Text (eigener Hintergrund, keine Spielgrafik)
+- [ ] Standard-Darstellung für Bestandsnutzer festlegen (derzeit Modern)
 
 ## Prüfen und Korrigieren
 

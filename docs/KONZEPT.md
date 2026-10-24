@@ -81,6 +81,34 @@ Farbflächen hatten gegen das Metall fast keinen Helligkeitskontrast (1,0–1,3)
 - Farbsegmente auf dunklem Grund mit dunklen Trennlinien (Kontrast Grün 7,1, Orange 5,5, Rot 3,3).
 - Farbenblind-Blau kräftiger (#2B8CE8), damit es sich vom Grau abhebt.
 
+## Darstellung (Option)
+
+Option „Darstellung“ in TTaro Mod Config (`diedreibeiden.penlight.style`, Rückfall
+`PENLIGHT_SETTINGS.defaultStyle`, derzeit Modern). Standalone ohne TTaroModUtils: Strg+Alt+S schaltet
+durch (Einstellung `style` in Main.py); die Flash-Greiffläche folgt der Größe der Anzeige
+(`HANDLE_SIZES`, per Test mit `PENLIGHT_SETTINGS` abgeglichen). Mit TTaroModUtils liest die Hülle
+`PenLightTTaro.unbound` die Option und gibt sie als `_ext.style` weiter.
+
+| Wert | Name | Normal | Mit Alt |
+|---|---|---|---|
+| 0 | Klassisch | Granate / Schild | gezeichnete Schiffe bzw. Silhouetten |
+| 1 | Modern | Status-Kapseln (oben ich → Ziel, unten Ziel → ich, Punkte Bug/Heck, Mitte, Deck) | ausgeklappte Kapseln mit mm-Werten |
+| 2 | Nur Text | zwei Zeilen, z. B. „HE: Bow/Stern“, „Enemy AP: everywhere“, in der Ampelfarbe | Kopfzeile, Zonenname und Wert als Text |
+
+Nicht bewertete Paarungen (Python: `grey`, Zonen −1, z. B. Schild gegen Träger) erscheinen in allen
+Darstellungen grau. Textfarbe per `colorTransform` mit Multiplikatoren (`PENLIGHT_TEXT_CT`), damit
+der Schatten der Schrift dunkel bleibt.
+
+Lesbarkeit „Nur Text“ (Prüfung 2026-10-24, Hintergründe aus Spiel-Screenshots gemessen):
+- Ohne Unterlage verfehlt Text auf typischem Wasser (55,60,58) teils den Kontrast 4,5 : 1 (Rot 2,9,
+  Farbenblind-Blau 3,2, -Orange 2,9), vor heller Gischt fast alle Farben (1,0–2,0). Daher jede Zeile
+  auf dunkler Unterlage 0xD90E1012 (85 %) und hellere Textfarben (Rot #FF7060, Grau #B0B5BA,
+  Blau #58AAFF, Orange #F58028): alle Farben ≥ 4,8 : 1 auch vor weißer Gischt.
+- Standardpalette bei Deuteranopie: Grün/Rot kaum unterscheidbar (ΔE ≈ 8). Im Text trägt das Wort
+  die Aussage („everywhere“, „Bow/Stern“), Farbe ist zusätzlich; sonst Farbenblind-Palette (ΔE ≥ 22).
+- Ohne Ziel nur „HE“ / „Enemy AP“ in Grau, mit Ziel und ohne Bewertung „not rated“ statt „-“.
+- Schrift 13 px fett (Spielschrift); größer über die Option Skalierung.
+
 ## Detailansicht (Alt gedrückt)
 
 Layout (rechts unter dem Fadenkreuz, linke obere Ecke Standard x +30, y +8):
@@ -240,6 +268,15 @@ Nur gegnerisches Team.
   `camera.evIsBinocularChanged` (Muster wie TTaros SmokeMarker); in der Aussenperspektive ausgeblendet.
   Der Flash-Griff der Standalone-Fassung ohne TTaro kennt die Kameraansicht nicht und bleibt aktiv.
   Im Client bestätigt (TTaro-Fassung).
+- Unbound 2 zeichnet `vblock` nicht: der Container bleibt samt Inhalt unsichtbar, ohne Eintrag im
+  python.log (Probe Status-Kapseln, 2026-10-24, eingegrenzt mit Diagnose-Plakette). Untereinander
+  stapelt ein normaler `block`, nebeneinander `hblock`. Test `tests/test_unbound.py` verbietet `vblock`.
+  Fehler in `.unbound`-Dateien erscheinen generell nicht im python.log; eingrenzen per sichtbarer
+  Diagnose (Testbild, Zustandswerte als Text) direkt in der Anzeige.
+- Text per `scaleX`/`scaleY` verkleinern taugt nicht: die Schrift rendert weich und schwer lesbar,
+  und untereinander gestapelte `tf` in einem skalierten Block ueberlappen (Alt-Ansicht der Kapseln,
+  2026-10-24). Besser Schriftklassen in Originalgroesse (`$TextDefault12NM` und groesser) und Zeilen
+  absolut positionieren.
 - Behoben: Nebraska, Delaware und Louisiana hatten ein 6-mm-Deck (dünne `SSC_Deck`-Platte,
   vermutlich ein Kleinteil). Jetzt zählt der Hangar (32/38/38 mm), siehe Datenquelle oben.
   Gegenprobe im Spiel offen: gibt es in der Panzerungsansicht eine 6-mm-Fläche?
