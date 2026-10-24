@@ -5,6 +5,8 @@ workflow uses them as "What's new" and then moves them under the new version.
 
 ## Unreleased
 
+## 0.4.0 – 2026-10-24
+
 - New: display style option in TTaro Mod Config – **Classic** (shell / shield), **Modern** (status capsules, new default) and **Text only**.
 - New: Modern detail view (Alt) with the plate thickness per zone and your shot (penetration, or calibre and overmatch limit).
 - New: texts of Modern and Text only follow the client language (20 languages; needs LocalizationLoader, otherwise English).
