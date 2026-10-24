@@ -47,6 +47,9 @@
 	# tools/make_capsule_icons.py; oben ich -> Ziel, unten Ziel -> ich, drei Punkte = Bug/Heck, Mitte, Deck),
 	# 2 = Nur Text (zwei Zeilen in der Ampelfarbe)
 	defaultStyle: 1,
+	# Probe Luftschlag (Branch Test): Anzeige auch ausserhalb der Zielansicht und Diagnosezeile mit
+	# Kameramodus, Zielansicht, Taktikkarte, aufgeschaltetem Ziel und Bewertung (false = aus)
+	probeAirstrike: true,
 	# Nur Text: jede Zeile auf einer dunklen Unterlage (0xD90E1012 in PenLightTextLine/-Alt, ARGB,
 	# 85 % Deckkraft), damit der Kontrast auch vor heller Gischt oder Explosionen mindestens 4,5 : 1
 	# erreicht (WCAG AA, gemessen an Screenshots); Zeilenhoehe inkl. Unterlage, Rand um den Text.
@@ -241,7 +244,7 @@
 		(bind enabled "isAlive")
 		(exprs
 			(style (position = "absolute") (left = 0) (top = 0))
-			(bind visible "isCrosshairVisible")
+			(bind visible "isCrosshairVisible || PENLIGHT_SETTINGS.probeAirstrike")
 		)
 	)
 )
@@ -298,6 +301,9 @@
 		# Detailansicht solange Alt gedrueckt ist (wie PenetrationCalculator)
 		(var cameraEntity:gfx = "$datahub.getSingleEntity(CC.camera)")
 		(var altVision:bool = "cameraEntity.camera.altVision" (event "cameraEntity.camera.evAltVisionChanged"))
+		(var probeCameraMode:number = "cameraEntity.camera.mode" (event "cameraEntity.camera.evModeChanged"))
+		(var probeBinocular:bool = "cameraEntity.camera.isBinocular" (event "cameraEntity.camera.evIsBinocularChanged"))
+		(var probeTactical:bool = "cameraEntity.camera.isTactical" (event "cameraEntity.camera.evTacticalStateChanged"))
 		# geladene Munition aus Main.py: ap (Overmatch), he / sap (Durchschlag Bug/Heck und Deck)
 		(var ammo:str = "'ammo' in omData && null != omData.ammo ? omData.ammo : 'ap'")
 		(var attackIcon:str = "PENLIGHT_ICON_PATH + (ammo == 'ap' ? 'shell_' : ammo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
@@ -418,6 +424,15 @@
 			# Option "Groessenskalierung" (um die linke obere Ecke)
 			(bind scaleX "uiScale")
 			(bind scaleY "uiScale")
+		)
+		# Probe Luftschlag: Diagnosezeile ueber der Anzeige (bewaehrte Muster: block + tf, kein vblock)
+		(block
+			(bind visible "PENLIGHT_SETTINGS.probeAirstrike")
+			(style (position = "absolute") (left = 0px) (top = -26px) (backgroundColor = 0xCC000000))
+			(tf
+				(class $TextDefaultBold13NM)
+				(bind text "'cam ' + toString(probeCameraMode) + '  bino ' + (probeBinocular ? '1' : '0') + '  map ' + (probeTactical ? '1' : '0') + '  target ' + (targetKey != '' ? targetKey : '-') + '  verdict ' + (hasVerdict ? '1' : '0') + '  ammo ' + ammo")
+			)
 		)
 		# eigenes Zahnrad links neben der Anzeige, sichtbar bei aktivem Mauszeiger (Strg);
 		# oeffnet TTaro Mod Config direkt auf der PenLight-Seite (wie BuildViewer)
