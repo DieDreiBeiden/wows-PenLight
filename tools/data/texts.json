@@ -7,6 +7,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Střed",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Pro tuto dvojici nehodnoceno",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "nehodnoceno",
   "IDS_PENLIGHT_NOWHERE": "nikde",
   "IDS_PENLIGHT_OM_UPTO": "OM do %d mm",
   "IDS_PENLIGHT_PEN": "%d mm průbojnost"
@@ -28,6 +29,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Mitte",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Für diese Paarung nicht bewertet",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "nicht bewertet",
   "IDS_PENLIGHT_NOWHERE": "nirgends",
   "IDS_PENLIGHT_OM_UPTO": "OM bis %d mm",
   "IDS_PENLIGHT_PEN": "%d mm Durchschlag"
@@ -49,6 +51,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Midship",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Not rated for this pairing",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "not rated",
   "IDS_PENLIGHT_NOWHERE": "nowhere",
   "IDS_PENLIGHT_OM_UPTO": "OM up to %d mm",
   "IDS_PENLIGHT_PEN": "%d mm penetration"
@@ -61,6 +64,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Centro",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Sin evaluar para este enfrentamiento",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "sin valorar",
   "IDS_PENLIGHT_NOWHERE": "ninguna zona",
   "IDS_PENLIGHT_OM_UPTO": "OM hasta %d mm",
   "IDS_PENLIGHT_PEN": "%d mm de penetración"
@@ -73,6 +77,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Centro",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Sin evaluar para este enfrentamiento",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "sin valorar",
   "IDS_PENLIGHT_NOWHERE": "ninguna zona",
   "IDS_PENLIGHT_OM_UPTO": "OM hasta %d mm",
   "IDS_PENLIGHT_PEN": "%d mm de penetración"
@@ -85,6 +90,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Centre",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Non évalué pour cette paire",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "non évalué",
   "IDS_PENLIGHT_NOWHERE": "nulle part",
   "IDS_PENLIGHT_OM_UPTO": "OM jusqu'à %d mm",
   "IDS_PENLIGHT_PEN": "%d mm de pénétration"
@@ -97,6 +103,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Centro",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Non valutato per questa coppia",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "non valutato",
   "IDS_PENLIGHT_NOWHERE": "da nessuna parte",
   "IDS_PENLIGHT_OM_UPTO": "OM fino a %d mm",
   "IDS_PENLIGHT_PEN": "%d mm di penetrazione"
@@ -109,6 +116,7 @@
   "IDS_PENLIGHT_MIDSHIP": "中央",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "この組み合わせは評価対象外",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "評価なし",
   "IDS_PENLIGHT_NOWHERE": "なし",
   "IDS_PENLIGHT_OM_UPTO": "OM %d mm まで",
   "IDS_PENLIGHT_PEN": "貫通力 %d mm"
@@ -121,6 +129,7 @@
   "IDS_PENLIGHT_MIDSHIP": "중앙",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "이 조합은 평가하지 않음",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "평가 없음",
   "IDS_PENLIGHT_NOWHERE": "없음",
   "IDS_PENLIGHT_OM_UPTO": "OM %d mm 이하",
   "IDS_PENLIGHT_PEN": "관통력 %d mm"
@@ -133,6 +142,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Midden",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Niet beoordeeld voor deze combinatie",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "niet beoordeeld",
   "IDS_PENLIGHT_NOWHERE": "nergens",
   "IDS_PENLIGHT_OM_UPTO": "OM tot %d mm",
   "IDS_PENLIGHT_PEN": "%d mm penetratie"
@@ -145,6 +155,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Śródokręcie",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Brak oceny dla tej pary",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "bez oceny",
   "IDS_PENLIGHT_NOWHERE": "nigdzie",
   "IDS_PENLIGHT_OM_UPTO": "OM do %d mm",
   "IDS_PENLIGHT_PEN": "%d mm penetracji"
@@ -157,6 +168,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Meio",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Sem avaliação para este confronto",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "sem avaliação",
   "IDS_PENLIGHT_NOWHERE": "nenhuma zona",
   "IDS_PENLIGHT_OM_UPTO": "OM até %d mm",
   "IDS_PENLIGHT_PEN": "%d mm de penetração"
@@ -169,6 +181,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Meio",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Sem avaliação para este confronto",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "sem avaliação",
   "IDS_PENLIGHT_NOWHERE": "nenhuma zona",
   "IDS_PENLIGHT_OM_UPTO": "OM até %d mm",
   "IDS_PENLIGHT_PEN": "%d mm de penetração"
@@ -181,6 +194,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Центр",
   "IDS_PENLIGHT_MM": "%d мм",
   "IDS_PENLIGHT_NOT_RATED": "Для этой пары не оценивается",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "без оценки",
   "IDS_PENLIGHT_NOWHERE": "нигде",
   "IDS_PENLIGHT_OM_UPTO": "OM до %d мм",
   "IDS_PENLIGHT_PEN": "Бронепробитие %d мм"
@@ -193,6 +207,7 @@
   "IDS_PENLIGHT_MIDSHIP": "กลางลำ",
   "IDS_PENLIGHT_MM": "%d มม.",
   "IDS_PENLIGHT_NOT_RATED": "ไม่ประเมินสำหรับคู่นี้",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "ไม่ประเมิน",
   "IDS_PENLIGHT_NOWHERE": "ไม่มี",
   "IDS_PENLIGHT_OM_UPTO": "OM ถึง %d มม.",
   "IDS_PENLIGHT_PEN": "เจาะเกราะ %d มม."
@@ -205,6 +220,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Orta",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Bu eşleşme için değerlendirilmedi",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "değerlendirilmedi",
   "IDS_PENLIGHT_NOWHERE": "hiçbir yerde",
   "IDS_PENLIGHT_OM_UPTO": "%d mm'ye kadar OM",
   "IDS_PENLIGHT_PEN": "%d mm delme"
@@ -217,6 +233,7 @@
   "IDS_PENLIGHT_MIDSHIP": "Центр",
   "IDS_PENLIGHT_MM": "%d мм",
   "IDS_PENLIGHT_NOT_RATED": "Для цієї пари не оцінюється",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "без оцінки",
   "IDS_PENLIGHT_NOWHERE": "ніде",
   "IDS_PENLIGHT_OM_UPTO": "OM до %d мм",
   "IDS_PENLIGHT_PEN": "Бронепробиття %d мм"
@@ -229,6 +246,7 @@
   "IDS_PENLIGHT_MIDSHIP": "舰体中部",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "此组合不评估",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "未评估",
   "IDS_PENLIGHT_NOWHERE": "无",
   "IDS_PENLIGHT_OM_UPTO": "OM 至 %d mm",
   "IDS_PENLIGHT_PEN": "穿深 %d mm"
@@ -241,6 +259,7 @@
   "IDS_PENLIGHT_MIDSHIP": "舰体中部",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "此组合不评估",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "未评估",
   "IDS_PENLIGHT_NOWHERE": "无",
   "IDS_PENLIGHT_OM_UPTO": "OM 至 %d mm",
   "IDS_PENLIGHT_PEN": "穿深 %d mm"
@@ -253,6 +272,7 @@
   "IDS_PENLIGHT_MIDSHIP": "艦體中段",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "此組合不評估",
+  "IDS_PENLIGHT_NOT_RATED_SHORT": "未評估",
   "IDS_PENLIGHT_NOWHERE": "無",
   "IDS_PENLIGHT_OM_UPTO": "OM 至 %d mm",
   "IDS_PENLIGHT_PEN": "穿深 %d mm"

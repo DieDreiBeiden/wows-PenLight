@@ -96,6 +96,16 @@ Nicht bewertete Paarungen (Python: `grey`, Zonen −1, z. B. Schild gegen Träge
 Darstellungen grau. Textfarbe per `colorTransform` mit Multiplikatoren (`PENLIGHT_TEXT_CT`), damit
 der Schatten der Schrift dunkel bleibt.
 
+Lesbarkeit „Nur Text“ (Prüfung 2026-10-24, Hintergründe aus Spiel-Screenshots gemessen):
+- Ohne Unterlage verfehlt Text auf typischem Wasser (55,60,58) teils den Kontrast 4,5 : 1 (Rot 2,9,
+  Farbenblind-Blau 3,2, -Orange 2,9), vor heller Gischt fast alle Farben (1,0–2,0). Daher jede Zeile
+  auf dunkler Unterlage 0xD90E1012 (85 %) und hellere Textfarben (Rot #FF7060, Grau #B0B5BA,
+  Blau #58AAFF, Orange #F58028): alle Farben ≥ 4,8 : 1 auch vor weißer Gischt.
+- Standardpalette bei Deuteranopie: Grün/Rot kaum unterscheidbar (ΔE ≈ 8). Im Text trägt das Wort
+  die Aussage („everywhere“, „Bow/Stern“), Farbe ist zusätzlich; sonst Farbenblind-Palette (ΔE ≥ 22).
+- Ohne Ziel nur „HE“ / „Enemy AP“ in Grau, mit Ziel und ohne Bewertung „not rated“ statt „-“.
+- Schrift 13 px fett (Spielschrift); größer über die Option Skalierung.
+
 ## Detailansicht (Alt gedrückt)
 
 Layout (rechts unter dem Fadenkreuz, linke obere Ecke Standard x +30, y +8):

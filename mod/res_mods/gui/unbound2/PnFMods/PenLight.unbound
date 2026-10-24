@@ -47,15 +47,22 @@
 	# tools/make_capsule_icons.py; oben ich -> Ziel, unten Ziel -> ich, drei Punkte = Bug/Heck, Mitte, Deck),
 	# 2 = Nur Text (zwei Zeilen in der Ampelfarbe)
 	defaultStyle: 1,
-	# Nur Text: Zeilenhoehe und Breite der Greifflaeche; Alt-Ansicht mit Kopfzeile, Zonenname und Wert
-	textLineHeight: 18,
-	textWidth: 170,
-	textAltWidth: 236,
-	textAltHeight: 48,
-	textAltGap: 6,
+	# Nur Text: jede Zeile auf einer dunklen Unterlage (0xD90E1012 in PenLightTextLine/-Alt, ARGB,
+	# 85 % Deckkraft), damit der Kontrast auch vor heller Gischt oder Explosionen mindestens 4,5 : 1
+	# erreicht (WCAG AA, gemessen an Screenshots); Zeilenhoehe inkl. Unterlage, Rand um den Text.
+	textPadX: 5,
+	textPadY: 1,
+	textLineHeight: 21,
+	textWidth: 180,
+	# Alt-Ansicht: eine Unterlage je Richtung mit Kopfzeile, Zonenname und Wert
+	textAltWidth: 246,
+	textAltHeight: 52,
+	textAltGap: 4,
+	textAltPadX: 6,
+	textHeadTop: 3,
 	textZoneStep: 78,
-	textNameTop: 18,
-	textValueTop: 32,
+	textNameTop: 20,
+	textValueTop: 34,
 	capsuleHeight: 18,
 	capsuleGap: 4,
 	# Breite der Kapsel-Bilder (px): normal, mit IFHE-Kennung breiter (feste Groesse wie bei den Symbolen)
@@ -140,17 +147,20 @@
 })
 # Einfaerbung der Texte (Option "Nur Text"): weisse Schrift x Multiplikator = Ampelfarbe; anders als bei
 # den Silhouetten ohne Offset, damit der dunkle Schatten der Schrift ($FontEnableReadability) dunkel bleibt.
+# Textfarben heller als die der Symbole, damit sie auf der Unterlage >= 4,5 : 1 erreichen:
+# gruen #3DDC5A, orange #FF8C00, rot #FF7060, grau #B0B5BA; farbenblind blau #58AAFF, gelb #F0E442,
+# orange #F58028.
 (def constant PENLIGHT_TEXT_CT {
 	green:  { redMultiplier:0.24,greenMultiplier:0.86,blueMultiplier:0.35,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
 	yellow: { redMultiplier:1,greenMultiplier:0.55,blueMultiplier:0,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
-	red:    { redMultiplier:0.91,greenMultiplier:0.28,blueMultiplier:0.2,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
-	grey:   { redMultiplier:0.62,greenMultiplier:0.64,blueMultiplier:0.66,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 }
+	red:    { redMultiplier:1,greenMultiplier:0.44,blueMultiplier:0.38,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	grey:   { redMultiplier:0.69,greenMultiplier:0.71,blueMultiplier:0.73,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 }
 })
 (def constant PENLIGHT_TEXT_CT_CB {
-	green:  { redMultiplier:0.17,greenMultiplier:0.55,blueMultiplier:0.91,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	green:  { redMultiplier:0.35,greenMultiplier:0.67,blueMultiplier:1,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
 	yellow: { redMultiplier:0.94,greenMultiplier:0.89,blueMultiplier:0.26,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
-	red:    { redMultiplier:0.84,greenMultiplier:0.37,blueMultiplier:0,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
-	grey:   { redMultiplier:0.62,greenMultiplier:0.64,blueMultiplier:0.66,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 }
+	red:    { redMultiplier:0.96,greenMultiplier:0.5,blueMultiplier:0.16,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	grey:   { redMultiplier:0.69,greenMultiplier:0.71,blueMultiplier:0.73,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 }
 })
 # Farbenblind-Schema (AMPEL_CB in tools/make_ampel_icons.py): blau = Overmatch, orange = kein Overmatch
 (def constant PENLIGHT_CT_CB {
@@ -368,24 +378,26 @@
 		(var txtEnemyAp:str = "tr('IDS_PENLIGHT_ENEMY_AP') != 'IDS_PENLIGHT_ENEMY_AP' && tr('IDS_PENLIGHT_ENEMY_AP') != '' ? tr('IDS_PENLIGHT_ENEMY_AP') : 'Enemy AP'")
 		(var txtEverywhere:str = "tr('IDS_PENLIGHT_EVERYWHERE') != 'IDS_PENLIGHT_EVERYWHERE' && tr('IDS_PENLIGHT_EVERYWHERE') != '' ? tr('IDS_PENLIGHT_EVERYWHERE') : 'everywhere'")
 		(var txtNowhere:str = "tr('IDS_PENLIGHT_NOWHERE') != 'IDS_PENLIGHT_NOWHERE' && tr('IDS_PENLIGHT_NOWHERE') != '' ? tr('IDS_PENLIGHT_NOWHERE') : 'nowhere'")
+		(var txtNotRatedShort:str = "tr('IDS_PENLIGHT_NOT_RATED_SHORT') != 'IDS_PENLIGHT_NOT_RATED_SHORT' && tr('IDS_PENLIGHT_NOT_RATED_SHORT') != '' ? tr('IDS_PENLIGHT_NOT_RATED_SHORT') : 'not rated'")
 		(var a0:bool = "detail[0] == 1")
 		(var a1:bool = "aMid == 1")
 		(var a2:bool = "detail[2] == 1")
 		(var d0:bool = "detail[3] == 1")
 		(var d1:bool = "dMid == 1")
 		(var d2:bool = "detail[5] == 1")
-		(var attackZones:str = "!attackRated ? '-' : (attackBits == '111' ? txtEverywhere : (attackBits == '000' ? txtNowhere
+		(var attackZones:str = "!attackRated ? txtNotRatedShort : (attackBits == '111' ? txtEverywhere : (attackBits == '000' ? txtNowhere
 								: (a0 ? txtBowStern : '') + (a0 && (a1 || a2) ? ' + ' : '') + (a1 ? txtMidship : '') + (a1 && a2 ? ' + ' : '') + (a2 ? txtDeck : '')))")
-		(var defenseZones:str = "!defenseRated ? '-' : (defenseBits == '111' ? txtEverywhere : (defenseBits == '000' ? txtNowhere
+		(var defenseZones:str = "!defenseRated ? txtNotRatedShort : (defenseBits == '111' ? txtEverywhere : (defenseBits == '000' ? txtNowhere
 								: (d0 ? txtBowStern : '') + (d0 && (d1 || d2) ? ' + ' : '') + (d1 ? txtMidship : '') + (d1 && d2 ? ' + ' : '') + (d2 ? txtDeck : '')))")
-		(var textAttack:str = "toUpper(ammo) + (hasIfhe ? ' IFHE' : '') + ': ' + attackZones")
-		(var textDefense:str = "txtEnemyAp + ': ' + defenseZones")
+		# ohne Ziel nur die Bezeichnung (grau); mit Ziel, aber nicht bewertet: 'not rated'
+		(var textAttack:str = "toUpper(ammo) + (hasIfhe ? ' IFHE' : '') + (hasVerdict ? ': ' + attackZones : '')")
+		(var textDefense:str = "txtEnemyAp + (hasVerdict ? ': ' + defenseZones : '')")
 		(var textCt:dict = "isColorBlind ? PENLIGHT_TEXT_CT_CB : PENLIGHT_TEXT_CT")
 		(var attackCt:dict = "textCt[attackState]")
 		(var defenseCt:dict = "textCt[defenseState]")
 		(var greyCt:dict = "textCt['grey']")
 		(var textAttackHead:str = "toUpper(ammo) + (hasIfhe ? ' IFHE' : '') + '  ' + attackLine")
-		(var textDefenseHead:str = "defenseRated && nums[8] > 0 ? txtEnemyAp + ' ' + subst(txtMm, [nums[8]]) + '  /  ' + subst(txtOmUpTo, [nums[9]]) : txtEnemyAp + ': ' + txtNotRated")
+		(var textDefenseHead:str = "defenseRated && nums[8] > 0 ? txtEnemyAp + ' ' + subst(txtMm, [nums[8]]) + '  /  ' + subst(txtOmUpTo, [nums[9]]) : txtEnemyAp + ': ' + txtNotRatedShort")
 		(var showTextAlt:bool = "showDetail && isTextOnly")
 	)
 
@@ -853,9 +865,20 @@
 )
 
 
-# Nur Text: eine Zeile in der Spielschrift, eingefaerbt per colorTransform (PENLIGHT_TEXT_CT).
+# Nur Text: eine Zeile auf dunkler Unterlage (Breite folgt dem Text), Schrift eingefaerbt per
+# colorTransform (PENLIGHT_TEXT_CT). Die Einfaerbung sitzt auf PenLightTextInk, nicht auf der Unterlage.
 (def element PenLightTextLine(_text:str, _ct:dict) layout=true
-	(style (bind height "PENLIGHT_SETTINGS.textLineHeight"))
+	(style (backgroundColor = 0xD90E1012))
+	(block
+		(style
+			(bind marginLeft "PENLIGHT_SETTINGS.textPadX") (bind marginRight "PENLIGHT_SETTINGS.textPadX")
+			(bind marginTop "PENLIGHT_SETTINGS.textPadY") (bind marginBottom "PENLIGHT_SETTINGS.textPadY")
+		)
+		(element PenLightTextInk _text="_text" _ct="_ct")
+	)
+)
+
+(def element PenLightTextInk(_text:str, _ct:dict) layout=true
 	(tf
 		(class $TextDefaultBold13NM)
 		(class $FontEnableReadability)
@@ -864,17 +887,18 @@
 	(bind colorTransform "_ct")
 )
 
-# Nur Text, Alt-Ansicht: Kopfzeile in der Ampelfarbe, darunter drei Zonen mit Name und Plattendicke;
-# Werte der Zonen mit Durchkommen bzw. Overmatch in der Ampelfarbe, die uebrigen grau.
+# Nur Text, Alt-Ansicht: eine Unterlage je Richtung; Kopfzeile in der Ampelfarbe, darunter drei Zonen
+# mit Name und Plattendicke; Werte der Zonen mit Durchkommen bzw. Overmatch in der Ampelfarbe, sonst grau.
 (def element PenLightTextAlt(_head:str, _headCt:dict, _z:array, _values:array, _names:array, _mmFmt:str,
 		_onCt:dict, _offCt:dict) layout=true
 	(style
 		(bind width "PENLIGHT_SETTINGS.textAltWidth")
 		(bind height "PENLIGHT_SETTINGS.textAltHeight")
+		(backgroundColor = 0xD90E1012)
 	)
 	(block
-		(style (position = "absolute") (left = 0) (top = 0))
-		(element PenLightTextLine _text="_head" _ct="_headCt")
+		(style (position = "absolute") (bind left "PENLIGHT_SETTINGS.textAltPadX") (bind top "PENLIGHT_SETTINGS.textHeadTop"))
+		(element PenLightTextInk _text="_head" _ct="_headCt")
 	)
 	(element PenLightTextZone _i="0" _name="_names[0]" _z="_z" _values="_values" _mmFmt="_mmFmt" _onCt="_onCt" _offCt="_offCt")
 	(element PenLightTextZone _i="1" _name="_names[1]" _z="_z" _values="_values" _mmFmt="_mmFmt" _onCt="_onCt" _offCt="_offCt")
@@ -883,7 +907,7 @@
 
 (def element PenLightTextZone(_i:number, _name:str, _z:array, _values:array, _mmFmt:str, _onCt:dict, _offCt:dict) layout=true
 	(scope
-		(var x:number = "_i * PENLIGHT_SETTINGS.textZoneStep")
+		(var x:number = "PENLIGHT_SETTINGS.textAltPadX + _i * PENLIGHT_SETTINGS.textZoneStep")
 		(var valueText:str = "_values[_i] >= 0 ? subst(_mmFmt, [_values[_i]]) : '-'")
 		(var valueCt:dict = "_z[_i] == 1 ? _onCt : _offCt")
 	)
@@ -898,6 +922,6 @@
 	)
 	(block
 		(style (position = "absolute") (bind left "x") (bind top "PENLIGHT_SETTINGS.textValueTop"))
-		(element PenLightTextLine _text="valueText" _ct="valueCt")
+		(element PenLightTextInk _text="valueText" _ct="valueCt")
 	)
 )
