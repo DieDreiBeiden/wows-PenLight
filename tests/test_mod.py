@@ -4,6 +4,7 @@
 import builtins
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -178,6 +179,19 @@ class ModTest(unittest.TestCase):
         self.key(205, alt=False)
         self.key(32, ctrl=False)
         self.assertEqual(len(self.ui_data), count)
+
+    def test_handle_sizes_match_unbound(self):
+        # Greifflaeche von Main.swf (HANDLE_SIZES) = Groesse der Anzeige laut PENLIGHT_SETTINGS
+        path = os.path.join(os.path.dirname(__file__), '..', 'mod', 'res_mods', 'gui', 'unbound2', 'PnFMods', 'PenLight.unbound')
+        with open(path, encoding='utf-8') as f:
+            values = dict((k, int(v)) for k, v in re.findall(r'^\t(\w+): (\d+),', f.read(), re.M))
+        self.run_mod('PASC720_Hawaii', [])
+        self.assertEqual(self.env['HANDLE_SIZES'], {
+            0: (values['iconSize'] * 2 + values['iconGap'], values['iconSize']),
+            1: (values['capsuleWidth'], values['capsuleHeight'] * 2 + values['capsuleGap']),
+            2: (values['textWidth'], values['textLineHeight'] * 2)})
+        self.assertEqual(self.env['HANDLE_PAD'], (values['dragPadLeft'], values['dragPadTop'],
+                                                  values['dragPadRight'], values['dragPadBottom']))
 
     def test_saved_settings_are_checked(self):
         self.run_mod('PASC720_Hawaii', [])

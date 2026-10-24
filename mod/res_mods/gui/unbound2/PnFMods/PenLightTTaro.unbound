@@ -12,6 +12,7 @@
 (def constant PENLIGHT_PREF_SCALE 'diedreibeiden.penlight.scale')
 (def constant PENLIGHT_PREF_COLOR_MODE 'diedreibeiden.penlight.colorMode')
 (def constant PENLIGHT_PREF_DETAIL_MODE 'diedreibeiden.penlight.detailMode')
+(def constant PENLIGHT_PREF_STYLE 'diedreibeiden.penlight.style')
 # Seite in TTaro Mod Config = author + '.' + slug aus dem Schema (fuer das eigene Zahnrad)
 (def constant PENLIGHT_MOD_SLUG 'diedreibeiden.penlight')
 
@@ -34,8 +35,12 @@
 		(var colorMode:number = "null != colorModePref && null != colorModePref.value ? colorModePref.value : 0")
 		(macro TT_GET_PREF _varName="'detailModePref'" _key="PENLIGHT_PREF_DETAIL_MODE")
 		(var detailMode:number = "null != detailModePref && null != detailModePref.value ? detailModePref.value : 0")
+		(macro TT_GET_PREF _varName="'stylePref'" _key="PENLIGHT_PREF_STYLE")
+		(var displayStyle:number = "null != stylePref && null != stylePref.value ? stylePref.value : PENLIGHT_SETTINGS.defaultStyle")
+		(var isModern:bool = "displayStyle == 1")
+		(var isTextOnly:bool = "displayStyle == 2")
 
-		(var ext:dict = "{posX: posX, posY: posY, scale: uiScale, colorMode: colorMode, detailMode: detailMode}")
+		(var ext:dict = "{posX: posX, posY: posY, scale: uiScale, colorMode: colorMode, detailMode: detailMode, style: displayStyle}")
 
 		# Zahnrad und Greifflaeche nur, solange man lebt (wie die Anzeige selbst)
 		(var avatar:gfx = "$datahub.getSingleEntity(CC.playerAvatar)")
@@ -73,14 +78,14 @@
 				(top = 0px)
 			)
 		)
-		# Greifflaeche ueber Granate | Schild mit Rand (dragPad*), damit sie leicht zu treffen ist
+		# Greifflaeche ueber der Anzeige (Groesse je Darstellung) mit Rand (dragPad*), damit sie leicht zu treffen ist
 		(block
 			(style
 				(position = "absolute")
 				(bind left "0 - PENLIGHT_SETTINGS.dragPadLeft")
 				(bind top "0 - PENLIGHT_SETTINGS.dragPadTop")
-				(bind width "PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap + PENLIGHT_SETTINGS.dragPadLeft + PENLIGHT_SETTINGS.dragPadRight")
-				(bind height "PENLIGHT_SETTINGS.iconSize + PENLIGHT_SETTINGS.dragPadTop + PENLIGHT_SETTINGS.dragPadBottom")
+				(bind width "(isModern ? PENLIGHT_SETTINGS.capsuleWidth : (isTextOnly ? PENLIGHT_SETTINGS.textWidth : PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap)) + PENLIGHT_SETTINGS.dragPadLeft + PENLIGHT_SETTINGS.dragPadRight")
+				(bind height "(isModern ? PENLIGHT_SETTINGS.capsuleHeight * 2 + PENLIGHT_SETTINGS.capsuleGap : (isTextOnly ? PENLIGHT_SETTINGS.textLineHeight * 2 : PENLIGHT_SETTINGS.iconSize)) + PENLIGHT_SETTINGS.dragPadTop + PENLIGHT_SETTINGS.dragPadBottom")
 				(backgroundColor = 0x00FFFFFF)
 				(bind hitTest "!isPositionLocked")
 			)
