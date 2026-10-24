@@ -8,7 +8,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from penlight.logic import (GREEN, RED, YELLOW, attack_color, defense_color,
-                            detail_icons, evaluate, floor_mm, overmatches, pen_detail, pen_state,
+                            detail_icons, evaluate, floor_mm, overmatch_limit, overmatches, pen_detail, pen_state,
                             zone_detail)
 
 
@@ -148,6 +148,19 @@ class Filter(unittest.TestCase):
         bb = self.ship('Battleship', 460, 32, 32)
         self.assertIsNotNone(evaluate(bb, bb))
 
+
+
+class Numbers(unittest.TestCase):
+    def test_overmatch_limit(self):
+        self.assertEqual(overmatch_limit(203), 14)    # 203 / 14.3 = 14.2
+        self.assertEqual(overmatch_limit(460), 32)
+        self.assertEqual(overmatch_limit(143), 9)     # genau 10 * 14.3: 10 mm wird nicht overmatcht
+        self.assertEqual(overmatch_limit(None), -1)
+
+    def test_numbers_for_he_and_unrated_shield(self):
+        dd = {'class': 'Destroyer', 'caliber': 127.0, 'bow': 19.0, 'deck': 19.0}
+        ca = {'class': 'Cruiser', 'caliber': 203.0, 'bow': 25.0, 'deck': 30.0, 'mid': 30.0}
+        self.assertEqual(evaluate(ca, dd, 'he', 34)['numbers'], [19, -1, 19, 25, 30, 30, 34, -1, -1, -1])
 
 if __name__ == '__main__':
     unittest.main()

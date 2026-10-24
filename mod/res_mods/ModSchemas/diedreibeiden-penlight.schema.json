@@ -16,6 +16,30 @@
         {
           "kind": "setting",
           "control": "dropdown",
+          "key": "penlight.style",
+          "label": "IDS_OM_STYLE",
+          "hint": {
+            "text": "IDS_OM_HINT_STYLE"
+          },
+          "default": 1,
+          "options": [
+            {
+              "value": 0,
+              "phrase": "IDS_OM_STYLE_CLASSIC"
+            },
+            {
+              "value": 1,
+              "phrase": "IDS_OM_STYLE_MODERN"
+            },
+            {
+              "value": 2,
+              "phrase": "IDS_OM_STYLE_TEXT"
+            }
+          ]
+        },
+        {
+          "kind": "setting",
+          "control": "dropdown",
           "key": "penlight.detailMode",
           "label": "IDS_TT_DISPLAY_MODE",
           "hint": {
