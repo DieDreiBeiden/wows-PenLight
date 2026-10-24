@@ -20,6 +20,9 @@ Klassen: Kreuzer und Schlachtschiffe (AP-Overmatch, Schild) sowie Zerstoerer und
 HE/SAP-Ziel bzw. Schiff mit HE/SAP); Traeger haben kein Hauptkaliber. U-Boote werden nicht bewertet.
 Die Felder 'armourDeck'/'armourExtremities' sind in Build 15.9 nur Platzhalter [-1, -1].
 - Hauptkaliber = 'barrelDiameter' (m) der Geschuetze im Artillerie-Modul.
+- Luftschlag = HE-Durchschlag der Bombe: Modul '<X>_AirSupport' (am Rumpf-Upgrade, 'airSupport') ->
+  ammoList -> Flugzeug -> bombName -> 'alphaPiercingHE'; nur Bomben mit ammoType HE (die meisten
+  Luftschlaege sind Wasserbomben gegen U-Boote). Ohne HE-Luftschlag None.
 - Voll ausgebaut = jeweils letztes Modul in ShipUpgradeInfo.
 """
 import io
@@ -160,6 +163,20 @@ def _main_caliber_mm(artillery):
     return round(max(calibers) * 1000, 1) if calibers else None
 
 
+def airstrike_he_mm(params, entry):
+    """HE-Durchschlag (mm) der Luftschlag-Bombe des Schiffs oder None."""
+    name = _pick(entry, '_AirSupport', 'airSupport', '_Hull')
+    module = entry.get(name) if name else None
+    if not isinstance(module, dict):
+        return None
+    pens = []
+    for plane in module.get('ammoList') or ():
+        bomb = params.get((params.get(plane) or {}).get('bombName')) or {}
+        if bomb.get('ammoType') == 'HE' and bomb.get('alphaPiercingHE'):
+            pens.append(bomb['alphaPiercingHE'])
+    return max(pens) if pens else None
+
+
 def extract(params):
     ships = {}
     for index, entry in params.items():
@@ -185,19 +202,20 @@ def extract(params):
             'deck': deck_mm(plates, species),
             'mid': mid_mm(plates),
             'caliber': _main_caliber_mm(art),
+            'airstrike': airstrike_he_mm(params, entry),
         }
     return ships
 
 
 def mod_table(ships, game_version):
-    """Kompakte Tabelle fuer die Mod: {name: [klasse, bug, deck, kaliber, mitte|None]}."""
+    """Kompakte Tabelle fuer die Mod: {name: [klasse, bug, deck, kaliber, mitte|None, luftschlag|None]}."""
     table = {}
     for name, s in ships.items():
         if name.startswith('PX') or None in (s['bow'], s['deck']):
             continue  # Event-/Operationsschiffe bzw. unvollstaendige Daten
         if s['caliber'] is None and s['class'] in CALIBER_REQUIRED:
             continue
-        table[name] = [s['class'], s['bow'], s['deck'], s['caliber'], s['mid']]
+        table[name] = [s['class'], s['bow'], s['deck'], s['caliber'], s['mid'], s.get('airstrike')]
     return {'gameVersion': game_version, 'ships': table}
 
 

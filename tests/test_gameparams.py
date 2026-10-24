@@ -106,6 +106,28 @@ class GameParamsTest(unittest.TestCase):
         # ohne Hangar: duennste Deckplatte wie bisher
         self.assertEqual(gameparams.deck_mm({'SSC_Deck': 6.0}, 'Cruiser'), 6.0)
 
+    def test_airstrike_he(self):
+        # Luftschlag am Rumpf-Upgrade: Flugzeug -> HE-Bombe; Wasserbomben zaehlen nicht
+        utrecht = ship(
+            'PHSC010_Utrecht', 'Cruiser',
+            {'A_Hull': GPData(armor=armor(25.0, 30.0)), 'A_AirSupport': GPData(ammoList=('PHAD020_AS',))},
+            {'A_Artillery': GPData(HP_1=GPData(barrelDiameter=0.152))},
+            {'H1': GPData(ucType='_Hull', prev='', components={'hull': ['A_Hull'], 'airSupport': ['A_AirSupport']})})
+        plane = GPData(index='PHAD020_AS', bombName='PHPB028')
+        bomb = GPData(index='PHPB028', ammoType='HE', alphaPiercingHE=36.9)
+        sub_hunter = ship(
+            'PXSD002_Test', 'Destroyer',
+            {'A_Hull': GPData(armor=armor(19.0, 19.0)), 'A_AirSupport': GPData(ammoList=('PXAD001_DC',))},
+            {}, {'H1': GPData(ucType='_Hull', prev='', components={'hull': ['A_Hull'], 'airSupport': ['A_AirSupport']})})
+        dc_plane = GPData(index='PXAD001_DC', bombName='PXDC001')
+        dc = GPData(index='PXDC001', ammoType='depthcharge', alphaPiercingHE=0)
+        write_gameparams(self.path, [utrecht, plane, bomb, sub_hunter, dc_plane, dc])
+        ships = gameparams.extract(gameparams.load(self.path))
+        self.assertEqual(ships['PHSC010_Utrecht']['airstrike'], 36.9)
+        self.assertIsNone(ships['PXSD002_Test']['airstrike'])
+        table = gameparams.mod_table(ships, '15,9,0,1')['ships']
+        self.assertEqual(table['PHSC010_Utrecht'], ['Cruiser', 25.0, 30.0, 152.0, None, 36.9])
+
     def test_final_hull_is_used(self):
         ships = gameparams.extract(gameparams.load(self.path))
         self.assertEqual(ships['PXSC001_Test']['hull'], 'B_Hull')
