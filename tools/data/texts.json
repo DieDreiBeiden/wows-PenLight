@@ -2,7 +2,6 @@
  "cs": {
   "IDS_PENLIGHT_BOW_STERN": "Příď/záď",
   "IDS_PENLIGHT_DECK": "Paluba",
-  "IDS_PENLIGHT_ENEMY_AP": "Nepřátelská AP",
   "IDS_PENLIGHT_MIDSHIP": "Střed",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Pro tuto dvojici nehodnoceno",
@@ -16,7 +15,6 @@
   "IDS_OM_HINT_DETAIL_MODE": "\"Mit Alt-Taste sichtbar\": Granate und Schild, Detailansicht solange Alt gedrückt ist.\n\"Immer AN\": die Detailansicht ersetzt die Symbole, sobald ein Ziel aufgeschaltet ist.",
   "IDS_PENLIGHT_BOW_STERN": "Bug/Heck",
   "IDS_PENLIGHT_DECK": "Deck",
-  "IDS_PENLIGHT_ENEMY_AP": "Gegner-AP",
   "IDS_PENLIGHT_MIDSHIP": "Mitte",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Für diese Paarung nicht bewertet",
@@ -30,7 +28,6 @@
   "IDS_OM_HINT_DETAIL_MODE": "\"Visible on Alt-key\": shell and shield icons, detail view while Alt is held.\n\"Always ON\": the detail view replaces the icons whenever a target is locked.",
   "IDS_PENLIGHT_BOW_STERN": "Bow/Stern",
   "IDS_PENLIGHT_DECK": "Deck",
-  "IDS_PENLIGHT_ENEMY_AP": "Enemy AP",
   "IDS_PENLIGHT_MIDSHIP": "Midship",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Not rated for this pairing",
@@ -40,7 +37,6 @@
  "es": {
   "IDS_PENLIGHT_BOW_STERN": "Proa/popa",
   "IDS_PENLIGHT_DECK": "Cubierta",
-  "IDS_PENLIGHT_ENEMY_AP": "AP enemigo",
   "IDS_PENLIGHT_MIDSHIP": "Centro",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Sin evaluar para este enfrentamiento",
@@ -50,7 +46,6 @@
  "es_mx": {
   "IDS_PENLIGHT_BOW_STERN": "Proa/popa",
   "IDS_PENLIGHT_DECK": "Cubierta",
-  "IDS_PENLIGHT_ENEMY_AP": "AP enemigo",
   "IDS_PENLIGHT_MIDSHIP": "Centro",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Sin evaluar para este enfrentamiento",
@@ -60,7 +55,6 @@
  "fr": {
   "IDS_PENLIGHT_BOW_STERN": "Proue/poupe",
   "IDS_PENLIGHT_DECK": "Pont",
-  "IDS_PENLIGHT_ENEMY_AP": "AP ennemi",
   "IDS_PENLIGHT_MIDSHIP": "Centre",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Non évalué pour cette paire",
@@ -70,7 +64,6 @@
  "it": {
   "IDS_PENLIGHT_BOW_STERN": "Prua/poppa",
   "IDS_PENLIGHT_DECK": "Ponte",
-  "IDS_PENLIGHT_ENEMY_AP": "AP nemico",
   "IDS_PENLIGHT_MIDSHIP": "Centro",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Non valutato per questa coppia",
@@ -80,7 +73,6 @@
  "ja": {
   "IDS_PENLIGHT_BOW_STERN": "艦首/艦尾",
   "IDS_PENLIGHT_DECK": "甲板",
-  "IDS_PENLIGHT_ENEMY_AP": "敵AP",
   "IDS_PENLIGHT_MIDSHIP": "中央",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "この組み合わせは評価対象外",
@@ -90,7 +82,6 @@
  "ko": {
   "IDS_PENLIGHT_BOW_STERN": "함수/함미",
   "IDS_PENLIGHT_DECK": "갑판",
-  "IDS_PENLIGHT_ENEMY_AP": "적 AP",
   "IDS_PENLIGHT_MIDSHIP": "중앙",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "이 조합은 평가하지 않음",
@@ -100,7 +91,6 @@
  "nl": {
   "IDS_PENLIGHT_BOW_STERN": "Boeg/achtersteven",
   "IDS_PENLIGHT_DECK": "Dek",
-  "IDS_PENLIGHT_ENEMY_AP": "Vijandelijke AP",
   "IDS_PENLIGHT_MIDSHIP": "Midden",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Niet beoordeeld voor deze combinatie",
@@ -110,7 +100,6 @@
  "pl": {
   "IDS_PENLIGHT_BOW_STERN": "Dziób/rufa",
   "IDS_PENLIGHT_DECK": "Pokład",
-  "IDS_PENLIGHT_ENEMY_AP": "AP wroga",
   "IDS_PENLIGHT_MIDSHIP": "Śródokręcie",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Brak oceny dla tej pary",
@@ -120,7 +109,6 @@
  "pt": {
   "IDS_PENLIGHT_BOW_STERN": "Proa/popa",
   "IDS_PENLIGHT_DECK": "Convés",
-  "IDS_PENLIGHT_ENEMY_AP": "AP inimigo",
   "IDS_PENLIGHT_MIDSHIP": "Meio",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Sem avaliação para este confronto",
@@ -130,7 +118,6 @@
  "pt_br": {
   "IDS_PENLIGHT_BOW_STERN": "Proa/popa",
   "IDS_PENLIGHT_DECK": "Convés",
-  "IDS_PENLIGHT_ENEMY_AP": "AP inimigo",
   "IDS_PENLIGHT_MIDSHIP": "Meio",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Sem avaliação para este confronto",
@@ -140,7 +127,6 @@
  "ru": {
   "IDS_PENLIGHT_BOW_STERN": "Нос/корма",
   "IDS_PENLIGHT_DECK": "Палуба",
-  "IDS_PENLIGHT_ENEMY_AP": "ББ противника",
   "IDS_PENLIGHT_MIDSHIP": "Центр",
   "IDS_PENLIGHT_MM": "%d мм",
   "IDS_PENLIGHT_NOT_RATED": "Для этой пары не оценивается",
@@ -150,7 +136,6 @@
  "th": {
   "IDS_PENLIGHT_BOW_STERN": "หัว/ท้ายเรือ",
   "IDS_PENLIGHT_DECK": "ดาดฟ้า",
-  "IDS_PENLIGHT_ENEMY_AP": "AP ของศัตรู",
   "IDS_PENLIGHT_MIDSHIP": "กลางลำ",
   "IDS_PENLIGHT_MM": "%d มม.",
   "IDS_PENLIGHT_NOT_RATED": "ไม่ประเมินสำหรับคู่นี้",
@@ -160,7 +145,6 @@
  "tr": {
   "IDS_PENLIGHT_BOW_STERN": "Pruva/kıç",
   "IDS_PENLIGHT_DECK": "Güverte",
-  "IDS_PENLIGHT_ENEMY_AP": "Düşman AP",
   "IDS_PENLIGHT_MIDSHIP": "Orta",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "Bu eşleşme için değerlendirilmedi",
@@ -170,7 +154,6 @@
  "uk": {
   "IDS_PENLIGHT_BOW_STERN": "Ніс/корма",
   "IDS_PENLIGHT_DECK": "Палуба",
-  "IDS_PENLIGHT_ENEMY_AP": "ББ противника",
   "IDS_PENLIGHT_MIDSHIP": "Центр",
   "IDS_PENLIGHT_MM": "%d мм",
   "IDS_PENLIGHT_NOT_RATED": "Для цієї пари не оцінюється",
@@ -180,7 +163,6 @@
  "zh": {
   "IDS_PENLIGHT_BOW_STERN": "舰艏/舰艉",
   "IDS_PENLIGHT_DECK": "甲板",
-  "IDS_PENLIGHT_ENEMY_AP": "敌方AP",
   "IDS_PENLIGHT_MIDSHIP": "舰体中部",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "此组合不评估",
@@ -190,7 +172,6 @@
  "zh_sg": {
   "IDS_PENLIGHT_BOW_STERN": "舰艏/舰艉",
   "IDS_PENLIGHT_DECK": "甲板",
-  "IDS_PENLIGHT_ENEMY_AP": "敌方AP",
   "IDS_PENLIGHT_MIDSHIP": "舰体中部",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "此组合不评估",
@@ -200,7 +181,6 @@
  "zh_tw": {
   "IDS_PENLIGHT_BOW_STERN": "艦艏/艦艉",
   "IDS_PENLIGHT_DECK": "甲板",
-  "IDS_PENLIGHT_ENEMY_AP": "敵方AP",
   "IDS_PENLIGHT_MIDSHIP": "艦體中段",
   "IDS_PENLIGHT_MM": "%d mm",
   "IDS_PENLIGHT_NOT_RATED": "此組合不評估",

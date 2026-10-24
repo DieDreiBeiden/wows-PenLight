@@ -58,15 +58,22 @@
 	glowRestAlpha: 0.45,
 	# Wechsel des Kapsel-Inhalts kurz einblenden (s)
 	capsuleFade: 0.15,
-	# Alt-Ansicht der Kapseln (Variante A, englisch): ausgeklappte Flaechen 186 x 42 (capsule/alt/*.png),
-	# Texte in der Spielschrift (12 px, verkleinert auf altTextScale)
-	altWidth: 186,
-	altHeight: 42,
+	# Alt-Ansicht der Kapseln (Variante A): Flaechen 250 x 56 (capsule/alt/*.png), Texte in der
+	# Spielschrift 12 px ohne Skalierung (skalierte Schrift rendert im Client weich und klein).
+	# Raster: linke Spalte Kuerzel bzw. Schild, eine Textkante fuer die Kopfzeile, drei gleich breite
+	# Zonenspalten; Zonenname und Wert absolut uebereinander (gestapelt ueberlappten sie im Client).
+	altWidth: 250,
+	altHeight: 56,
 	altGap: 4,
-	altTextScale: 0.7,
-	# Kopfzeile etwas kleiner, damit Kaliber, Overmatch-Grenze (OM) und Schiffsname hineinpassen
-	altHeadScale: 0.62,
-	altZoneStep: 60,
+	altLabelX: 10,
+	altTextX: 40,
+	altHeadTop: 5,
+	altZoneX: 10,
+	altZoneStep: 78,
+	altNameTop: 23,
+	altValueTop: 37,
+	altDotTop: 35,
+	altZoneTextX: 13,
 	# Rand der Greifflaeche um Granate | Schild (px bei Skalierung 1); links schmal wegen Zahnrad
 	dragPadLeft: 4,
 	dragPadTop: 12,
@@ -301,7 +308,6 @@
 		(var defenseGlow:str = "hasVerdict && defenseBits == '111' ? PENLIGHT_ICON_PATH + 'capsule/glow_def' + (isColorBlind ? '_cb' : '') + '.png' : ''")
 		# Alt-Ansicht der Kapseln: Werte aus Main.py (logic.numbers), -1 = unbekannt
 		(var nums:array = "verdict.length >= 6 ? verdict[5] : [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1]")
-		(var targetName:str = "targetNameIDS != '' ? toUpper(tr(targetNameIDS)) : ''")
 		# Texte der Alt-Ansicht in der Client-Sprache (texts/<sprache>/penlight.mo, tools/make_texts.py).
 		# tr() kennt eigene Kataloge nur mit LocalizationLoader (AndrewTaro); sonst liefert es den Schluessel
 		# zurueck, dann gilt der englische Text.
@@ -311,10 +317,10 @@
 		(var txtMm:str = "tr('IDS_PENLIGHT_MM') != 'IDS_PENLIGHT_MM' && tr('IDS_PENLIGHT_MM') != '' ? tr('IDS_PENLIGHT_MM') : '%d mm'")
 		(var txtPen:str = "tr('IDS_PENLIGHT_PEN') != 'IDS_PENLIGHT_PEN' && tr('IDS_PENLIGHT_PEN') != '' ? tr('IDS_PENLIGHT_PEN') : '%d mm penetration'")
 		(var txtOmUpTo:str = "tr('IDS_PENLIGHT_OM_UPTO') != 'IDS_PENLIGHT_OM_UPTO' && tr('IDS_PENLIGHT_OM_UPTO') != '' ? tr('IDS_PENLIGHT_OM_UPTO') : 'OM up to %d mm'")
-		(var txtEnemyAp:str = "tr('IDS_PENLIGHT_ENEMY_AP') != 'IDS_PENLIGHT_ENEMY_AP' && tr('IDS_PENLIGHT_ENEMY_AP') != '' ? tr('IDS_PENLIGHT_ENEMY_AP') : 'Enemy AP'")
 		(var txtNotRated:str = "tr('IDS_PENLIGHT_NOT_RATED') != 'IDS_PENLIGHT_NOT_RATED' && tr('IDS_PENLIGHT_NOT_RATED') != '' ? tr('IDS_PENLIGHT_NOT_RATED') : 'Not rated for this pairing'")
-		(var attackLine:str = "ammo == 'ap' ? subst(txtMm, [nums[6]]) + '  |  ' + subst(txtOmUpTo, [nums[7]]) + '  |  ' + targetName : subst(txtPen, [nums[6]]) + '  |  ' + targetName")
-		(var defenseLine:str = "nums[8] > 0 ? txtEnemyAp + ' ' + subst(txtMm, [nums[8]]) + '  |  ' + subst(txtOmUpTo, [nums[9]]) : txtNotRated")
+		(var attackLine:str = "ammo == 'ap' ? subst(txtMm, [nums[6]]) + '  |  ' + subst(txtOmUpTo, [nums[7]]) : subst(txtPen, [nums[6]])")
+		# Verteidigung: das Schild links steht fuer den Gegner, daher nur 'AP' (passt in 12 px)
+		(var defenseLine:str = "nums[8] > 0 ? 'AP ' + subst(txtMm, [nums[8]]) + '  |  ' + subst(txtOmUpTo, [nums[9]]) : txtNotRated")
 		(var zoneNames:array = "[txtBowStern, txtMidship, txtDeck]")
 		(var attackState:str = "attackBits == '111' ? 'green' : (attackBits == '000' ? 'red' : 'yellow')")
 		(var defenseState:str = "defenseBits == '111' ? 'red' : (defenseBits == '000' ? 'green' : 'yellow')")
@@ -700,7 +706,7 @@
 	# Kopfzeile: Munitionskuerzel (oben) bzw. Schild (unten), daneben die Erklaerung
 	(block
 		(bind visible "_kind == 'atk'")
-		(style (position = "absolute") (left = 8) (top = 2))
+		(style (position = "absolute") (bind left "PENLIGHT_SETTINGS.altLabelX") (top = 1))
 		(tf
 			(class $TextDefaultBold17NM)
 			(bind text "_label")
@@ -709,15 +715,14 @@
 	(block
 		(bind visible "_kind == 'def'")
 		(style
-			(position = "absolute") (left = 7) (top = 4)
+			(position = "absolute") (bind left "PENLIGHT_SETTINGS.altLabelX + 1") (top = 5)
 			(backgroundSize = "autosize")
 			(bind backgroundImage "shieldUrl")
 		)
 	)
 	(block
 		(style
-			(position = "absolute") (left = 34) (top = 6)
-			(bind scaleX "PENLIGHT_SETTINGS.altHeadScale") (bind scaleY "PENLIGHT_SETTINGS.altHeadScale")
+			(position = "absolute") (bind left "PENLIGHT_SETTINGS.altTextX") (bind top "PENLIGHT_SETTINGS.altHeadTop")
 		)
 		(tf
 			(class $TextDefault12NM)
@@ -730,39 +735,37 @@
 	(element PenLightAltZone _i="2" _name="_names[2]" _z="_z" _values="_values" _state="_state" _pal="pal" _nowhere="nowhere" _path="path" _mmFmt="_mmFmt")
 )
 
-# Eine Zone der Alt-Ansicht: Punkt (gefuellt / umrandet), darunter Name und Plattendicke.
+# Eine Zone der Alt-Ansicht: Punkt (gefuellt / umrandet), rechts daneben Name und darunter Plattendicke.
 (def element PenLightAltZone(_i:number, _name:str, _z:array, _values:array, _state:str, _pal:str, _nowhere:bool,
 		_path:str, _mmFmt:str = '%d mm') layout=true
 	(scope
 		(var on:bool = "_z[_i] == 1")
 		(var dotUrl:str = "_path + (on ? 'dot_fill_' + _pal + _state : (_nowhere ? 'dot_ring_' + _pal + _state : 'dot_ring_grey')) + '.png'")
 		(var valueText:str = "_values[_i] >= 0 ? subst(_mmFmt, [_values[_i]]) : '-'")
-		(var x:number = "18 + _i * PENLIGHT_SETTINGS.altZoneStep")
+		(var x:number = "PENLIGHT_SETTINGS.altZoneX + _i * PENLIGHT_SETTINGS.altZoneStep")
 	)
 	(style (position = "absolute") (left = 0) (top = 0))
 	(block
 		(style
-			(position = "absolute") (bind left "x") (top = 24)
+			(position = "absolute") (bind left "x") (bind top "PENLIGHT_SETTINGS.altDotTop")
 			(backgroundSize = "autosize")
 			(bind backgroundImage "dotUrl")
 		)
 	)
 	(block
-		(style
-			(position = "absolute") (bind left "x + 11") (top = 21)
-			(bind scaleX "PENLIGHT_SETTINGS.altTextScale") (bind scaleY "PENLIGHT_SETTINGS.altTextScale")
+		(style (position = "absolute") (bind left "x + PENLIGHT_SETTINGS.altZoneTextX") (bind top "PENLIGHT_SETTINGS.altNameTop"))
+		(tf
+			(class $TextDefault12NM)
+			(class $FontEnableReadability)
+			(bind text "_name")
 		)
-		(block
-			(tf
-				(class $TextDefault12NM)
-				(class $FontEnableReadability)
-				(bind text "_name")
-			)
-			(tf
-				(class $TextDefaultBold12NM)
-				(class $FontEnableReadability)
-				(bind text "valueText")
-			)
+	)
+	(block
+		(style (position = "absolute") (bind left "x + PENLIGHT_SETTINGS.altZoneTextX") (bind top "PENLIGHT_SETTINGS.altValueTop"))
+		(tf
+			(class $TextDefaultBold12NM)
+			(class $FontEnableReadability)
+			(bind text "valueText")
 		)
 	)
 )

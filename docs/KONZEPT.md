@@ -225,6 +225,10 @@ Nur gegnerisches Team.
   stapelt ein normaler `block`, nebeneinander `hblock`. Test `tests/test_unbound.py` verbietet `vblock`.
   Fehler in `.unbound`-Dateien erscheinen generell nicht im python.log; eingrenzen per sichtbarer
   Diagnose (Testbild, Zustandswerte als Text) direkt in der Anzeige.
+- Text per `scaleX`/`scaleY` verkleinern taugt nicht: die Schrift rendert weich und schwer lesbar,
+  und untereinander gestapelte `tf` in einem skalierten Block ueberlappen (Alt-Ansicht der Kapseln,
+  2026-10-24). Besser Schriftklassen in Originalgroesse (`$TextDefault12NM` und groesser) und Zeilen
+  absolut positionieren.
 - Bekanntes Problem: Nebraska, Delaware und Louisiana haben laut `gameparams.py` ein 6-mm-Deck
   (dünnste `Cas_Deck`-Platte, vermutlich ein Kleinteil statt des eigentlichen Decks). Als Ziel
   dadurch Deck für jede HE/SAP durchschlagbar und ab 86 mm AP overmatcht. In den Release-Notes als
