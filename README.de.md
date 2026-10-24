@@ -34,7 +34,7 @@ normalen Außenperspektive ist sie ausgeblendet.
 
 - [Was angezeigt wird](#was-angezeigt-wird)
 - [Fair Play](#fair-play)
-- [Fassungen und Branches](#fassungen-und-branches)
+- [Branches](#branches)
 - [Installation](#installation)
 - [Bedienung](#bedienung)
 - [Nach einem Spiel-Patch](#nach-einem-spiel-patch)
@@ -169,8 +169,6 @@ In TTaro Mod Config → PenLight → **Darstellung** wählst du, wie das Ergebni
 - „Nur Text“ ist auf Kontrast geprüft (mindestens 4,5 : 1, auch vor heller Gischt).
 - Die Texte von Modern und Nur Text folgen der Client-Sprache (20 Sprachen), wenn AndrewTaros
   LocalizationLoader installiert ist, sonst Englisch.
-- In 0.4.0 nur in der TTaro-Fassung (`PenLight-0.4.0-ttaro.zip`); die Standalone-Fassung behält
-  vorerst die klassische Anzeige.
 
 ---
 
@@ -201,15 +199,13 @@ mitgeliefert.
 
 ---
 
-## Fassungen und Branches
+## Branches
 
-| Branch | Benötigt | Einstellungen | Verschieben |
-|---|---|---|---|
-| `main` | ModForge **und** TTaroModUtils | Optionsseite in TTaro Mod Config (Zahnrad neben der Anzeige) | mit der Maus ziehen |
-| `main-standalone` | ModForge; TTaroModUtils **optional** | mit TTaro: wie `main`; ohne: Tastenkürzel | mit der Maus ziehen (mit oder ohne TTaro) |
-
-`main-standalone` erkennt TTaroModUtils automatisch und verhält sich dann wie `main`. Ohne TTaro
-nutzt es eigene Tastenkürzel und einen kleinen Flash-Teil zum Ziehen.
+| Branch | Zweck |
+|---|---|
+| `main` | die veröffentlichte Fassung; benötigt ModForge **und** TTaroModUtils |
+| `Test` | Probe-Builds, die erst im Spiel getestet werden; nicht veröffentlicht |
+| `Test-Standalone` | experimentelle Fassung, die auch **ohne TTaroModUtils** läuft (Tastenkürzel, Flash-Greiffläche); nicht veröffentlicht |
 
 ---
 
@@ -218,13 +214,11 @@ nutzt es eigene Tastenkürzel und einen kleinen Flash-Teil zum Ziehen.
 **Voraussetzungen**
 
 - [ModForge](https://github.com/AndrewTaro/ModForge) – hängt die Anzeige ins Gefecht ein.
-- Für `main` zusätzlich [TTaroModUtils](https://github.com/AndrewTaro/TTaroModUtils);
-  für `main-standalone` optional.
+- [TTaroModUtils](https://github.com/AndrewTaro/TTaroModUtils) – Optionsseite, Zahnrad und Verschieben.
 
 **Schritte**
 
-1. **Eine** Zip unter [Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases) herunterladen: `PenLight-<Version>-ttaro.zip` (Fassung `main`)
-   oder `PenLight-<Version>-standalone.zip` (Fassung `main-standalone`).
+1. `PenLight-<Version>.zip` unter [Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases) herunterladen (bis 0.4.0: `PenLight-<Version>-ttaro.zip`).
 2. Spiel beenden.
 3. Im Spielordner unter `bin/` den Ordner mit der **höchsten Nummer** suchen,
    z. B. `bin/13357625/`.
@@ -240,14 +234,12 @@ Ausführlichere Hinweise und Diagnose: [`mod/README.md`](mod/README.md).
 
 **Entfernen:** die PenLight-Dateien aus `res_mods` löschen (`PnFMods/PenLight/`,
 `gui/unbound2/PnFMods/PenLight*.unbound`, `ForgeBlueprints/PenLightContainer.xml`,
-`ModSchemas/diedreibeiden-penlight.schema.json`, `texts/*/penlight.mo`). `main-standalone` ohne
-TTaro speichert seine Einstellungen zusätzlich in `World of Warships/ModPrefs/diedreibeiden-penlight.json`.
+`ModSchemas/diedreibeiden-penlight.schema.json`, `texts/*/penlight.mo`). Die frühere Standalone-
+Fassung speicherte ihre Einstellungen zusätzlich in `World of Warships/ModPrefs/diedreibeiden-penlight.json`.
 
 ---
 
 ## Bedienung
-
-### Mit TTaroModUtils
 
 Im Gefecht in die Zielansicht wechseln und **Strg** halten, damit der Mauszeiger erscheint:
 
@@ -256,21 +248,6 @@ Im Gefecht in die Zielansicht wechseln und **Strg** halten, damit der Mauszeiger
   Darstellung (Klassisch / Modern / Nur Text), Darstellungsmodus (Detail mit Alt / immer),
   Farben (Standard / Farbenblind),
   Größenskalierung, Verschieben sperren, Position zurücksetzen.
-
-### Ohne TTaroModUtils (`main-standalone`)
-
-- **Ziehen** mit der Maus in der Zielansicht: Strg halten, über Granate | Schild fahren (feiner Rahmen erscheint), ziehen.
-- **Tastenkürzel** mit **Strg+Alt**:
-
-| Taste | Wirkung |
-|---|---|
-| Pfeiltasten | verschieben, 5 px (mit Umschalt 1 px) |
-| Pos1 | Position zurücksetzen |
-| D | Detailansicht: mit Alt ↔ immer |
-| F | Farben: Standard ↔ Farbenblind |
-| + / − | Größe 0,5–2,0 |
-
-Gespeichert wird in `World of Warships/ModPrefs/` – Einstellungen überleben Spiel-Patches.
 
 ---
 
@@ -305,12 +282,11 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 | Status-Kapseln und Alt-Flächen (Modern) | `python3 -I tools/make_capsule_icons.py` |
 | Abbildungen der README | `python3 -I tools/make_readme_images.py` |
 | Texte der TTaro-Optionsseite | `python3 -I tools/make_texts.py` |
-| Flash-Teil `Main.swf` (`main-standalone`) | `tools/build_flash.py`, Voraussetzungen siehe Dateikopf |
 | To-Do-Liste | [`docs/TODO.md`](docs/TODO.md) |
-| Release mit beiden Zips | GitHub: Actions → Release → Run workflow (auf `main`). Version = nächste Patch-Version, sofern nicht angegeben; der Workflow schreibt sie auf beiden Branches in `ForgeBlueprints/PenLightContainer.xml`, ModForge sieht also immer die Release-Version. Neuerungen = „Unreleased“ in `docs/CHANGELOG.md`, Rahmen in `docs/RELEASE_NOTES.md` |
-| Release-Vorschau | Gleicher Workflow mit `dry_run`: Text in der Zusammenfassung des Laufs, Zips als Download am Lauf, nichts gepusht oder veröffentlicht |
-| Prüfung bei jedem Push | Workflow Check: Tests, `Main.py` aktuell, Python-2.7-Syntax; auf `main`/`main-standalone` zusätzlich: gemeinsame Dateien gleich (gewollte Unterschiede in `.github/edition-files.txt`) |
-| Probe-Build aus `Test` | Workflow Check nach jedem Push auf `Test`: `res_mods` als Download am Lauf (14 Tage), kein Release |
+| Release | GitHub: Actions → Release → Run workflow (auf `main`). Version = nächste Patch-Version, sofern nicht angegeben; der Workflow schreibt sie in `ForgeBlueprints/PenLightContainer.xml` und in die Versionszeile der README, ModForge sieht also immer die Release-Version. Neuerungen = „Unreleased“ in `docs/CHANGELOG.md`, Rahmen in `docs/RELEASE_NOTES.md` |
+| Release-Vorschau | Gleicher Workflow mit `dry_run`: Text in der Zusammenfassung des Laufs, Zip als Download am Lauf, nichts gepusht oder veröffentlicht |
+| Prüfung bei jedem Push | Workflow Check: Tests, `Main.py` aktuell, Python-2.7-Syntax |
+| Probe-Build aus `Test` / `Test-Standalone` | Workflow Check nach jedem Push: `res_mods` als Download am Lauf (14 Tage), kein Release |
 
 - Die Spiel-Logik (`src/penlight/logic.py`) läuft unter Python 2.7 (Client) und 3.x (Tests).
 - `mod/res_mods/PnFMods/PenLight/Main.py` ist generiert – Änderungen in `src/penlight/`.
@@ -323,12 +299,11 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 
 ```
 mod/res_mods/                     Dateien so, wie sie in bin/<Build>/res_mods/ gehören
-  PnFMods/PenLight/               Main.py (generiert), ships.json, Icons, (Main.swf)
+  PnFMods/PenLight/               Main.py (generiert), ships.json, Icons, capsule/
   gui/unbound2/PnFMods/           PenLight*.unbound – die Anzeige (Unbound 2)
   ForgeBlueprints/                ModForge-Manifest
   ModSchemas/, texts/             Optionsseite für TTaro Mod Config
 src/penlight/                     logic.py (Ampel), mod_main.py (Anbindung an den Client)
-src/as3/                          Flash-Teil zum Verschieben ohne TTaro (main-standalone)
 tools/                            GameParams-Auswertung, Build, Icon-Generatoren
 tests/                            Unit-Tests inkl. nachgebautem Client
 docs/                             Konzept, Abbildungen

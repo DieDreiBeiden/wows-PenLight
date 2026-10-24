@@ -211,6 +211,9 @@ Nur gegnerisches Team.
 - Ordner: `bin/<Build>/res_mods/PnFMods/PenLight/`, plus leere
   `res_mods/PnFModsLoader.py`.
 - Gegnerliste über `battle.getPlayersInfo()` (nicht `getAllShips()` – liefert nur sichtbare Schiffe).
+- Fassungen: veröffentlicht wird nur die TTaro-Fassung (`main`, Zip `PenLight-<Version>.zip`). Die
+  Fassung ohne TTaroModUtils (Tastenkürzel, Flash-Greiffläche `Main.swf`) ist seit 0.4.0 kein
+  Release-Zweig mehr und liegt als Experiment im Branch `Test-Standalone` (2026-10-24).
 
 ## Erkenntnisse Probe v1 (Client 15.9.0.13357625)
 

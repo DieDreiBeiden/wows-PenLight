@@ -5,6 +5,8 @@ workflow uses them as "What's new" and then moves them under the new version.
 
 ## Unreleased
 
+- The edition without TTaroModUtils (standalone) is no longer released; releases contain one zip, `PenLight-<version>.zip`, which needs ModForge and TTaroModUtils. If you used the standalone edition, delete `gui/unbound2/PnFMods/PenLightTTaro.unbound` and `PnFMods/PenLight/Main.swf`.
+
 ## 0.4.0 – 2026-10-24
 
 - New: display style option in TTaro Mod Config – **Classic** (shell / shield), **Modern** (status capsules, new default) and **Text only**.
