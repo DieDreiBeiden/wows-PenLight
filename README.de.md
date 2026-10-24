@@ -2,25 +2,31 @@
 
 [English](README.md) · **Deutsch**
 
+> **Branch `Test-Standalone`:** experimentelle Fassung, die auch **ohne TTaroModUtils** läuft
+> (Tastenkürzel, Flash-Greiffläche). Nicht Teil der Releases; die veröffentlichte Fassung liegt auf `main`.
+
 *PenLight = **Pen**etration (Durchschlag) + **Light** (Ampel).*
 
 **Overmatch- und Durchschlags-Anzeige für World of Warships.** Schaltest du ein Ziel auf, zeigt
 PenLight direkt neben dem Fadenkreuz zwei kleine Ampeln:
 
-- **Granate:** Kommt meine **geladene** Munition durch die Panzerung des Ziels? AP wird nach
-  Overmatch bewertet, HE und SAP nach ihrem Durchschlagswert.
-- **Schild:** Können die AP-Granaten des Ziels meine Panzerung overmatchen?
+- **Mein Schuss → Ziel:** Kommt meine **geladene** Munition durch die Panzerung des Ziels? AP wird
+  nach Overmatch bewertet, HE und SAP nach ihrem Durchschlagswert.
+- **Ziel → ich:** Können die AP-Granaten des Ziels meine Panzerung overmatchen?
 
-Mit gedrückter **Alt**-Taste zeigt eine Detailansicht dasselbe für jede Zone beider Schiffe:
-Bug/Heck, Mitte und Deck.
+Zur Wahl stehen drei [Darstellungen](#darstellung): **Klassisch** (Granate und Schild),
+**Modern** (Status-Kapseln, Standard) und **Nur Text**. Mit gedrückter **Alt**-Taste zeigt eine
+Detailansicht dasselbe für jede Zone beider Schiffe: Bug/Heck, Mitte und Deck.
 
 Die Anzeige erscheint nur in der **gezoomten Zielansicht** (Fernglas / Zielfernrohr). In der
 normalen Außenperspektive ist sie ausgeblendet.
 
 <p align="center">
-  <img src="docs/images/ampel.png" alt="Granate und Schild in allen Zuständen, Standard- und Farbenblind-Farben" width="610">
+  <img src="docs/images/styles.png" alt="Dieselbe Lage in den Darstellungen Klassisch, Modern und Nur Text" width="760">
 </p>
 
+> **Aktuelle Version: 0.4.0** (Vorabversion) – [Download unter Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases).
+>
 > Informationsanzeige über die offizielle ModsAPI des Spiels. Sie vergleicht nur statische
 > Panzerungs- und Kaliberwerte, wie die Panzerungsansicht im Hafen – siehe [Fair Play](#fair-play).
 > Getestet mit dem EU-Client, Build 15.9.0.13357625 (Linux/Steam).
@@ -69,6 +75,10 @@ Dann durchschlägt sie diese Platte bei jedem Auftreffwinkel; Anwinkeln hilft ni
 zählt nicht als Overmatch.
 
 ### Die Ampel
+
+<p align="center">
+  <img src="docs/images/ampel.png" alt="Granate und Schild in allen Zuständen, Standard- und Farbenblind-Farben" width="610">
+</p>
 
 Die Farben zeigen, ob die Lage **gut oder schlecht für dich** ist. Deshalb haben Granate und
 Schild beim gleichen Ergebnis entgegengesetzte Farben:
@@ -151,7 +161,7 @@ durchschlagen, nicht, dass du die Zitadelle triffst.
 ### Darstellung
 
 In TTaro Mod Config → PenLight → **Darstellung** wählst du, wie das Ergebnis erscheint (ohne
-TTaroModUtils in `main-standalone`: **Strg+Alt+S**):
+TTaroModUtils: **Strg+Alt+S**):
 
 | Darstellung | Normale Ansicht | Mit Alt |
 |---|---|---|
@@ -215,14 +225,17 @@ nutzt es eigene Tastenkürzel und einen kleinen Flash-Teil zum Ziehen.
 
 **Schritte**
 
-1. Spiel beenden.
-2. Im Spielordner unter `bin/` den Ordner mit der **höchsten Nummer** suchen,
+1. **Eine** Zip unter [Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases) herunterladen: `PenLight-<Version>-ttaro.zip` (Fassung `main`)
+   oder `PenLight-<Version>-standalone.zip` (Fassung `main-standalone`).
+2. Spiel beenden.
+3. Im Spielordner unter `bin/` den Ordner mit der **höchsten Nummer** suchen,
    z. B. `bin/13357625/`.
    - Steam unter Linux: `~/.local/share/Steam/steamapps/common/World of Warships/`
    - Windows: meist `C:\Games\World_of_Warships\`
-3. Den Inhalt von [`mod/res_mods/`](mod/res_mods) nach `bin/<Nummer>/res_mods/` kopieren
-   und vorhandene PenLight-Dateien überschreiben.
-4. Spiel starten. Liegt danach `res_mods/PnFMods/PenLight/penlight_log.txt` vor,
+4. Das Archiv nach `bin/<Nummer>/` entpacken, sodass sich sein Ordner `res_mods` mit dem
+   vorhandenen zusammenführt, und vorhandene PenLight-Dateien überschreiben. (Ohne Release: den
+   Inhalt von [`mod/res_mods/`](mod/res_mods) aus dem Branch kopieren.)
+5. Spiel starten. Liegt danach `res_mods/PnFMods/PenLight/penlight_log.txt` vor,
    wurde die Mod geladen.
 
 Ausführlichere Hinweise und Diagnose: [`mod/README.md`](mod/README.md).
