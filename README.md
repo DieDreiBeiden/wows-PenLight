@@ -7,20 +7,23 @@
 **Overmatch and penetration indicator for World of Warships.** When you lock onto a target,
 PenLight shows two small traffic lights right next to your crosshair:
 
-- **Shell:** does my **loaded** ammunition get through the target's armour? AP is rated by
-  overmatch, HE and SAP by their penetration value.
-- **Shield:** can the target's AP shells overmatch my armour?
+- **My shot → target:** does my **loaded** ammunition get through the target's armour? AP is
+  rated by overmatch, HE and SAP by their penetration value.
+- **Target → me:** can the target's AP shells overmatch my armour?
 
-Hold **Alt** for a detail view that shows the same for each zone of both ships: bow/stern,
-midship and deck.
+You choose between three [display styles](#display-styles): **Classic** (shell and shield),
+**Modern** (status capsules, default) and **Text only**. Hold **Alt** for a detail view that shows
+the same for each zone of both ships: bow/stern, midship and deck.
 
 The display appears only in the **zoomed aiming view** (binoculars / scope). In the normal
 third-person view it is hidden.
 
 <p align="center">
-  <img src="docs/images/ampel.png" alt="Shell and shield in every state, standard and colour-blind palettes" width="610">
+  <img src="docs/images/styles.png" alt="The same situation in the display styles Classic, Modern and Text only" width="760">
 </p>
 
+> **Current version: 0.4.0** (pre-release) – [download from Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases).
+>
 > Information display built on the game's official ModsAPI. It only compares static armour and
 > calibre values, like the armour viewer in port – see [Fair play](#fair-play).
 > Tested with the EU client, build 15.9.0.13357625 (Linux/Steam).
@@ -69,6 +72,10 @@ It then penetrates that plate at any impact angle, so angling does not help. A t
 count as overmatch.
 
 ### The traffic light
+
+<p align="center">
+  <img src="docs/images/ampel.png" alt="Shell and shield in every state, standard and colour-blind palettes" width="610">
+</p>
 
 The colours show whether the situation is **good or bad for you**. That is why shell and shield
 use opposite colours for the same result:
@@ -149,6 +156,25 @@ penetrated, not that you hit the citadel.
 
 ---
 
+### Display styles
+
+In TTaro Mod Config → PenLight → **Display style** you choose how the result is shown:
+
+| Style | Normal view | With Alt |
+|---|---|---|
+| **Classic** | shell and shield as shown above | ships per zone as shown above |
+| **Modern** (default) | two status capsules: top = my shot → target, bottom = target's AP → me; three dots for bow/stern, midship and deck | expanded capsules with the plate thickness per zone and the shot (penetration, or calibre and overmatch limit) |
+| **Text only** | two lines on a dark backing, e.g. "HE: Bow/Stern" and "Enemy AP: everywhere", in the traffic-light colours | headline, zone name and plate thickness as text |
+
+- All styles follow the colour-blind scheme. Pairings that are not rated stay grey.
+- Text only was checked for contrast (at least 4.5 : 1, also in front of bright spray).
+- The texts of Modern and Text only follow the client language (20 languages) if AndrewTaro's
+  LocalizationLoader is installed, otherwise English.
+- In 0.4.0 only in the TTaro edition (`PenLight-0.4.0-ttaro.zip`); the standalone edition keeps
+  the classic display for now.
+
+---
+
 ## Fair play
 
 PenLight is an information display. It answers the same question the armour viewer in port
@@ -196,14 +222,17 @@ TTaro it uses its own hotkeys and a small Flash part for dragging.
 
 **Steps**
 
-1. Close the game.
-2. In the game folder, find the folder with the **highest number** under `bin/`,
+1. Download **one** zip from [Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases): `PenLight-<version>-ttaro.zip` (edition `main`) or
+   `PenLight-<version>-standalone.zip` (edition `main-standalone`).
+2. Close the game.
+3. In the game folder, find the folder with the **highest number** under `bin/`,
    e.g. `bin/13357625/`.
    - Steam on Linux: `~/.local/share/Steam/steamapps/common/World of Warships/`
    - Windows: usually `C:\Games\World_of_Warships\`
-3. Copy the contents of [`mod/res_mods/`](mod/res_mods) into `bin/<number>/res_mods/` and
-   overwrite existing PenLight files.
-4. Start the game. If `res_mods/PnFMods/PenLight/penlight_log.txt` exists afterwards,
+4. Unzip the archive into `bin/<number>/` so that its `res_mods` folder merges with the existing
+   one, and overwrite existing PenLight files. (Without a release: copy the contents of
+   [`mod/res_mods/`](mod/res_mods) from the branch.)
+5. Start the game. If `res_mods/PnFMods/PenLight/penlight_log.txt` exists afterwards,
    the mod was loaded.
 
 More detailed notes and diagnostics (German): [`mod/README.md`](mod/README.md).
@@ -223,7 +252,8 @@ In battle, switch to the aiming view and hold **Ctrl** to show the mouse cursor:
 
 - Grab the icons and **drag** to move the display.
 - The **gear** to the left of the display opens the PenLight page in TTaro Mod Config:
-  display mode (detail on Alt / always), colours (standard / colour-blind),
+  display style (classic / modern / text only), display mode (detail on Alt / always),
+  colours (standard / colour-blind),
   size scale, lock dragging, reset position.
 
 ### Without TTaroModUtils (`main-standalone`)
@@ -271,6 +301,7 @@ The ship silhouettes come from the game itself and follow every patch automatica
 | Generate `Main.py` (from `src/penlight/`) | `python3 -I tools/build_mod.py` |
 | Draw shell, shield, HE/SAP icons, tags and marks | `python3 -I tools/make_ampel_icons.py` |
 | Detail images, labels, frames | `python3 -I tools/make_detail_icons.py` |
+| Status capsules and Alt panels (Modern) | `python3 -I tools/make_capsule_icons.py` |
 | README images | `python3 -I tools/make_readme_images.py` |
 | Texts of the TTaro options page | `python3 -I tools/make_texts.py` |
 | Flash part `Main.swf` (`main-standalone`) | `tools/build_flash.py`, requirements in the file header |
