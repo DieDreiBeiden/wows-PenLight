@@ -9,18 +9,18 @@
 # Solange Alt gedrueckt ist und eine Bewertung vorliegt, ersetzen die beschrifteten Detail-Schiffe die Symbole:
 # untereinander oben "TARGET" (Ziel, ich -> Ziel) und darunter "ME" (eigenes Schiff, Ziel -> ich),
 # linke obere Ecke an der Stelle der Symbole.
-# Muster: Einbindung per ModForge wie PenetrationCalculator, Zielerkennung wie
+# Muster: Einbindung wie PenetrationCalculator (TTaro), Zielerkennung wie
 # XTargetTracker (Battle Expert, AutoSpy).
 # Alt-Ansicht (Prototyp): Spiel-Silhouetten img://gui/ship_bars/<shortName>_h.png in vier Sektionen
 # (Aufbauten = Deck, Rumpf = Heck/Mitte/Bug); Rueckfall auf detail_*.png (useSilhouettes in PENLIGHT_SETTINGS).
 # Icons: res_mods/PnFMods/PenLight/{shell,shield}_{green,yellow,red,grey}.png, 29x29 (gezeichnet von tools/make_ampel_icons.py).
-# Einstellungen: ohne TTaroModUtils aus Main.py (omData.settings; Strg+Alt+Taste, Ziehen per
-# Main.swf, gespeichert in ModPrefs/), mit TTaroModUtils aus dessen Optionsseite (_ext von
-# PenLightTTaroRoot). Ohne beides gelten offsetX/offsetY und die Standardwerte.
+# Position: per Ziehen ueber TTaroModUtils (Schema ModSchemas/diedreibeiden-penlight.schema.json,
+# Muster wie BuildViewer). Benoetigt TTaroModUtils (Makros TT_DRAGGABLE_POSITION/TT_DRAGGABLE/TT_GET_PREF).
+# Ohne gespeicherte Position gelten offsetX/offsetY relativ zur Bildschirmmitte.
 
 # Einstellungen
 (def constant PENLIGHT_SETTINGS {
-	# Rueckfall-Position (linke obere Ecke der Anzeige), solange Main.py keine liefert:
+	# Rueckfall-Position (linke obere Ecke der Anzeige), solange TTaroModUtils keine liefert:
 	# Abstand zur Bildschirmmitte in Pixeln (x: + = rechts, y: + = unten). x >= 30 haelt die
 	# Detail-Schiffe (Alt) von der senkrechten Fadenkreuzlinie fern.
 	offsetX: 30,
@@ -42,7 +42,7 @@
 	# Zusatzplakette IFHE (tag_ifhe.png) links unten an der HE-Granate, wenn IFHE erkannt ist
 	badgeOffsetX: -3,
 	badgeOffsetY: 22,
-	# Darstellung (mit TTaro: Option penlight.style, ohne TTaro: Strg+Alt+S, Main.py), Rueckfall:
+	# Darstellung (Option in TTaro Mod Config, penlight.style), Rueckfall ohne gespeicherte Einstellung:
 	# 0 = Klassisch (Granate | Schild), 1 = Modern (Status-Kapseln, capsule/*.png aus
 	# tools/make_capsule_icons.py; oben ich -> Ziel, unten Ziel -> ich, drei Punkte = Bug/Heck, Mitte, Deck),
 	# 2 = Nur Text (zwei Zeilen in der Ampelfarbe)
@@ -95,8 +95,7 @@
 	altValueTop: 39,
 	altDotTop: 39,
 	altZoneTextX: 13,
-	# Rand der Greifflaeche um Granate | Schild (px bei Skalierung 1); links schmal wegen Zahnrad.
-	# Ohne TTaro gilt HANDLE_PAD in Main.py (Flash-Griff), Werte gleich halten.
+	# Rand der Greifflaeche um Granate | Schild (px bei Skalierung 1); links schmal wegen Zahnrad
 	dragPadLeft: 4,
 	dragPadTop: 12,
 	dragPadRight: 12,
@@ -199,15 +198,20 @@
 	)
 )
 
+# TTaroModUtils-Schluessel = author + '.' + key aus dem Schema
+(def constant PENLIGHT_PREF_POSITION 'diedreibeiden.penlight.position')
+(def constant PENLIGHT_PREF_LOCK 'diedreibeiden.penlight.disableDragDrop')
+(def constant PENLIGHT_PREF_SCALE 'diedreibeiden.penlight.scale')
+(def constant PENLIGHT_PREF_COLOR_MODE 'diedreibeiden.penlight.colorMode')
+(def constant PENLIGHT_PREF_DETAIL_MODE 'diedreibeiden.penlight.detailMode')
+(def constant PENLIGHT_PREF_STYLE 'diedreibeiden.penlight.style')
+# Seite in TTaro Mod Config = author + '.' + slug aus dem Schema (fuer das eigene Zahnrad)
+(def constant PENLIGHT_MOD_SLUG 'diedreibeiden.penlight')
 
 # Pfad relativ zu gui/unbound2/PnFMods/ (wie PenetrationCalculator)
 (def constant PENLIGHT_ICON_PATH 'url:../../../PnFMods/PenLight/')
 
-# Wurzel der Anzeige. Ohne TTaroModUtils haengt ModForge sie direkt ein (_ext = {}, Einstellungen
-# aus Main.py); mit TTaroModUtils haengt ModForge stattdessen PenLightTTaroRoot ein
-# (PenLightTTaro.unbound), die diese Wurzel mit den TTaro-Einstellungen in _ext aufruft:
-#   {posX, posY (Bildschirmkoordinaten), scale, colorMode, detailMode, style}
-(def element PenLightRoot(_ext:dict = {}) layout=true
+(def element PenLightRoot() layout=true
 	(scope
 		(var stageComponent:gfx = "$datahub.getSingleComponent(CC.stage)")
 		(var stageWidth:number = "stageComponent.width" (event "stageComponent.evStageSizeChanged"))
@@ -233,15 +237,41 @@
 		(bind height "stageHeight")
 	)
 
-	(element PenLightCrosshairItem _ext="_ext"
-		(style (position = "absolute") (left = 0) (top = 0))
-		(bind visible "isCrosshairVisible")
+	(controller $Instance renderer='PenLightCrosshairItem'
+		(bind enabled "isAlive")
+		(exprs
+			(style (position = "absolute") (left = 0) (top = 0))
+			(bind visible "isCrosshairVisible")
+		)
 	)
 )
 
-(def element PenLightCrosshairItem(_ext:dict = {}) layout=true
+(def element PenLightCrosshairItem() layout=true
 	(scope
+		# Position: gespeicherte Drag-Position (Bildschirmkoordinaten) oder Rueckfall
 		(macro STAGE_SIZE)
+		(macro TT_GET_PREF _varName="'lockPref'" _key="PENLIGHT_PREF_LOCK")
+		(var isPositionLocked:bool = "null != lockPref && null != lockPref.value ? lockPref.value : false")
+		(macro TT_DRAGGABLE_POSITION _fullKey="PENLIGHT_PREF_POSITION")
+		(var hasDragPosition:bool = "null != __dragPos && null != __dragPos.value && isNumber(__dragPos.value.x)")
+		(var posX:number = "hasDragPosition ? dragX : stageWidth / 2 + PENLIGHT_SETTINGS.offsetX")
+		(var posY:number = "hasDragPosition ? dragY : stageHeight / 2 + PENLIGHT_SETTINGS.offsetY")
+
+		# Optionen aus TTaro Mod Config (Schema ModSchemas/diedreibeiden-penlight.schema.json)
+		(macro TT_GET_PREF _varName="'scalePref'" _key="PENLIGHT_PREF_SCALE")
+		(var uiScale:number = "null != scalePref && null != scalePref.value ? scalePref.value : 1")
+		(macro TT_GET_PREF _varName="'colorModePref'" _key="PENLIGHT_PREF_COLOR_MODE")
+		(var isColorBlind:bool = "null != colorModePref && null != colorModePref.value ? colorModePref.value == 1 : false")
+		(macro TT_GET_PREF _varName="'detailModePref'" _key="PENLIGHT_PREF_DETAIL_MODE")
+		(var isDetailAlways:bool = "null != detailModePref && null != detailModePref.value ? detailModePref.value == 1 : false")
+		(macro TT_GET_PREF _varName="'stylePref'" _key="PENLIGHT_PREF_STYLE")
+		(var displayStyle:number = "null != stylePref && null != stylePref.value ? stylePref.value : PENLIGHT_SETTINGS.defaultStyle")
+		(var isClassic:bool = "displayStyle == 0")
+		(var isModern:bool = "displayStyle == 1")
+		(var isTextOnly:bool = "displayStyle == 2")
+		# Farbschema: Dateipraefix der Icons und Einfaerbung der Silhouetten
+		(var palettePrefix:str = "isColorBlind ? 'cb_' : ''")
+		(var palette:dict = "isColorBlind ? PENLIGHT_CT_CB : PENLIGHT_CT")
 
 		# Zielerkennung: jeder Avatar meldet per evTargetChanged, ob er aufgeschaltet ist
 		(event evTargetChanged)
@@ -258,24 +288,6 @@
 		(var omData:dict = "omComponent ? omComponent.data : {}" (event "omComponent.evDataChanged"))
 		(var byId:dict = "'byId' in omData && null != omData.byId ? omData.byId : {}")
 		(var byName:dict = "'byName' in omData && null != omData.byName ? omData.byName : {}")
-
-		# Einstellungen aus Main.py (Strg+Alt+Pfeile/Pos1/D/F/S/+/-), Rueckfall auf PENLIGHT_SETTINGS
-		# bzw. aus _ext (TTaro-Hülle), _ext hat Vorrang
-		(var om:dict = "'settings' in omData && null != omData.settings ? omData.settings : {}")
-		(var posX:number = "'posX' in _ext ? _ext.posX : stageWidth / 2 + ('x' in om ? om.x : PENLIGHT_SETTINGS.offsetX)")
-		(var posY:number = "'posY' in _ext ? _ext.posY : stageHeight / 2 + ('y' in om ? om.y : PENLIGHT_SETTINGS.offsetY)")
-		(var uiScale:number = "'scale' in _ext ? _ext.scale : ('scale' in om ? om.scale : 1)")
-		(var colorMode:number = "'colorMode' in _ext ? _ext.colorMode : ('colorMode' in om ? om.colorMode : 0)")
-		(var detailMode:number = "'detailMode' in _ext ? _ext.detailMode : ('detailMode' in om ? om.detailMode : 0)")
-		(var isColorBlind:bool = "colorMode == 1")
-		(var isDetailAlways:bool = "detailMode == 1")
-		(var displayStyle:number = "'style' in _ext ? _ext.style : ('style' in om ? om.style : PENLIGHT_SETTINGS.defaultStyle)")
-		(var isClassic:bool = "displayStyle == 0")
-		(var isModern:bool = "displayStyle == 1")
-		(var isTextOnly:bool = "displayStyle == 2")
-		# Farbschema: Dateipraefix der Icons und Einfaerbung der Silhouetten
-		(var palettePrefix:str = "isColorBlind ? 'cb_' : ''")
-		(var palette:dict = "isColorBlind ? PENLIGHT_CT_CB : PENLIGHT_CT")
 
 		(var verdict:array = "(targetKey != '' && targetKey in byId) ? byId[targetKey]
 								: ((targetName != '' && targetName in byName) ? byName[targetName] : [])")
@@ -407,6 +419,14 @@
 			(bind scaleX "uiScale")
 			(bind scaleY "uiScale")
 		)
+		# eigenes Zahnrad links neben der Anzeige, sichtbar bei aktivem Mauszeiger (Strg);
+		# oeffnet TTaro Mod Config direkt auf der PenLight-Seite (wie BuildViewer)
+		(element TT_ConfigButtonElement _modSlug="PENLIGHT_MOD_SLUG" _tooltipAlign="outerTop|outerLeft"
+			(style
+				(left = -30px)
+				(top = 0px)
+			)
+		)
 		(hblock
 			(bind visible "!showDetail && isClassic")
 			(element PenLightIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey" _tag="attackTag" _badge="attackBadge")
@@ -467,6 +487,21 @@
 				_bow="tBow" _mid="tMid" _deck="tDeck" _palette="palette")
 			(element PenLightSilhouetteShip _shortName="ownShortName" _label="ownLabel" _nameIDS="ownNameIDS"
 				_bow="mBow" _mid="mMid" _deck="mDeck" _palette="palette")
+		)
+		# Greifflaeche zum Verschieben (Mauszeiger im Gefecht z. B. per Strg), wie BuildViewer.
+		# Als letztes Kind ueber den Symbolen, sonst fangen diese die Maus ab; mit Rand um
+		# Granate | Schild (dragPad*), damit sie leicht zu treffen ist.
+		(block
+			(style
+				(position = "absolute")
+				(bind left "0 - PENLIGHT_SETTINGS.dragPadLeft")
+				(bind top "0 - PENLIGHT_SETTINGS.dragPadTop")
+				(bind width "(isModern ? PENLIGHT_SETTINGS.capsuleWidth : (isTextOnly ? PENLIGHT_SETTINGS.textWidth : PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap)) + PENLIGHT_SETTINGS.dragPadLeft + PENLIGHT_SETTINGS.dragPadRight")
+				(bind height "(isModern ? PENLIGHT_SETTINGS.capsuleHeight * 2 + PENLIGHT_SETTINGS.capsuleGap : (isTextOnly ? PENLIGHT_SETTINGS.textLineHeight * 2 : PENLIGHT_SETTINGS.iconSize)) + PENLIGHT_SETTINGS.dragPadTop + PENLIGHT_SETTINGS.dragPadBottom")
+				(backgroundColor = 0x00FFFFFF)
+				(bind hitTest "!isPositionLocked")
+			)
+			(macro TT_DRAGGABLE _fullKey="PENLIGHT_PREF_POSITION" _isDragEnabled="!isPositionLocked")
 		)
 	)
 )

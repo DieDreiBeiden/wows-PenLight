@@ -23,18 +23,21 @@ Stand: 2026-10-24. Probe-Builds entstehen im Branch `Test`, übernommen wird ers
 
 - [x] Status-Kapseln mit Animationen, Alt-Ansicht Variante A, Option Darstellung, Nur Text mit
       Unterlage – im Spiel getestet, nach `main` übernommen (2026-10-24)
-- [ ] Übernahme nach `main-standalone` (Probe im Branch `Test`): Darstellung per Strg+Alt+S ohne
-      TTaro, Flash-Greiffläche je Darstellung; im Spiel testen, mit und ohne TTaroModUtils
 - [ ] Texte in der Client-Sprache mit LocalizationLoader im Spiel prüfen; Übersetzungen für
       Thai, Koreanisch und Türkisch von Muttersprachlern prüfen lassen
 - [ ] Munitionskürzel in den Kapseln lokalisieren (spieleigene `IDS_AMMOTYPE_*`), optional
 - [ ] README-Bilder für Modern und Nur Text (eigener Hintergrund, keine Spielgrafik)
 - [ ] Standard-Darstellung für Bestandsnutzer festlegen (derzeit Modern)
 
+## Standalone (Branch `Test-Standalone`, Experiment, nicht veröffentlicht)
+
+- [ ] Darstellungen per Strg+Alt+S und Flash-Greiffläche je Darstellung im Spiel testen, mit und
+      ohne TTaroModUtils; Ziehen mit der Maus ohne TTaro bestätigen
+- [ ] Alten Branch `main-standalone` auf GitHub löschen (manuell; Inhalt steckt in `Test-Standalone`)
+
 ## Prüfen und Korrigieren
 
 - [ ] IFHE-Erkennung im Spiel bestätigen (Logzeile `ammo he raw … mm, coeff …`)
-- [ ] Ziehen mit der Maus in der Standalone-Fassung ohne TTaro testen
 - [x] Deck von Nebraska, Delaware und Louisiana (vorher 6 mm): Hangar zählt jetzt (32/38/38 mm)
 - [ ] Gegenprobe im Spiel: Panzerungsansicht Louisiana auf eine 6-mm-Fläche prüfen
 

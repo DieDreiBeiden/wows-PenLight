@@ -4,7 +4,6 @@
 import builtins
 import json
 import os
-import re
 import shutil
 import sys
 import tempfile
@@ -36,16 +35,12 @@ AMMO = {1: Obj(ammoType='AP', alphaPiercingHE=0.0, alphaPiercingCS=0),
         2: Obj(ammoType='HE', alphaPiercingHE=21.0, alphaPiercingCS=0),
         3: Obj(ammoType='CS', alphaPiercingHE=0.0, alphaPiercingCS=30),
         4: Obj(ammoType='HE', alphaPiercingHE=36.0, alphaPiercingCS=0)}
-DEFAULTS = {'x': 30, 'y': 8, 'detailMode': 0, 'colorMode': 0, 'scale': 1.0, 'style': 1}
 
 
 class ModTest(unittest.TestCase):
-    def run_mod(self, own_ship, enemies, data_version=VERSION, ttaro=False, ammo=1, he_coeff=1.0):
+    def run_mod(self, own_ship, enemies, data_version=VERSION, ammo=1, he_coeff=1.0):
         root = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, root)
-        if ttaro:
-            os.mkdir(os.path.join(root, 'TTaroModUtils'))
-            open(os.path.join(root, 'TTaroModUtils', 'Main.py'), 'w').close()
         mod_dir = os.path.join(root, 'PenLight')
         wrong_dir = os.path.join(root, 'OvermatcherProbe')  # getModDir-Befund im Client
         os.mkdir(mod_dir)
@@ -59,9 +54,6 @@ class ModTest(unittest.TestCase):
             ship_names[i] = ship
         handlers = {}
         self.ui_data = []
-        self.flash_calls = []
-        self.flash_callbacks = {}
-        self.mod_dir = mod_dir
 
         def client_open(path, mode):
             # wie im Client: Modus Pflicht, 'a' nur fuer vorhandene Dateien
@@ -87,15 +79,9 @@ class ModTest(unittest.TestCase):
             'events': Obj(onBattleShown=lambda f: handlers.setdefault('shown', f),
                           onPlayersListUpdated=lambda f: handlers.setdefault('players', f),
                           onBattleQuit=lambda f: handlers.setdefault('quit', f),
-                          onKeyEvent=lambda f: handlers.setdefault('key', f),
                           onArtilleryAmmoChanged=lambda f: handlers.setdefault('ammo', f)),
-            'flash': Obj(call=lambda name, args: self.flash_calls.append((name, args)),
-                         addExternalCallback=lambda name, f: self.flash_callbacks.setdefault(name, f)),
-            'Keys': Obj(KEY_LEFTARROW=203, KEY_RIGHTARROW=205, KEY_UPARROW=200, KEY_DOWNARROW=208,
-                        KEY_HOME=199, KEY_D=32, KEY_F=33, KEY_S=31, KEY_EQUALS=13, KEY_MINUS=12),
         }
         self.handlers = handlers
-        self.env = env
         # wie die Client-Sandbox: kein globals()/locals()/vars() (python.log 15.9)
         env['__builtins__'] = dict((k, v) for k, v in vars(builtins).items()
                                    if k not in ('globals', 'locals', 'vars'))
@@ -117,11 +103,10 @@ class ModTest(unittest.TestCase):
 
     def test_ui_payload_for_unbound(self):
         self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944', 'PASD013_Gearing'])
-        self.assertEqual(self.ui_data[0], ('modPenLight', {'byId': {}, 'byName': {},
-                                                              'settings': DEFAULTS, 'ammo': 'ap',
+        self.assertEqual(self.ui_data[0], ('modPenLight', {'byId': {}, 'byName': {}, 'ammo': 'ap',
                                                               'ifhe': False}))
         self.assertEqual(self.ui_data[-1], ('update', {
-            'settings': DEFAULTS, 'ammo': 'ap', 'ifhe': False,
+            'ammo': 'ap', 'ifhe': False,
             # Detail: ich->Ziel [Bug, Mitte, Deck], Ziel->ich [Bug, Mitte, Deck]
             # Werte: Ziel 32/32/57, ich 27/28/36, mein Kaliber 127 (Overmatch bis 8), Ziel 460 (bis 32)
             'byId': {'10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r',
@@ -129,105 +114,6 @@ class ModTest(unittest.TestCase):
             'byName': {'bot10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r',
                                  [32, 32, 57, 27, 28, 36, 127, 8, 460, 32]]},
         }))
-
-    def key(self, code, ctrl=True, alt=True, shift=False):
-        self.handlers['key'](Obj(key=code, isKeyDown=lambda: True, isCtrlDown=lambda: ctrl,
-                                 isAltDown=lambda: alt, isShiftDown=lambda: shift))
-
-    def saved(self):
-        # ModPrefs existiert im Test nicht -> Rueckfall in den Mod-Ordner
-        return json.load(open(os.path.join(self.mod_dir, 'diedreibeiden-penlight.json')))
-
-    def test_position_keys_move_save_and_reset(self):
-        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
-        self.key(205)                 # rechts, 5 px
-        self.key(208, shift=True)     # runter, 1 px
-        settings = self.ui_data[-1][1]['settings']
-        self.assertEqual((settings['x'], settings['y']), (35, 9))
-        self.assertEqual((self.saved()['x'], self.saved()['y']), (35, 9))
-        self.key(199)                 # Pos1 = zuruecksetzen
-        self.assertEqual(self.ui_data[-1][1]['settings'], DEFAULTS)
-
-    def test_option_keys(self):
-        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
-        self.key(32)                  # D: Detailansicht immer
-        self.key(33)                  # F: Farbenblind
-        for _ in range(20):
-            self.key(13)              # +: Groesse, gedeckelt bei 2,0
-        self.key(12)                  # -: 1,9
-        self.key(31)                  # S: Darstellung Modern -> Nur Text
-        expected = dict(DEFAULTS, detailMode=1, colorMode=1, scale=1.9, style=2)
-        self.assertEqual(self.ui_data[-1][1]['settings'], expected)
-        self.assertEqual(self.saved(), expected)
-
-    def test_style_key_cycles_and_resizes_handle(self):
-        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
-        # Greifflaeche je Darstellung plus Rand 4/12/12/10: Modern (Standard) Kapseln 72 x 40
-        self.assertEqual(self.flash_calls[-1][1][2:4], [88.0, 62.0])
-        self.key(31)                  # S: Nur Text, zwei Zeilen 180 x 42
-        self.assertEqual(self.ui_data[-1][1]['settings']['style'], 2)
-        self.assertEqual(self.flash_calls[-1][1][2:4], [196.0, 64.0])
-        self.key(31)                  # S: Klassisch, Granate | Schild 62 x 29
-        self.assertEqual(self.ui_data[-1][1]['settings']['style'], 0)
-        self.assertEqual(self.flash_calls[-1][1][2:4], [78.0, 51.0])
-        self.key(31)                  # S: wieder Modern
-        self.assertEqual(self.saved()['style'], 1)
-
-    def test_keys_without_ctrl_alt_are_ignored(self):
-        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
-        count = len(self.ui_data)
-        self.key(205, alt=False)
-        self.key(32, ctrl=False)
-        self.assertEqual(len(self.ui_data), count)
-
-    def test_handle_sizes_match_unbound(self):
-        # Greifflaeche von Main.swf (HANDLE_SIZES) = Groesse der Anzeige laut PENLIGHT_SETTINGS
-        path = os.path.join(os.path.dirname(__file__), '..', 'mod', 'res_mods', 'gui', 'unbound2', 'PnFMods', 'PenLight.unbound')
-        with open(path, encoding='utf-8') as f:
-            values = dict((k, int(v)) for k, v in re.findall(r'^\t(\w+): (\d+),', f.read(), re.M))
-        self.run_mod('PASC720_Hawaii', [])
-        self.assertEqual(self.env['HANDLE_SIZES'], {
-            0: (values['iconSize'] * 2 + values['iconGap'], values['iconSize']),
-            1: (values['capsuleWidth'], values['capsuleHeight'] * 2 + values['capsuleGap']),
-            2: (values['textWidth'], values['textLineHeight'] * 2)})
-        self.assertEqual(self.env['HANDLE_PAD'], (values['dragPadLeft'], values['dragPadTop'],
-                                                  values['dragPadRight'], values['dragPadBottom']))
-
-    def test_saved_settings_are_checked(self):
-        self.run_mod('PASC720_Hawaii', [])
-        # kaputte bzw. unzulaessige Werte fallen auf den Standard zurueck, Groesse wird begrenzt
-        raw = {'x': 50, 'y': 'oben', 'detailMode': 7, 'colorMode': 1, 'scale': 9, 'style': 5}
-        self.assertEqual(self.env['clean_settings'](raw), dict(DEFAULTS, x=50, colorMode=1, scale=2.0))
-
-    def test_drag_moves_live_and_saves_on_release(self):
-        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
-        # Greifflaeche im Gefecht aktiv: Kapseln (Modern, 72 x 40) plus Rand 4/12/12/10 um die Standardposition
-        self.assertEqual(self.flash_calls[-1], ('omSetHandle', [26.0, -4.0, 88.0, 62.0, True]))
-        # Flash meldet die Ecke der Greifflaeche, gespeichert wird die Position der Symbole
-        self.flash_callbacks['omDragMove'](116.4, -62)
-        self.assertEqual(self.ui_data[-1][1]['settings']['x'], 120)
-        self.assertFalse(os.path.exists(os.path.join(self.mod_dir, 'diedreibeiden-penlight.json')))
-        self.flash_callbacks['omDragEnd'](126, -52)
-        self.assertEqual((self.saved()['x'], self.saved()['y']), (130, -40))
-
-    def test_handle_follows_scale_and_battle_end(self):
-        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'])
-        self.key(13)                  # +: Groesse 1,1 -> Greifflaeche waechst mit
-        name, args = self.flash_calls[-1]
-        self.assertEqual((name, args[4]), ('omSetHandle', True))
-        self.assertAlmostEqual(args[0], 30 - 4 * 1.1)
-        self.assertAlmostEqual(args[1], 8 - 12 * 1.1)
-        self.assertAlmostEqual(args[2], 88 * 1.1)
-        self.handlers['quit']()
-        self.assertFalse(self.flash_calls[-1][1][4])
-
-    def test_ttaro_takes_over_settings(self):
-        self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'], ttaro=True)
-        self.assertIn('settings via TTaroModUtils', self.log)
-        self.assertFalse(self.flash_calls[-1][1][4])   # Greifflaeche von Main.swf aus
-        count = len(self.ui_data)
-        self.key(205)                                   # Tastenkuerzel aus
-        self.assertEqual(len(self.ui_data), count)
 
     def test_he_rates_destroyer(self):
         # Hawaii HE 21 mm gegen Gearing (19 mm): gruen; Schild grau, weil kein Kreuzer/Schlachtschiff
@@ -282,6 +168,7 @@ class ModTest(unittest.TestCase):
         entry = self.ui_data[-1][1]['byId']['10']
         self.assertEqual(entry[2], [0, -1, 0, 0, 0, 0])
         self.assertEqual(entry[3:5], ['', 'detail_me_r_r_r'])  # Granate ohne Bild, Schild: nirgends Overmatch
+        self.assertEqual(entry[5][:3], [16, -1, 16])         # Werte: Mitte unbekannt = -1
 
     def test_version_mismatch_disables(self):
         lines = self.run_mod('PASC720_Hawaii', ['PJSB018_Yamato_1944'], data_version='15,8,0,1')

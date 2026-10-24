@@ -7,20 +7,23 @@
 **Overmatch and penetration indicator for World of Warships.** When you lock onto a target,
 PenLight shows two small traffic lights right next to your crosshair:
 
-- **Shell:** does my **loaded** ammunition get through the target's armour? AP is rated by
-  overmatch, HE and SAP by their penetration value.
-- **Shield:** can the target's AP shells overmatch my armour?
+- **My shot → target:** does my **loaded** ammunition get through the target's armour? AP is
+  rated by overmatch, HE and SAP by their penetration value.
+- **Target → me:** can the target's AP shells overmatch my armour?
 
-Hold **Alt** for a detail view that shows the same for each zone of both ships: bow/stern,
-midship and deck.
+You choose between three [display styles](#display-styles): **Classic** (shell and shield),
+**Modern** (status capsules, default) and **Text only**. Hold **Alt** for a detail view that shows
+the same for each zone of both ships: bow/stern, midship and deck.
 
 The display appears only in the **zoomed aiming view** (binoculars / scope). In the normal
 third-person view it is hidden.
 
 <p align="center">
-  <img src="docs/images/ampel.png" alt="Shell and shield in every state, standard and colour-blind palettes" width="610">
+  <img src="docs/images/styles.png" alt="The same situation in the display styles Classic, Modern and Text only" width="760">
 </p>
 
+> **Current version: 0.4.0** (pre-release) – [download from Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases).
+>
 > Information display built on the game's official ModsAPI. It only compares static armour and
 > calibre values, like the armour viewer in port – see [Fair play](#fair-play).
 > Tested with the EU client, build 15.9.0.13357625 (Linux/Steam).
@@ -31,7 +34,7 @@ third-person view it is hidden.
 
 - [What it shows](#what-it-shows)
 - [Fair play](#fair-play)
-- [Editions and branches](#editions-and-branches)
+- [Branches](#branches)
 - [Installation](#installation)
 - [Usage](#usage)
 - [After a game patch](#after-a-game-patch)
@@ -69,6 +72,10 @@ It then penetrates that plate at any impact angle, so angling does not help. A t
 count as overmatch.
 
 ### The traffic light
+
+<p align="center">
+  <img src="docs/images/ampel.png" alt="Shell and shield in every state, standard and colour-blind palettes" width="610">
+</p>
 
 The colours show whether the situation is **good or bad for you**. That is why shell and shield
 use opposite colours for the same result:
@@ -151,8 +158,7 @@ penetrated, not that you hit the citadel.
 
 ### Display styles
 
-In TTaro Mod Config → PenLight → **Display style** you choose how the result is shown (without
-TTaroModUtils in `main-standalone`: **Ctrl+Alt+S**):
+In TTaro Mod Config → PenLight → **Display style** you choose how the result is shown:
 
 | Style | Normal view | With Alt |
 |---|---|---|
@@ -192,15 +198,13 @@ Armour and calibres are static ship data. They are extracted offline from the cl
 
 ---
 
-## Editions and branches
+## Branches
 
-| Branch | Requires | Settings | Moving the display |
-|---|---|---|---|
-| `main` | ModForge **and** TTaroModUtils | options page in TTaro Mod Config (gear button next to the display) | drag with the mouse |
-| `main-standalone` | ModForge; TTaroModUtils **optional** | with TTaro: as on `main`; without: hotkeys | drag with the mouse (with or without TTaro) |
-
-`main-standalone` detects TTaroModUtils automatically and then behaves like `main`. Without
-TTaro it uses its own hotkeys and a small Flash part for dragging.
+| Branch | Purpose |
+|---|---|
+| `main` | the released edition; needs ModForge **and** TTaroModUtils |
+| `Test` | probe builds that are tested in game first; not released |
+| `Test-Standalone` | experimental edition that also runs **without TTaroModUtils** (hotkeys, Flash drag handle); not released |
 
 ---
 
@@ -209,33 +213,32 @@ TTaro it uses its own hotkeys and a small Flash part for dragging.
 **Requirements**
 
 - [ModForge](https://github.com/AndrewTaro/ModForge) – mounts the display in battle.
-- For `main` additionally [TTaroModUtils](https://github.com/AndrewTaro/TTaroModUtils);
-  optional for `main-standalone`.
+- [TTaroModUtils](https://github.com/AndrewTaro/TTaroModUtils) – options page, gear button and dragging.
 
 **Steps**
 
-1. Close the game.
-2. In the game folder, find the folder with the **highest number** under `bin/`,
+1. Download `PenLight-<version>.zip` from [Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases) (up to 0.4.0: `PenLight-<version>-ttaro.zip`).
+2. Close the game.
+3. In the game folder, find the folder with the **highest number** under `bin/`,
    e.g. `bin/13357625/`.
    - Steam on Linux: `~/.local/share/Steam/steamapps/common/World of Warships/`
    - Windows: usually `C:\Games\World_of_Warships\`
-3. Copy the contents of [`mod/res_mods/`](mod/res_mods) into `bin/<number>/res_mods/` and
-   overwrite existing PenLight files.
-4. Start the game. If `res_mods/PnFMods/PenLight/penlight_log.txt` exists afterwards,
+4. Unzip the archive into `bin/<number>/` so that its `res_mods` folder merges with the existing
+   one, and overwrite existing PenLight files. (Without a release: copy the contents of
+   [`mod/res_mods/`](mod/res_mods) from the branch.)
+5. Start the game. If `res_mods/PnFMods/PenLight/penlight_log.txt` exists afterwards,
    the mod was loaded.
 
 More detailed notes and diagnostics (German): [`mod/README.md`](mod/README.md).
 
 **Uninstall:** delete the PenLight files from `res_mods` (`PnFMods/PenLight/`,
 `gui/unbound2/PnFMods/PenLight*.unbound`, `ForgeBlueprints/PenLightContainer.xml`,
-`ModSchemas/diedreibeiden-penlight.schema.json`, `texts/*/penlight.mo`). `main-standalone` without
-TTaro also keeps its settings in `World of Warships/ModPrefs/diedreibeiden-penlight.json`.
+`ModSchemas/diedreibeiden-penlight.schema.json`, `texts/*/penlight.mo`). The former standalone
+edition also kept its settings in `World of Warships/ModPrefs/diedreibeiden-penlight.json`.
 
 ---
 
 ## Usage
-
-### With TTaroModUtils
 
 In battle, switch to the aiming view and hold **Ctrl** to show the mouse cursor:
 
@@ -244,22 +247,6 @@ In battle, switch to the aiming view and hold **Ctrl** to show the mouse cursor:
   display style (classic / modern / text only), display mode (detail on Alt / always),
   colours (standard / colour-blind),
   size scale, lock dragging, reset position.
-
-### Without TTaroModUtils (`main-standalone`)
-
-- **Drag** with the mouse in the aiming view: hold Ctrl, hover over shell | shield (a thin frame appears), drag.
-- **Hotkeys** with **Ctrl+Alt**:
-
-| Key | Effect |
-|---|---|
-| Arrow keys | move, 5 px (1 px with Shift) |
-| Home | reset position |
-| D | detail view: on Alt ↔ always |
-| F | colours: standard ↔ colour-blind |
-| S | display style: classic → modern → text only |
-| + / − | size 0.5–2.0 |
-
-Settings are stored in `World of Warships/ModPrefs/` and survive game patches.
 
 ---
 
@@ -294,12 +281,11 @@ The ship silhouettes come from the game itself and follow every patch automatica
 | Status capsules and Alt panels (Modern) | `python3 -I tools/make_capsule_icons.py` |
 | README images | `python3 -I tools/make_readme_images.py` |
 | Texts of the TTaro options page | `python3 -I tools/make_texts.py` |
-| Flash part `Main.swf` (`main-standalone`) | `tools/build_flash.py`, requirements in the file header |
 | To-do list | [`docs/TODO.md`](docs/TODO.md) |
-| Release with both zips | GitHub: Actions → Release → Run workflow (on `main`). Version = next patch unless given; the workflow writes it into `ForgeBlueprints/PenLightContainer.xml` on both branches, so ModForge always sees the release version. What's new = "Unreleased" in `docs/CHANGELOG.md`, frame in `docs/RELEASE_NOTES.md` |
-| Release preview | Same workflow with `dry_run`: notes in the run summary, zips as download on the run, nothing pushed or published |
-| Checks on every push | Workflow Check: tests, `Main.py` up to date, Python 2.7 syntax; on `main`/`main-standalone` also: shared files identical (intended differences in `.github/edition-files.txt`) |
-| Probe build from `Test` | Workflow Check after each push to `Test`: `res_mods` as download on the run (14 days), no release |
+| Release | GitHub: Actions → Release → Run workflow (on `main`). Version = next patch unless given; the workflow writes it into `ForgeBlueprints/PenLightContainer.xml` and the README version line, so ModForge always sees the release version. What's new = "Unreleased" in `docs/CHANGELOG.md`, frame in `docs/RELEASE_NOTES.md` |
+| Release preview | Same workflow with `dry_run`: notes in the run summary, zip as download on the run, nothing pushed or published |
+| Checks on every push | Workflow Check: tests, `Main.py` up to date, Python 2.7 syntax |
+| Probe build from `Test` / `Test-Standalone` | Workflow Check after each push: `res_mods` as download on the run (14 days), no release |
 
 - The game logic (`src/penlight/logic.py`) runs on Python 2.7 (client) and 3.x (tests).
 - `mod/res_mods/PnFMods/PenLight/Main.py` is generated – edit `src/penlight/` instead.
@@ -312,12 +298,11 @@ The ship silhouettes come from the game itself and follow every patch automatica
 
 ```
 mod/res_mods/                     files as they belong in bin/<build>/res_mods/
-  PnFMods/PenLight/               Main.py (generated), ships.json, icons, (Main.swf)
+  PnFMods/PenLight/               Main.py (generated), ships.json, icons, capsule/
   gui/unbound2/PnFMods/           PenLight*.unbound – the display (Unbound 2)
   ForgeBlueprints/                ModForge manifest
   ModSchemas/, texts/             options page for TTaro Mod Config
 src/penlight/                     logic.py (traffic light), mod_main.py (client binding)
-src/as3/                          Flash part for dragging without TTaro (main-standalone)
 tools/                            GameParams parsing, build, icon generators
 tests/                            unit tests incl. a mocked client
 docs/                             concept, images

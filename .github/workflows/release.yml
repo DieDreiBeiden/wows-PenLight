@@ -1,0 +1,131 @@
+# Release von Hand ausloesen: Actions -> Release -> Run workflow (auf main).
+# Version: Eingabe oder leer = naechste Patch-Version nach dem neuesten Tag (mit "replace": der
+# neueste Tag). Der Workflow schreibt sie in ForgeBlueprints/PenLightContainer.xml, damit die Mod
+# immer die Release-Version an ModForge meldet, und schiebt "Unreleased" in docs/CHANGELOG.md unter
+# die neue Version; die Zeile 'Current version' / 'Aktuelle Version' der READMEs folgt ebenfalls
+# (Commit von github-actions auf main). Danach prueft er Tests und Main.py, baut die Zip
+# PenLight-<Version>.zip (TTaro-Fassung; die Fassung ohne TTaro liegt nur im Branch Test-Standalone)
+# aus diesem Commit und legt Tag v<Version> samt Release an. Release-Text: Vorlage docs/RELEASE_NOTES.md mit den Eintraegen aus
+# docs/CHANGELOG.md und einem Vergleichslink zum vorherigen Release.
+# Probelauf (dry_run): alles wie oben, aber ohne Push und ohne Release; Zip und Release-Text liegen
+# dann als Download am Lauf (7 Tage), der Text steht zusaetzlich in der Zusammenfassung des Laufs.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version ohne "v", z. B. 0.4.0 (leer = naechste Patch-Version)'
+        required: false
+        default: ''
+      prerelease:
+        description: 'Als Vorabversion markieren'
+        type: boolean
+        default: true
+      replace:
+        description: 'Bestehenden Release und Tag dieser Version loeschen und neu anlegen'
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Probelauf: nichts pushen, nichts veroeffentlichen'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      REQUESTED: ${{ inputs.version }}
+      PRERELEASE: ${{ inputs.prerelease }}
+      REPLACE: ${{ inputs.replace }}
+      DRY_RUN: ${{ inputs.dry_run }}
+      MANIFEST: mod/res_mods/ForgeBlueprints/PenLightContainer.xml
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Version und Release-Text
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::Release nur von main ausloesen (aktuell $GITHUB_REF)"
+            exit 1
+          fi
+          mkdir dist
+          python3 -I tools/release_notes.py pick "$REQUESTED" "$REPLACE" $(git tag -l) > dist/version.env
+          cat dist/version.env >> "$GITHUB_ENV"
+          . dist/version.env
+          python3 -I tools/release_notes.py notes "$VERSION" "$PREVIOUS" "$GITHUB_REPOSITORY" > dist/notes.md
+          echo "Version $VERSION, vorheriger Release ${PREVIOUS:-keiner}"
+          cat dist/notes.md
+          {
+            if [ "$DRY_RUN" = "true" ]; then echo "> Probelauf, nichts veroeffentlicht"; echo; fi
+            echo "# PenLight $VERSION"
+            echo
+            cat dist/notes.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Version und Changelog committen
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898297+github-actions[bot]@users.noreply.github.com'
+          python3 -I tools/release_notes.py set-version "$MANIFEST" "$VERSION"
+          python3 -I tools/release_notes.py set-readme "$VERSION" "$PRERELEASE" README.md README.de.md
+          python3 -I tools/release_notes.py finalize "$VERSION" "$(date -u +%F)"
+          if ! git diff --quiet; then
+            git commit -m "Release $VERSION: Version und Changelog" -- "$MANIFEST" docs/CHANGELOG.md README.md README.de.md
+          fi
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "Probelauf: Commits nur lokal im Lauf, kein Push"
+            exit 0
+          fi
+          git push origin HEAD:main
+
+      - name: Tests und Main.py
+        run: |
+          python3 -m unittest discover -s tests
+          python3 -I tools/build_mod.py
+          git diff --exit-code -- mod/res_mods/PnFMods/PenLight/Main.py
+
+      - name: Paket bauen
+        run: |
+          git archive --format=zip -o "dist/PenLight-$VERSION.zip" HEAD:mod res_mods
+          for z in dist/*.zip; do
+            unzip -l "$z" | tail -1
+            unzip -p "$z" "res_mods/ForgeBlueprints/PenLightContainer.xml" | grep -q "version=\"$VERSION\"" \
+              || { echo "::error::$z meldet nicht Version $VERSION"; exit 1; }
+          done
+
+      - name: Probelauf hochladen
+        if: inputs.dry_run
+        uses: actions/upload-artifact@v4
+        with:
+          name: PenLight-${{ env.VERSION }}-probelauf
+          path: |
+            dist/notes.md
+            dist/PenLight-*.zip
+          retention-days: 7
+
+      - name: Release anlegen
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$REPLACE" = "true" ]; then
+            gh release delete "v$VERSION" --cleanup-tag --yes || true
+            git push origin ":refs/tags/v$VERSION" || true
+          fi
+          flags=()
+          if [ "$PRERELEASE" = "true" ]; then flags+=(--prerelease); fi
+          gh release create "v$VERSION" dist/PenLight-*.zip \
+            --target "$(git rev-parse HEAD)" \
+            --title "PenLight $VERSION" \
+            --notes-file dist/notes.md \
+            "${flags[@]}"

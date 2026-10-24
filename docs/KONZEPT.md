@@ -84,10 +84,7 @@ Farbflächen hatten gegen das Metall fast keinen Helligkeitskontrast (1,0–1,3)
 ## Darstellung (Option)
 
 Option „Darstellung“ in TTaro Mod Config (`diedreibeiden.penlight.style`, Rückfall
-`PENLIGHT_SETTINGS.defaultStyle`, derzeit Modern). Standalone ohne TTaroModUtils: Strg+Alt+S schaltet
-durch (Einstellung `style` in Main.py); die Flash-Greiffläche folgt der Größe der Anzeige
-(`HANDLE_SIZES`, per Test mit `PENLIGHT_SETTINGS` abgeglichen). Mit TTaroModUtils liest die Hülle
-`PenLightTTaro.unbound` die Option und gibt sie als `_ext.style` weiter.
+`PENLIGHT_SETTINGS.defaultStyle`, derzeit Modern):
 
 | Wert | Name | Normal | Mit Alt |
 |---|---|---|---|
@@ -141,42 +138,26 @@ Unter jeder Silhouette der Schiffsname in der Spielschrift (`$TextDefaultBold13N
 Die Silhouetten werden nicht mitgeliefert (Spieldateien), passen also nach jedem Patch.
 PenetrationCalculator liegt links unter dem Fadenkreuz (rechtsbündig bis x −19, ab y +34).
 
-Branch `main-standalone` erkennt TTaroModUtils selbst (Nutzerwunsch): Das ModForge-Manifest hat
-zwei `<ubMountInBattle>` mit `<requires mods="TTaroModUtils"/>` bzw. `"not TTaroModUtils"`.
-Mit TTaro wird `PenLightTTaroRoot` (PenLightTTaro.unbound) eingehängt: TTaro-Optionsseite,
-Zahnrad und Ziehen wie auf `main`, Einstellungen als `_ext` an `PenLightRoot`. Ohne TTaro
-hängt `PenLightRoot` direkt (Einstellungen aus Main.py). Main.py prüft dieselbe Bedingung
-(`PnFMods/TTaroModUtils/Main.py` vorhanden) und schaltet dann Tasten und Main.swf-Greiffläche ab.
-TTaros interne Technik (Sandbox-Umgehung über `xml.sax.saxutils.os`, verschlüsselte Namen) wird
-bewusst nicht übernommen; genutzt werden nur dessen veröffentlichte Makros/Elemente.
-Offene Frage: Der Client liest alle Dateien in `gui/unbound2/PnFMods/`; ohne TTaro sind die
-TT_-Makros in PenLightTTaro.unbound unbekannt – ob das nur einen Logeintrag erzeugt, ist ungetestet.
+Optionen (TTaro Mod Config, Seite `diedreibeiden.penlight`; eigenes Zahnrad
+`TT_ConfigButtonElement` links neben der Anzeige wie bei BuildViewer):
+- `penlight.detailMode` 0 = Detail mit Alt, 1 = immer (ersetzt die Symbole bei Bewertung)
+- Silhouetten an/aus nur als `useSilhouettes` in `PENLIGHT_SETTINGS` (aus der Optionsseite
+  entfernt, Nutzerentscheidung)
+- `penlight.colorMode` 0 = Standard, 1 = Farbenblind (Okabe-Ito: Blau #2B8CE8 = Overmatch,
+  Gelb #F0E442 = nur Bug/Heck, Orange #D55E00 = kein Overmatch); Icons mit Präfix `cb_`,
+  Silhouetten per `PENLIGHT_CT_CB`. Die gezeichneten Ersatzbilder bleiben Standardfarben.
+- `penlight.scale` 0,5–2,0 (scaleX/scaleY der ganzen Anzeige)
+Beschriftungen: vorhandene TTaro-Texte (`IDS_TT_DISPLAY_MODE`, `IDS_TT_UI_SCALE`, …) plus
+eigene `IDS_OM_*` in `texts/<sprache>/penlight.mo` (wie TTaroModUtils; Quelle
+`tools/data/texts.json`, erzeugt von `tools/make_texts.py`).
 
-Ohne TTaro (ModForge bleibt für das Einhängen
-der Anzeige nötig – es ist laut README zum Mitliefern in Mod-Paketen gedacht):
-Einen offiziellen Rückkanal Unbound → Python gibt es in der ModsAPI nur über einen Flash-Teil
-(`flash.addExternalCallback`); TTaro nutzt dafür interne Client-Zugriffe. Deshalb kein
-Optionsmenü per Maus, sondern Tastenkürzel über `events.onKeyEvent` (offiziell):
-
-| Strg+Alt + | Wirkung |
-|---|---|
-| Pfeiltasten | Anzeige verschieben, 5 px (mit Umschalt 1 px) |
-| Pos1 | Position zurücksetzen (Mitte +30 / +8) |
-| D | Detailansicht: mit Alt ↔ immer |
-| F | Farben: Standard ↔ Farbenblind |
-| + / − | Größe in 0,1-Schritten, 0,5–2,0 |
-
-Drag & Drop per Maus über einen Flash-Teil (`Main.swf`, Quelle `src/as3/Main.as`, offizielle
-FlashAPI): unsichtbare Greiffläche über Granate | Schild auf `gameAPI.stage`, Rahmen beim
-Überfahren; Python → Flash `omSetHandle [x, y, b, h, aktiv]`, Flash → Python `omDragMove [x, y]`
-(Anzeige folgt live) und `omDragEnd [x, y]` (speichern). x/y = Abstand zur Bildschirmmitte.
-Kompiliert mit Apache Flex 4.16.1 gegen `wows_library.swc` (extern, der Client stellt `ModBase`),
-SWF-Version 13 wie die Spieldateien.
-Gespeichert in `(wows)/ModPrefs/diedreibeiden-penlight.json` (Rückfall: Mod-Ordner),
-übergeben an die Anzeige als `omData.settings` ({x, y, detailMode, colorMode, scale}).
-Farbenblind-Schema: an Okabe-Ito angelehnt, Blau #2B8CE8 = Overmatch, Gelb #F0E442 = nur Bug/Heck,
-Orange #D55E00 = kein Overmatch (Icons mit Präfix `cb_`, Silhouetten per `PENLIGHT_CT_CB`).
-Silhouetten an/aus nur als `useSilhouettes` in `PENLIGHT_SETTINGS`.
+Position im Spiel per Ziehen über TTaroModUtils (wie BuildViewer): eigenes Schema
+`ModSchemas/diedreibeiden-penlight.schema.json` (eigene `id`, nicht kopiert – TTaro warnt,
+doppelte IDs sperren beide Mods), Schlüssel `diedreibeiden.penlight.position` und
+`…disableDragDrop`. Ohne gespeicherte Position gilt der Rückfall aus `PENLIGHT_SETTINGS`.
+Abhängigkeit: ModForge + TTaroModUtils (Makros `TT_GET_PREF`, `TT_DRAGGABLE_POSITION`,
+`TT_DRAGGABLE`). Referenz-Repos: github.com/AndrewTaro (ohne Lizenzdatei → nur als Referenz,
+kein Code übernommen).
 
 - 16 Bilder `detail_<me|target>_<bugheck>_<mitte>_<deck>.png` (g/r), erzeugt mit
   `tools/make_detail_icons.py` (gezeichnet; das frühere Grund-Icon
@@ -230,6 +211,9 @@ Nur gegnerisches Team.
 - Ordner: `bin/<Build>/res_mods/PnFMods/PenLight/`, plus leere
   `res_mods/PnFModsLoader.py`.
 - Gegnerliste über `battle.getPlayersInfo()` (nicht `getAllShips()` – liefert nur sichtbare Schiffe).
+- Fassungen: veröffentlicht wird nur die TTaro-Fassung (`main`, Zip `PenLight-<Version>.zip`). Die
+  Fassung ohne TTaroModUtils (Tastenkürzel, Flash-Greiffläche `Main.swf`) ist seit 0.4.0 kein
+  Release-Zweig mehr und liegt als Experiment im Branch `Test-Standalone` (2026-10-24).
 
 ## Erkenntnisse Probe v1 (Client 15.9.0.13357625)
 

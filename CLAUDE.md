@@ -9,7 +9,7 @@
 - Konzept, Ampel-Logik und Client-Befunde: `docs/KONZEPT.md`
 - Für Spieler sichtbare Änderungen auf `main` als englischen Eintrag unter `## Unreleased` in
   `docs/CHANGELOG.md` festhalten; daraus schreibt der Release-Workflow die Release Notes.
-- Gewollte Unterschiede zwischen `main` und `main-standalone` in `.github/edition-files.txt`
-  eintragen; der Check-Workflow meldet jede andere Abweichung.
 - Probe-Builds (Versuche, die erst im Spiel getestet werden) nur im Branch `Test`;
-  `main` und `main-standalone` bleiben dabei unangetastet, übernommen wird erst nach Freigabe.
+  `main` bleibt dabei unangetastet, übernommen wird erst nach Freigabe.
+- Die Fassung ohne TTaroModUtils (Standalone) ist kein Release-Zweig mehr; sie liegt als
+  Experiment im Branch `Test-Standalone`.
