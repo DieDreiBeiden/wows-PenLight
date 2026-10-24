@@ -1,4 +1,4 @@
-<mod name="PenLightContainer" version="0.3.2" priority="0">
+<mod name="PenLightContainer" version="0.4.0" priority="0">
   <requires installer="&gt;=1.0.0"/>
 
   <!-- ModForge-Manifest nach Vorlage PenetrationCalculatorContainer.xml.
