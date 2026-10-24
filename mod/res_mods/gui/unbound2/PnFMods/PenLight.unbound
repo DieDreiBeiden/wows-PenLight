@@ -47,7 +47,12 @@
 	useCapsules: true,
 	capsuleHeight: 18,
 	capsuleGap: 4,
+	# Breite der Kapsel-Bilder (px): normal, mit IFHE-Kennung breiter. Feste Groesse wie bei den
+	# Symbolen; autosize im normalen Fluss blieb im Client unsichtbar (Probe 08fe617).
 	capsuleWidth: 72,
+	capsuleWidthNarrow: 62,
+	# Diagnose: Bildpfad der Kapseln als Text darunter (nur zur Fehlersuche)
+	debugCapsules: true,
 	# Leuchtring der Randfaelle (glow_*.png, GLOW_PAD px um die Kapsel): Pulse beim Aufschalten bzw.
 	# sobald ein Randfall eintritt (Dauer je Puls in s, Anzahl), danach dauerhaft schwach sichtbar
 	glowPad: 5,
@@ -353,8 +358,17 @@
 		)
 		(vblock
 			(bind visible "!showDetail && PENLIGHT_SETTINGS.useCapsules")
-			(element PenLightCapsule _url="attackCapsule" _glow="attackGlow" _pulseKey="targetKey")
-			(element PenLightCapsule _url="defenseCapsule" _glow="defenseGlow" _pulseKey="targetKey")
+			(element PenLightCapsule _url="attackCapsule" _glow="attackGlow" _pulseKey="targetKey"
+				_w="capsuleAmmo == 'he_if' ? PENLIGHT_SETTINGS.capsuleWidth : PENLIGHT_SETTINGS.capsuleWidthNarrow")
+			(element PenLightCapsule _url="defenseCapsule" _glow="defenseGlow" _pulseKey="targetKey"
+				_w="PENLIGHT_SETTINGS.capsuleWidthNarrow")
+			(block
+				(bind visible "PENLIGHT_SETTINGS.debugCapsules")
+				(tf
+					(class $TextDefaultBold13NM)
+					(bind text "'atk: ' + attackCapsule + '  def: ' + defenseCapsule")
+				)
+			)
 		)
 		# Alt-Ansicht der Kapseln (Variante A): an derselben Stelle, oben ich -> Ziel, unten Ziel -> ich
 		(vblock
@@ -610,8 +624,9 @@
 # Animationen wie bei Stern/Warndreieck im main-Branch: der Leuchtring pulsiert beim Aufschalten
 # (neues Ziel) und sobald ein Randfall eintritt (hell -> schwach), danach bleibt er schwach sichtbar; jeder
 # Inhaltswechsel der Kapsel wird kurz eingeblendet.
-(def element PenLightCapsule(_url:str, _glow:str = '', _pulseKey:str = '') layout=true
+(def element PenLightCapsule(_url:str, _glow:str = '', _pulseKey:str = '', _w:number = 62) layout=true
 	(style
+		(bind width "_w")
 		(bind height "PENLIGHT_SETTINGS.capsuleHeight")
 		(bind marginBottom "PENLIGHT_SETTINGS.capsuleGap")
 	)
@@ -621,7 +636,9 @@
 			(position = "absolute")
 			(bind left "0 - PENLIGHT_SETTINGS.glowPad")
 			(bind top "0 - PENLIGHT_SETTINGS.glowPad")
-			(backgroundSize = "autosize")
+			(bind width "_w + PENLIGHT_SETTINGS.glowPad * 2")
+			(bind height "PENLIGHT_SETTINGS.capsuleHeight + PENLIGHT_SETTINGS.glowPad * 2")
+			(backgroundSize = "fill")
 			(bind backgroundImage "_glow")
 			(bind alpha "PENLIGHT_SETTINGS.glowRestAlpha")
 		)
@@ -633,7 +650,11 @@
 	)
 	(block
 		(style
-			(backgroundSize = "autosize")
+			(position = "absolute")
+			(left = 0) (top = 0)
+			(bind width "_w")
+			(bind height "PENLIGHT_SETTINGS.capsuleHeight")
+			(backgroundSize = "fill")
 			(bind backgroundImage "_url")
 		)
 		(controller $Animation
@@ -642,8 +663,6 @@
 		)
 	)
 )
-
-
 
 # Alt-Ansicht der Status-Kapseln (Variante A): ausgeklappte Flaeche mit Kopfzeile (Munition bzw.
 # Schild, Erklaerung) und drei Zonen (Punkt, Name, Plattendicke). Randfaelle mit Rahmen und
