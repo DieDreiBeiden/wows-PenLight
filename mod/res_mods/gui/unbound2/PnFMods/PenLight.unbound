@@ -355,7 +355,7 @@
 		# Testbild = feste Kapsel (Ladeweg der Bilder), daneben Zustand und berechnete Bildpfade.
 		(block
 			(bind visible "PENLIGHT_SETTINGS.debugCapsules")
-			(style (position = "absolute") (left = 0px) (top = -64px) (backgroundColor = 0xCC000000))
+			(style (position = "absolute") (left = 0px) (top = -100px) (backgroundColor = 0xCC000000))
 			(hblock
 				(block
 					(style
@@ -377,6 +377,26 @@
 				(class $TextDefaultBold13NM)
 				(bind text "'atk ' + attackCapsule")
 			)
+			# Eingrenzung: jede Nummer prueft eine Schicht fuer sich, jede in eigenem Container
+			# 2 Minimal-Element mit Bild-Parameter | 3 Block mit gebundenem Bild, ohne Element
+			# 4 vblock mit der Kapsel-Bedingung, nur Text | 5 vblock ohne Bedingung mit Minimal-Element
+			# 1 (eigene Zeile, falls es den Container mitreisst): PenLightCapsule ausserhalb des vblock
+			(hblock
+				(hblock (tf (class $TextDefaultBold13NM) (bind text "'2 '"))
+					(element PenLightCapsuleMin _url="attackCapsule"))
+				(hblock (tf (class $TextDefaultBold13NM) (bind text "'  3 '"))
+					(block (style (width = 62) (height = 18) (backgroundSize = "fill") (bind backgroundImage "attackCapsule"))))
+				(hblock (tf (class $TextDefaultBold13NM) (bind text "'  4 '"))
+					(vblock
+						(bind visible "!showDetail && PENLIGHT_SETTINGS.useCapsules")
+						(tf (class $TextDefaultBold13NM) (bind text "'ok'"))))
+				(hblock (tf (class $TextDefaultBold13NM) (bind text "'  5 '"))
+					(vblock
+						(tf (class $TextDefaultBold13NM) (bind text "'ok'"))
+						(element PenLightCapsuleMin _url="attackCapsule")))
+			)
+			(hblock (tf (class $TextDefaultBold13NM) (bind text "'1 '"))
+				(element PenLightCapsule _url="attackCapsule" _glow="''" _pulseKey="targetKey" _w="62"))
 		)
 		(hblock
 			(bind visible "!showDetail && !PENLIGHT_SETTINGS.useCapsules")
@@ -688,6 +708,15 @@
 			(bindcall play duration="PENLIGHT_SETTINGS.capsuleFade" from="{alpha: 0.35}" to="{alpha: 1}"
 				action="killAll" easing="Easing.quad_out" init=false (bind trigger "_url"))
 		)
+	)
+)
+
+# Diagnose: kleinstmoegliches Kapsel-Element (feste Groesse, Bild als Parameter, keine Kinder)
+(def element PenLightCapsuleMin(_url:str) layout=true
+	(style
+		(width = 62) (height = 18)
+		(backgroundSize = "fill")
+		(bind backgroundImage "_url")
 	)
 )
 
