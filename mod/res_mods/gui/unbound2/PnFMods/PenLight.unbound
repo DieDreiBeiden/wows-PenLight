@@ -42,6 +42,59 @@
 	# Zusatzplakette IFHE (tag_ifhe.png) links unten an der HE-Granate, wenn IFHE erkannt ist
 	badgeOffsetX: -3,
 	badgeOffsetY: 22,
+	# Darstellung (Option in TTaro Mod Config, penlight.style), Rueckfall ohne gespeicherte Einstellung:
+	# 0 = Klassisch (Granate | Schild), 1 = Modern (Status-Kapseln, capsule/*.png aus
+	# tools/make_capsule_icons.py; oben ich -> Ziel, unten Ziel -> ich, drei Punkte = Bug/Heck, Mitte, Deck),
+	# 2 = Nur Text (zwei Zeilen in der Ampelfarbe)
+	defaultStyle: 1,
+	# Nur Text: jede Zeile auf einer dunklen Unterlage (0xD90E1012 in PenLightTextLine/-Alt, ARGB,
+	# 85 % Deckkraft), damit der Kontrast auch vor heller Gischt oder Explosionen mindestens 4,5 : 1
+	# erreicht (WCAG AA, gemessen an Screenshots); Zeilenhoehe inkl. Unterlage, Rand um den Text.
+	textPadX: 5,
+	textPadY: 1,
+	textLineHeight: 21,
+	textWidth: 180,
+	# Alt-Ansicht: eine Unterlage je Richtung mit Kopfzeile, Zonenname und Wert
+	textAltWidth: 246,
+	textAltHeight: 52,
+	textAltGap: 4,
+	textAltPadX: 6,
+	textHeadTop: 3,
+	textZoneStep: 78,
+	textNameTop: 20,
+	textValueTop: 34,
+	capsuleHeight: 18,
+	capsuleGap: 4,
+	# Breite der Kapsel-Bilder (px): normal, mit IFHE-Kennung breiter (feste Groesse wie bei den Symbolen)
+	capsuleWidth: 72,
+	capsuleWidthNarrow: 62,
+	# Leuchtring der Randfaelle (glow_*.png, GLOW_PAD px um die Kapsel): Pulse beim Aufschalten bzw.
+	# sobald ein Randfall eintritt (Dauer je Puls in s, Anzahl), danach dauerhaft schwach sichtbar
+	glowPad: 5,
+	glowPulse: 0.25,
+	glowPulseCount: 4,
+	glowRestAlpha: 0.45,
+	# Wechsel des Kapsel-Inhalts kurz einblenden (s)
+	capsuleFade: 0.15,
+	# Alt-Ansicht der Kapseln (Variante A): Flaechen 240 x 56 (capsule/alt/*.png), Texte in der
+	# Spielschrift 12 px ohne Skalierung (skalierte Schrift rendert im Client weich und klein).
+	# Raster: linke Spalte (altLabelX) nur Kuerzel bzw. Schild; eine gemeinsame Textkante (altTextX)
+	# fuer Kopfzeile und erste Zone, Punkte direkt davor auf Hoehe der Werte; drei gleich breite
+	# Zonenspalten; Zonenname und Wert absolut uebereinander (gestapelt ueberlappten sie im Client).
+	# Trenner '/' statt '|' (sieht in der Spielschrift wie ein grosses I aus).
+	altWidth: 240,
+	altHeight: 56,
+	altGap: 4,
+	altLabelX: 10,
+	altTextX: 40,
+	altLabelTop: 3,
+	altHeadTop: 7,
+	altZoneX: 27,
+	altZoneStep: 78,
+	altNameTop: 25,
+	altValueTop: 39,
+	altDotTop: 39,
+	altZoneTextX: 13,
 	# Rand der Greifflaeche um Granate | Schild (px bei Skalierung 1); links schmal wegen Zahnrad
 	dragPadLeft: 4,
 	dragPadTop: 12,
@@ -92,6 +145,23 @@
 	grey:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:128,greenOffset:132,blueOffset:136,alphaOffset:0 },
 	base:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:40,greenOffset:42,blueOffset:44,alphaOffset:0 }
 })
+# Einfaerbung der Texte (Option "Nur Text"): weisse Schrift x Multiplikator = Ampelfarbe; anders als bei
+# den Silhouetten ohne Offset, damit der dunkle Schatten der Schrift ($FontEnableReadability) dunkel bleibt.
+# Textfarben heller als die der Symbole, damit sie auf der Unterlage >= 4,5 : 1 erreichen:
+# gruen #3DDC5A, orange #FF8C00, rot #FF7060, grau #B0B5BA; farbenblind blau #58AAFF, gelb #F0E442,
+# orange #F58028.
+(def constant PENLIGHT_TEXT_CT {
+	green:  { redMultiplier:0.24,greenMultiplier:0.86,blueMultiplier:0.35,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	yellow: { redMultiplier:1,greenMultiplier:0.55,blueMultiplier:0,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	red:    { redMultiplier:1,greenMultiplier:0.44,blueMultiplier:0.38,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	grey:   { redMultiplier:0.69,greenMultiplier:0.71,blueMultiplier:0.73,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 }
+})
+(def constant PENLIGHT_TEXT_CT_CB {
+	green:  { redMultiplier:0.35,greenMultiplier:0.67,blueMultiplier:1,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	yellow: { redMultiplier:0.94,greenMultiplier:0.89,blueMultiplier:0.26,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	red:    { redMultiplier:0.96,greenMultiplier:0.5,blueMultiplier:0.16,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	grey:   { redMultiplier:0.69,greenMultiplier:0.71,blueMultiplier:0.73,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 }
+})
 # Farbenblind-Schema (AMPEL_CB in tools/make_ampel_icons.py): blau = Overmatch, orange = kein Overmatch
 (def constant PENLIGHT_CT_CB {
 	green: { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:43,greenOffset:140,blueOffset:232,alphaOffset:0 },
@@ -134,6 +204,7 @@
 (def constant PENLIGHT_PREF_SCALE 'diedreibeiden.penlight.scale')
 (def constant PENLIGHT_PREF_COLOR_MODE 'diedreibeiden.penlight.colorMode')
 (def constant PENLIGHT_PREF_DETAIL_MODE 'diedreibeiden.penlight.detailMode')
+(def constant PENLIGHT_PREF_STYLE 'diedreibeiden.penlight.style')
 # Seite in TTaro Mod Config = author + '.' + slug aus dem Schema (fuer das eigene Zahnrad)
 (def constant PENLIGHT_MOD_SLUG 'diedreibeiden.penlight')
 
@@ -193,6 +264,11 @@
 		(var isColorBlind:bool = "null != colorModePref && null != colorModePref.value ? colorModePref.value == 1 : false")
 		(macro TT_GET_PREF _varName="'detailModePref'" _key="PENLIGHT_PREF_DETAIL_MODE")
 		(var isDetailAlways:bool = "null != detailModePref && null != detailModePref.value ? detailModePref.value == 1 : false")
+		(macro TT_GET_PREF _varName="'stylePref'" _key="PENLIGHT_PREF_STYLE")
+		(var displayStyle:number = "null != stylePref && null != stylePref.value ? stylePref.value : PENLIGHT_SETTINGS.defaultStyle")
+		(var isClassic:bool = "displayStyle == 0")
+		(var isModern:bool = "displayStyle == 1")
+		(var isTextOnly:bool = "displayStyle == 2")
 		# Farbschema: Dateipraefix der Icons und Einfaerbung der Silhouetten
 		(var palettePrefix:str = "isColorBlind ? 'cb_' : ''")
 		(var palette:dict = "isColorBlind ? PENLIGHT_CT_CB : PENLIGHT_CT")
@@ -262,6 +338,67 @@
 		# Mini-Icons der Beschriftung in der Ampelfarbe von Granate bzw. Schild
 		(var targetLabel:str = "PENLIGHT_ICON_PATH + 'label_target_' + (ammo == 'ap' ? '' : ammo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
 		(var ownLabel:str = "PENLIGHT_ICON_PATH + 'label_me_' + palettePrefix + (hasVerdict ? verdict[1] : 'grey') + '.png'")
+		# Status-Kapseln: Zonen als Bits (Bug/Heck, Mitte, Deck); Mitte unbekannt (-1) zaehlt wie
+		# "Bug/Heck und Deck" (wie in der Overmatch-Logik ohne Mittelwert)
+		(var aMid:number = "detail[1] == -1 ? (detail[0] == 1 && detail[2] == 1 ? 1 : 0) : detail[1]")
+		(var dMid:number = "detail[4] == -1 ? (detail[3] == 1 && detail[5] == 1 ? 1 : 0) : detail[4]")
+		(var attackBits:str = "(detail[0] == 1 ? '1' : '0') + (aMid == 1 ? '1' : '0') + (detail[2] == 1 ? '1' : '0')")
+		(var defenseBits:str = "(detail[3] == 1 ? '1' : '0') + (dMid == 1 ? '1' : '0') + (detail[5] == 1 ? '1' : '0')")
+		# nicht bewertet (Python: 'grey', Zonen -1, z. B. Schild gegen Traeger) -> grau, nicht "000"
+		(var attackRated:bool = "hasVerdict && verdict[0] != 'grey'")
+		(var defenseRated:bool = "hasVerdict && verdict[1] != 'grey'")
+		(var capsuleAmmo:str = "hasIfhe ? 'he_if' : ammo")
+		(var attackCapsule:str = "PENLIGHT_ICON_PATH + 'capsule/atk_' + capsuleAmmo + '_' + (attackRated ? palettePrefix + attackBits : 'grey') + '.png'")
+		(var defenseCapsule:str = "PENLIGHT_ICON_PATH + 'capsule/def_' + (defenseRated ? palettePrefix + defenseBits : 'grey') + '.png'")
+		# Randfaelle: ich komme ueberall durch / Ziel kommt ueberall durch
+		(var attackGlow:str = "attackRated && attackBits == '111' ? PENLIGHT_ICON_PATH + 'capsule/glow_atk' + (hasIfhe ? '_if' : '') + (isColorBlind ? '_cb' : '') + '.png' : ''")
+		(var defenseGlow:str = "defenseRated && defenseBits == '111' ? PENLIGHT_ICON_PATH + 'capsule/glow_def' + (isColorBlind ? '_cb' : '') + '.png' : ''")
+		# Alt-Ansicht der Kapseln: Werte aus Main.py (logic.numbers), -1 = unbekannt
+		(var nums:array = "verdict.length >= 6 ? verdict[5] : [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1]")
+		# Texte der Alt-Ansicht in der Client-Sprache (texts/<sprache>/penlight.mo, tools/make_texts.py).
+		# tr() kennt eigene Kataloge nur mit LocalizationLoader (AndrewTaro); sonst liefert es den Schluessel
+		# zurueck, dann gilt der englische Text.
+		(var txtBowStern:str = "tr('IDS_PENLIGHT_BOW_STERN') != 'IDS_PENLIGHT_BOW_STERN' && tr('IDS_PENLIGHT_BOW_STERN') != '' ? tr('IDS_PENLIGHT_BOW_STERN') : 'Bow/Stern'")
+		(var txtMidship:str = "tr('IDS_PENLIGHT_MIDSHIP') != 'IDS_PENLIGHT_MIDSHIP' && tr('IDS_PENLIGHT_MIDSHIP') != '' ? tr('IDS_PENLIGHT_MIDSHIP') : 'Midship'")
+		(var txtDeck:str = "tr('IDS_PENLIGHT_DECK') != 'IDS_PENLIGHT_DECK' && tr('IDS_PENLIGHT_DECK') != '' ? tr('IDS_PENLIGHT_DECK') : 'Deck'")
+		(var txtMm:str = "tr('IDS_PENLIGHT_MM') != 'IDS_PENLIGHT_MM' && tr('IDS_PENLIGHT_MM') != '' ? tr('IDS_PENLIGHT_MM') : '%d mm'")
+		(var txtPen:str = "tr('IDS_PENLIGHT_PEN') != 'IDS_PENLIGHT_PEN' && tr('IDS_PENLIGHT_PEN') != '' ? tr('IDS_PENLIGHT_PEN') : '%d mm penetration'")
+		(var txtOmUpTo:str = "tr('IDS_PENLIGHT_OM_UPTO') != 'IDS_PENLIGHT_OM_UPTO' && tr('IDS_PENLIGHT_OM_UPTO') != '' ? tr('IDS_PENLIGHT_OM_UPTO') : 'OM up to %d mm'")
+		(var txtNotRated:str = "tr('IDS_PENLIGHT_NOT_RATED') != 'IDS_PENLIGHT_NOT_RATED' && tr('IDS_PENLIGHT_NOT_RATED') != '' ? tr('IDS_PENLIGHT_NOT_RATED') : 'Not rated for this pairing'")
+		(var attackLine:str = "ammo == 'ap' ? subst(txtMm, [nums[6]]) + '  /  ' + subst(txtOmUpTo, [nums[7]]) : subst(txtPen, [nums[6]])")
+		# Verteidigung: das Schild links steht fuer den Gegner, daher nur 'AP' (passt in 12 px)
+		(var defenseLine:str = "nums[8] > 0 ? 'AP ' + subst(txtMm, [nums[8]]) + '  /  ' + subst(txtOmUpTo, [nums[9]]) : txtNotRated")
+		(var zoneNames:array = "[txtBowStern, txtMidship, txtDeck]")
+		(var attackState:str = "!attackRated ? 'grey' : (attackBits == '111' ? 'green' : (attackBits == '000' ? 'red' : 'yellow'))")
+		(var defenseState:str = "!defenseRated ? 'grey' : (defenseBits == '111' ? 'red' : (defenseBits == '000' ? 'green' : 'yellow'))")
+		(var altAmmoLabel:str = "toUpper(ammo)")
+		(var showAltCapsules:bool = "showDetail && isModern")
+
+		# Option "Nur Text": eine Zeile je Richtung, Zonen mit Durchkommen bzw. Overmatch, Ampelfarbe
+		(var txtEnemyAp:str = "tr('IDS_PENLIGHT_ENEMY_AP') != 'IDS_PENLIGHT_ENEMY_AP' && tr('IDS_PENLIGHT_ENEMY_AP') != '' ? tr('IDS_PENLIGHT_ENEMY_AP') : 'Enemy AP'")
+		(var txtEverywhere:str = "tr('IDS_PENLIGHT_EVERYWHERE') != 'IDS_PENLIGHT_EVERYWHERE' && tr('IDS_PENLIGHT_EVERYWHERE') != '' ? tr('IDS_PENLIGHT_EVERYWHERE') : 'everywhere'")
+		(var txtNowhere:str = "tr('IDS_PENLIGHT_NOWHERE') != 'IDS_PENLIGHT_NOWHERE' && tr('IDS_PENLIGHT_NOWHERE') != '' ? tr('IDS_PENLIGHT_NOWHERE') : 'nowhere'")
+		(var txtNotRatedShort:str = "tr('IDS_PENLIGHT_NOT_RATED_SHORT') != 'IDS_PENLIGHT_NOT_RATED_SHORT' && tr('IDS_PENLIGHT_NOT_RATED_SHORT') != '' ? tr('IDS_PENLIGHT_NOT_RATED_SHORT') : 'not rated'")
+		(var a0:bool = "detail[0] == 1")
+		(var a1:bool = "aMid == 1")
+		(var a2:bool = "detail[2] == 1")
+		(var d0:bool = "detail[3] == 1")
+		(var d1:bool = "dMid == 1")
+		(var d2:bool = "detail[5] == 1")
+		(var attackZones:str = "!attackRated ? txtNotRatedShort : (attackBits == '111' ? txtEverywhere : (attackBits == '000' ? txtNowhere
+								: (a0 ? txtBowStern : '') + (a0 && (a1 || a2) ? ' + ' : '') + (a1 ? txtMidship : '') + (a1 && a2 ? ' + ' : '') + (a2 ? txtDeck : '')))")
+		(var defenseZones:str = "!defenseRated ? txtNotRatedShort : (defenseBits == '111' ? txtEverywhere : (defenseBits == '000' ? txtNowhere
+								: (d0 ? txtBowStern : '') + (d0 && (d1 || d2) ? ' + ' : '') + (d1 ? txtMidship : '') + (d1 && d2 ? ' + ' : '') + (d2 ? txtDeck : '')))")
+		# ohne Ziel nur die Bezeichnung (grau); mit Ziel, aber nicht bewertet: 'not rated'
+		(var textAttack:str = "toUpper(ammo) + (hasIfhe ? ' IFHE' : '') + (hasVerdict ? ': ' + attackZones : '')")
+		(var textDefense:str = "txtEnemyAp + (hasVerdict ? ': ' + defenseZones : '')")
+		(var textCt:dict = "isColorBlind ? PENLIGHT_TEXT_CT_CB : PENLIGHT_TEXT_CT")
+		(var attackCt:dict = "textCt[attackState]")
+		(var defenseCt:dict = "textCt[defenseState]")
+		(var greyCt:dict = "textCt['grey']")
+		(var textAttackHead:str = "toUpper(ammo) + (hasIfhe ? ' IFHE' : '') + '  ' + attackLine")
+		(var textDefenseHead:str = "defenseRated && nums[8] > 0 ? txtEnemyAp + ' ' + subst(txtMm, [nums[8]]) + '  /  ' + subst(txtOmUpTo, [nums[9]]) : txtEnemyAp + ': ' + txtNotRatedShort")
+		(var showTextAlt:bool = "showDetail && isTextOnly")
 	)
 
 	(controller $Repeat renderer='PenLightTargetTracker'
@@ -291,13 +428,52 @@
 			)
 		)
 		(hblock
-			(bind visible "!showDetail")
+			(bind visible "!showDetail && isClassic")
 			(element PenLightIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey" _tag="attackTag" _badge="attackBadge")
 			(element PenLightIcon _url="defenseIcon" _mark="defenseMark" _pulseKey="targetKey")
 		)
+		(block
+			(bind visible "!showDetail && isModern")
+			(element PenLightCapsule _url="attackCapsule" _glow="attackGlow" _pulseKey="targetKey"
+				_w="capsuleAmmo == 'he_if' ? PENLIGHT_SETTINGS.capsuleWidth : PENLIGHT_SETTINGS.capsuleWidthNarrow")
+			(element PenLightCapsule _url="defenseCapsule" _glow="defenseGlow" _pulseKey="targetKey"
+				_w="PENLIGHT_SETTINGS.capsuleWidthNarrow")
+		)
+		# Alt-Ansicht der Kapseln (Variante A): an derselben Stelle, oben ich -> Ziel, unten Ziel -> ich
+		(block
+			(bind visible "showAltCapsules")
+			(style (position = "absolute") (left = 0) (top = 0))
+			(element PenLightAltPanel _kind="'atk'" _state="attackState" _z="[detail[0] == 1 ? 1 : 0, aMid, detail[2] == 1 ? 1 : 0]"
+				_line="attackLine" _label="altAmmoLabel" _values="[nums[0], nums[1], nums[2]]" _cb="isColorBlind" _pulseKey="targetKey"
+				_names="zoneNames" _mmFmt="txtMm")
+			(element PenLightAltPanel _kind="'def'" _state="defenseState" _z="[detail[3] == 1 ? 1 : 0, dMid, detail[5] == 1 ? 1 : 0]"
+				_line="defenseLine" _label="''" _values="[nums[3], nums[4], nums[5]]" _cb="isColorBlind" _pulseKey="targetKey"
+				_names="zoneNames" _mmFmt="txtMm")
+		)
+		# Nur Text: oben ich -> Ziel, unten Ziel -> ich
+		(block
+			(bind visible "!showDetail && isTextOnly")
+			(style (position = "absolute") (left = 0) (top = 0))
+			(element PenLightTextLine _text="textAttack" _ct="attackCt")
+			(block
+				(style (position = "absolute") (left = 0) (bind top "PENLIGHT_SETTINGS.textLineHeight"))
+				(element PenLightTextLine _text="textDefense" _ct="defenseCt")
+			)
+		)
+		(block
+			(bind visible "showTextAlt")
+			(style (position = "absolute") (left = 0) (top = 0))
+			(element PenLightTextAlt _head="textAttackHead" _headCt="attackCt" _z="[a0 ? 1 : 0, a1 ? 1 : 0, a2 ? 1 : 0]"
+				_values="[nums[0], nums[1], nums[2]]" _names="zoneNames" _mmFmt="txtMm" _onCt="attackCt" _offCt="greyCt")
+			(block
+				(style (position = "absolute") (left = 0) (bind top "PENLIGHT_SETTINGS.textAltHeight + PENLIGHT_SETTINGS.textAltGap"))
+				(element PenLightTextAlt _head="textDefenseHead" _headCt="defenseCt" _z="[d0 ? 1 : 0, d1 ? 1 : 0, d2 ? 1 : 0]"
+					_values="[nums[3], nums[4], nums[5]]" _names="zoneNames" _mmFmt="txtMm" _onCt="defenseCt" _offCt="greyCt")
+			)
+		)
 		# absolut an derselben Stelle wie die Symbole, damit nichts springt
 		(block
-			(bind visible "showDetail && !showSilhouettes")
+			(bind visible "showDetail && !showSilhouettes && isClassic")
 			(style (position = "absolute") (left = 0) (top = 0))
 			# untereinander: oben Target (gehoert zur Granate), unten Me (gehoert zum Schild)
 			(element PenLightShip _url="attackDetail")
@@ -305,7 +481,7 @@
 		)
 		# Prototyp: dieselbe Stelle, Spiel-Silhouetten statt gezeichneter Schiffe
 		(block
-			(bind visible "showSilhouettes")
+			(bind visible "showSilhouettes && isClassic")
 			(style (position = "absolute") (left = 0) (top = 0))
 			(element PenLightSilhouetteShip _shortName="targetShortName" _label="targetLabel" _nameIDS="targetNameIDS"
 				_bow="tBow" _mid="tMid" _deck="tDeck" _palette="palette")
@@ -320,8 +496,8 @@
 				(position = "absolute")
 				(bind left "0 - PENLIGHT_SETTINGS.dragPadLeft")
 				(bind top "0 - PENLIGHT_SETTINGS.dragPadTop")
-				(bind width "PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap + PENLIGHT_SETTINGS.dragPadLeft + PENLIGHT_SETTINGS.dragPadRight")
-				(bind height "PENLIGHT_SETTINGS.iconSize + PENLIGHT_SETTINGS.dragPadTop + PENLIGHT_SETTINGS.dragPadBottom")
+				(bind width "(isModern ? PENLIGHT_SETTINGS.capsuleWidth : (isTextOnly ? PENLIGHT_SETTINGS.textWidth : PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap)) + PENLIGHT_SETTINGS.dragPadLeft + PENLIGHT_SETTINGS.dragPadRight")
+				(bind height "(isModern ? PENLIGHT_SETTINGS.capsuleHeight * 2 + PENLIGHT_SETTINGS.capsuleGap : (isTextOnly ? PENLIGHT_SETTINGS.textLineHeight * 2 : PENLIGHT_SETTINGS.iconSize)) + PENLIGHT_SETTINGS.dragPadTop + PENLIGHT_SETTINGS.dragPadBottom")
 				(backgroundColor = 0x00FFFFFF)
 				(bind hitTest "!isPositionLocked")
 			)
@@ -530,5 +706,222 @@
 	)
 	(dispatch evTargetChanged args="{entity: trackedEntity}" dir="EventDirection.UP" on='addedToStage'
 		(bind enabled "isTargetLocked")
+	)
+)
+
+
+# Status-Kapsel (Probe): Bild in eigener Breite, darunter ein Leuchtring fuer die Randfaelle.
+# Animationen wie bei Stern/Warndreieck im main-Branch: der Leuchtring pulsiert beim Aufschalten
+# (neues Ziel) und sobald ein Randfall eintritt (hell -> schwach), danach bleibt er schwach sichtbar; jeder
+# Inhaltswechsel der Kapsel wird kurz eingeblendet.
+(def element PenLightCapsule(_url:str, _glow:str = '', _pulseKey:str = '', _w:number = 62) layout=true
+	(style
+		(bind width "_w")
+		(bind height "PENLIGHT_SETTINGS.capsuleHeight")
+		(bind marginBottom "PENLIGHT_SETTINGS.capsuleGap")
+	)
+	(block
+		(bind visible "_glow != ''")
+		(style
+			(position = "absolute")
+			(bind left "0 - PENLIGHT_SETTINGS.glowPad")
+			(bind top "0 - PENLIGHT_SETTINGS.glowPad")
+			(bind width "_w + PENLIGHT_SETTINGS.glowPad * 2")
+			(bind height "PENLIGHT_SETTINGS.capsuleHeight + PENLIGHT_SETTINGS.glowPad * 2")
+			(backgroundSize = "fill")
+			(bind backgroundImage "_glow")
+			(bind alpha "PENLIGHT_SETTINGS.glowRestAlpha")
+		)
+		(controller $Animation
+			(bindcall play duration="PENLIGHT_SETTINGS.glowPulse" from="{alpha: 1}" to="{alpha: PENLIGHT_SETTINGS.glowRestAlpha}"
+				repeatCount="PENLIGHT_SETTINGS.glowPulseCount" action="killAll" easing="Easing.quad_out"
+				init=false (bind trigger "_pulseKey + _glow"))
+		)
+	)
+	(block
+		(style
+			(position = "absolute")
+			(left = 0) (top = 0)
+			(bind width "_w")
+			(bind height "PENLIGHT_SETTINGS.capsuleHeight")
+			(backgroundSize = "fill")
+			(bind backgroundImage "_url")
+		)
+		(controller $Animation
+			(bindcall play duration="PENLIGHT_SETTINGS.capsuleFade" from="{alpha: 0.35}" to="{alpha: 1}"
+				action="killAll" easing="Easing.quad_out" init=false (bind trigger "_url"))
+		)
+	)
+)
+
+# Alt-Ansicht der Status-Kapseln (Variante A): ausgeklappte Flaeche mit Kopfzeile (Munition bzw.
+# Schild, Erklaerung) und drei Zonen (Punkt, Name, Plattendicke). Randfaelle mit Rahmen und
+# Leuchtring, der wie bei den Kapseln beim Aufschalten pulsiert.
+(def element PenLightAltPanel(_kind:str, _state:str, _z:array, _line:str, _label:str, _values:array,
+		_cb:bool = false, _pulseKey:str = '', _names:array = ['Bow/Stern', 'Midship', 'Deck'], _mmFmt:str = '%d mm') layout=true
+	(scope
+		(var path:str = "PENLIGHT_ICON_PATH + 'capsule/alt/'")
+		(var cbSuffix:str = "_cb ? '_cb' : ''")
+		(var pal:str = "_cb ? 'cb_' : ''")
+		(var extreme:bool = "(_kind == 'atk' && _state == 'green') || (_kind == 'def' && _state == 'red')")
+		(var nowhere:bool = "_z[0] == 0 && _z[1] == 0 && _z[2] == 0")
+		(var panelUrl:str = "path + (extreme ? 'panel_' + _kind + '_ext' + cbSuffix : 'panel') + '.png'")
+		(var glowUrl:str = "extreme ? path + 'glow_' + _kind + cbSuffix + '.png' : ''")
+		(var shieldUrl:str = "path + (extreme ? 'shield_warn' + cbSuffix : 'shield') + '.png'")
+	)
+	(style
+		(bind width "PENLIGHT_SETTINGS.altWidth")
+		(bind height "PENLIGHT_SETTINGS.altHeight")
+		(bind marginBottom "PENLIGHT_SETTINGS.altGap")
+	)
+	(block
+		(bind visible "glowUrl != ''")
+		(style
+			(position = "absolute")
+			(bind left "0 - PENLIGHT_SETTINGS.glowPad")
+			(bind top "0 - PENLIGHT_SETTINGS.glowPad")
+			(backgroundSize = "autosize")
+			(bind backgroundImage "glowUrl")
+			(bind alpha "PENLIGHT_SETTINGS.glowRestAlpha")
+		)
+		(controller $Animation
+			(bindcall play duration="PENLIGHT_SETTINGS.glowPulse" from="{alpha: 1}" to="{alpha: PENLIGHT_SETTINGS.glowRestAlpha}"
+				repeatCount="PENLIGHT_SETTINGS.glowPulseCount" action="killAll" easing="Easing.quad_out"
+				init=false (bind trigger "_pulseKey + glowUrl"))
+		)
+	)
+	(block
+		(style
+			(position = "absolute") (left = 0) (top = 0)
+			(backgroundSize = "autosize")
+			(bind backgroundImage "panelUrl")
+		)
+	)
+	# Kopfzeile: Munitionskuerzel (oben) bzw. Schild (unten), daneben die Erklaerung
+	(block
+		(bind visible "_kind == 'atk'")
+		(style (position = "absolute") (bind left "PENLIGHT_SETTINGS.altLabelX") (bind top "PENLIGHT_SETTINGS.altLabelTop"))
+		(tf
+			(class $TextDefaultBold17NM)
+			(bind text "_label")
+		)
+	)
+	(block
+		(bind visible "_kind == 'def'")
+		(style
+			(position = "absolute") (bind left "PENLIGHT_SETTINGS.altLabelX + 1") (bind top "PENLIGHT_SETTINGS.altLabelTop + 4")
+			(backgroundSize = "autosize")
+			(bind backgroundImage "shieldUrl")
+		)
+	)
+	(block
+		(style
+			(position = "absolute") (bind left "PENLIGHT_SETTINGS.altTextX") (bind top "PENLIGHT_SETTINGS.altHeadTop")
+		)
+		(tf
+			(class $TextDefault12NM)
+			(class $FontEnableReadability)
+			(bind text "_line")
+		)
+	)
+	(element PenLightAltZone _i="0" _name="_names[0]" _z="_z" _values="_values" _state="_state" _pal="pal" _nowhere="nowhere" _path="path" _mmFmt="_mmFmt")
+	(element PenLightAltZone _i="1" _name="_names[1]" _z="_z" _values="_values" _state="_state" _pal="pal" _nowhere="nowhere" _path="path" _mmFmt="_mmFmt")
+	(element PenLightAltZone _i="2" _name="_names[2]" _z="_z" _values="_values" _state="_state" _pal="pal" _nowhere="nowhere" _path="path" _mmFmt="_mmFmt")
+)
+
+# Eine Zone der Alt-Ansicht: Punkt (gefuellt / umrandet), rechts daneben Name und darunter Plattendicke.
+(def element PenLightAltZone(_i:number, _name:str, _z:array, _values:array, _state:str, _pal:str, _nowhere:bool,
+		_path:str, _mmFmt:str = '%d mm') layout=true
+	(scope
+		(var on:bool = "_z[_i] == 1")
+		(var dotUrl:str = "_path + (_state == 'grey' ? 'dot_ring_grey' : (on ? 'dot_fill_' + _pal + _state : (_nowhere ? 'dot_ring_' + _pal + _state : 'dot_ring_grey'))) + '.png'")
+		(var valueText:str = "_values[_i] >= 0 ? subst(_mmFmt, [_values[_i]]) : '-'")
+		(var x:number = "PENLIGHT_SETTINGS.altZoneX + _i * PENLIGHT_SETTINGS.altZoneStep")
+	)
+	(style (position = "absolute") (left = 0) (top = 0))
+	(block
+		(style
+			(position = "absolute") (bind left "x") (bind top "PENLIGHT_SETTINGS.altDotTop")
+			(backgroundSize = "autosize")
+			(bind backgroundImage "dotUrl")
+		)
+	)
+	(block
+		(style (position = "absolute") (bind left "x + PENLIGHT_SETTINGS.altZoneTextX") (bind top "PENLIGHT_SETTINGS.altNameTop"))
+		(tf
+			(class $TextDefault12NM)
+			(class $FontEnableReadability)
+			(bind text "_name")
+		)
+	)
+	(block
+		(style (position = "absolute") (bind left "x + PENLIGHT_SETTINGS.altZoneTextX") (bind top "PENLIGHT_SETTINGS.altValueTop"))
+		(tf
+			(class $TextDefaultBold12NM)
+			(class $FontEnableReadability)
+			(bind text "valueText")
+		)
+	)
+)
+
+
+# Nur Text: eine Zeile auf dunkler Unterlage (Breite folgt dem Text), Schrift eingefaerbt per
+# colorTransform (PENLIGHT_TEXT_CT). Die Einfaerbung sitzt auf PenLightTextInk, nicht auf der Unterlage.
+(def element PenLightTextLine(_text:str, _ct:dict) layout=true
+	(style (backgroundColor = 0xD90E1012))
+	(block
+		(style
+			(bind marginLeft "PENLIGHT_SETTINGS.textPadX") (bind marginRight "PENLIGHT_SETTINGS.textPadX")
+			(bind marginTop "PENLIGHT_SETTINGS.textPadY") (bind marginBottom "PENLIGHT_SETTINGS.textPadY")
+		)
+		(element PenLightTextInk _text="_text" _ct="_ct")
+	)
+)
+
+(def element PenLightTextInk(_text:str, _ct:dict) layout=true
+	(tf
+		(class $TextDefaultBold13NM)
+		(class $FontEnableReadability)
+		(bind text "_text")
+	)
+	(bind colorTransform "_ct")
+)
+
+# Nur Text, Alt-Ansicht: eine Unterlage je Richtung; Kopfzeile in der Ampelfarbe, darunter drei Zonen
+# mit Name und Plattendicke; Werte der Zonen mit Durchkommen bzw. Overmatch in der Ampelfarbe, sonst grau.
+(def element PenLightTextAlt(_head:str, _headCt:dict, _z:array, _values:array, _names:array, _mmFmt:str,
+		_onCt:dict, _offCt:dict) layout=true
+	(style
+		(bind width "PENLIGHT_SETTINGS.textAltWidth")
+		(bind height "PENLIGHT_SETTINGS.textAltHeight")
+		(backgroundColor = 0xD90E1012)
+	)
+	(block
+		(style (position = "absolute") (bind left "PENLIGHT_SETTINGS.textAltPadX") (bind top "PENLIGHT_SETTINGS.textHeadTop"))
+		(element PenLightTextInk _text="_head" _ct="_headCt")
+	)
+	(element PenLightTextZone _i="0" _name="_names[0]" _z="_z" _values="_values" _mmFmt="_mmFmt" _onCt="_onCt" _offCt="_offCt")
+	(element PenLightTextZone _i="1" _name="_names[1]" _z="_z" _values="_values" _mmFmt="_mmFmt" _onCt="_onCt" _offCt="_offCt")
+	(element PenLightTextZone _i="2" _name="_names[2]" _z="_z" _values="_values" _mmFmt="_mmFmt" _onCt="_onCt" _offCt="_offCt")
+)
+
+(def element PenLightTextZone(_i:number, _name:str, _z:array, _values:array, _mmFmt:str, _onCt:dict, _offCt:dict) layout=true
+	(scope
+		(var x:number = "PENLIGHT_SETTINGS.textAltPadX + _i * PENLIGHT_SETTINGS.textZoneStep")
+		(var valueText:str = "_values[_i] >= 0 ? subst(_mmFmt, [_values[_i]]) : '-'")
+		(var valueCt:dict = "_z[_i] == 1 ? _onCt : _offCt")
+	)
+	(style (position = "absolute") (left = 0) (top = 0))
+	(block
+		(style (position = "absolute") (bind left "x") (bind top "PENLIGHT_SETTINGS.textNameTop"))
+		(tf
+			(class $TextDefault12NM)
+			(class $FontEnableReadability)
+			(bind text "_name")
+		)
+	)
+	(block
+		(style (position = "absolute") (bind left "x") (bind top "PENLIGHT_SETTINGS.textValueTop"))
+		(element PenLightTextInk _text="valueText" _ct="valueCt")
 	)
 )

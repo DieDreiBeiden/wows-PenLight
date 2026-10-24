@@ -179,13 +179,14 @@ def ui_payload(results):
     """Daten fuer PenLight.unbound: Schluessel = Avatar-ID (als Text) bzw. Spielername.
 
     Wert: [granate, schild, [ich->ziel bug, mitte, deck, ziel->ich bug, mitte, deck],
-           bild_granate, bild_schild]  (Bildnamen ohne .png, '' = keine Daten)
+           bild_granate, bild_schild, werte]  (Bildnamen ohne .png, '' = keine Daten;
+           werte = logic.numbers, mm fuer die Alt-Ansicht der Status-Kapseln)
     Granate und Ziel-Teil gelten fuer die geladene Munition ('ammo': ap / he / sap); bei HE/SAP
     ist die Granate green / bow / deck / red und der Ziel-Teil der Durchschlag statt Overmatch.
     """
     by_id, by_name = {}, {}
     for pid, r in results.items():
-        pair = [r['attack'], r['defense'], r['detail']] + list(detail_icons(r['detail']))
+        pair = [r['attack'], r['defense'], r['detail']] + list(detail_icons(r['detail'])) + [r['numbers']]
         by_id[str(pid)] = pair
         if r.get('player'):
             by_name[r['player']] = pair
