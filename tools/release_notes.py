@@ -3,12 +3,14 @@
 
     python3 -I tools/release_notes.py pick GEWUENSCHT REPLACE [TAG ...]   -> VERSION=… / PREVIOUS=…
     python3 -I tools/release_notes.py set-version MANIFEST VERSION
+    python3 -I tools/release_notes.py set-readme VERSION PRERELEASE README.md [README.de.md ...]
     python3 -I tools/release_notes.py notes VERSION VORHERIGER_TAG OWNER/REPO > notes.md
     python3 -I tools/release_notes.py finalize VERSION DATUM
 
 Version: GEWUENSCHT (z. B. 0.4.0) oder leer = naechste Patch-Version nach dem neuesten Tag; leer mit
 REPLACE=true = neuester Tag (Release wird ersetzt). 'set-version' schreibt sie ins ModForge-Manifest,
-damit die Mod immer die Release-Version meldet.
+damit die Mod immer die Release-Version meldet. 'set-readme' schreibt sie in die Zeile
+'Current version' / 'Aktuelle Version' der READMEs (PRERELEASE true: mit Hinweis Vorabversion).
 Release-Text: neue Eintraege kommen unter '## Unreleased' in docs/CHANGELOG.md. 'notes' nimmt den
 Abschnitt '## VERSION', falls es ihn schon gibt (Release wird ersetzt), sonst 'Unreleased'.
 'finalize' macht aus 'Unreleased' den Abschnitt '## VERSION – DATUM' und legt ein leeres
@@ -67,6 +69,22 @@ def container_version(xml):
 def set_container_version(xml, version):
     container_version(xml)
     return _MANIFEST_VERSION.sub(lambda m: m.group(1) + version + m.group(3), xml, count=1)
+
+
+README_VERSION = (
+    (re.compile(r'\*\*Current version: [0-9]+\.[0-9]+\.[0-9]+\*\*(?: \(pre-release\))?'),
+     '**Current version: %s**', ' (pre-release)'),
+    (re.compile(r'\*\*Aktuelle Version: [0-9]+\.[0-9]+\.[0-9]+\*\*(?: \(Vorabversion\))?'),
+     '**Aktuelle Version: %s**', ' (Vorabversion)'),
+)
+
+
+def set_readme_version(text, version, prerelease):
+    """Versionszeile der README (englisch oder deutsch) setzen; ohne Zeile -> ValueError."""
+    for pattern, label, pre in README_VERSION:
+        if pattern.search(text):
+            return pattern.sub(lambda m: label % version + (pre if prerelease else ''), text, count=1)
+    raise ValueError('README ohne Versionszeile (Current version / Aktuelle Version)')
 
 
 def sections(changelog):
@@ -134,6 +152,9 @@ def main(argv):
             print('VERSION=%s\nPREVIOUS=%s' % (version, previous))
         elif cmd == 'set-version' and len(argv) == 4:
             _write(argv[2], set_container_version(_read(argv[2]), argv[3]))
+        elif cmd == 'set-readme' and len(argv) >= 5:
+            for path in argv[4:]:
+                _write(path, set_readme_version(_read(path), argv[2], argv[3] == 'true'))
         elif cmd == 'notes' and len(argv) == 5:
             sys.stdout.write(build_notes(_read(TEMPLATE), _read(CHANGELOG), argv[2], argv[3], argv[4]))
         elif cmd == 'finalize' and len(argv) == 4:

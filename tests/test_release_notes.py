@@ -60,6 +60,17 @@ class ReleaseNotesTest(unittest.TestCase):
         self.assertEqual(rn.container_version(done), '0.4.0')
         self.assertIn('installer="&gt;=1.0.0"', done)
 
+    def test_readme_version(self):
+        en = '> **Current version: 0.4.0** (pre-release) - [download](x).'
+        self.assertEqual(rn.set_readme_version(en, '0.4.1', False), '> **Current version: 0.4.1** - [download](x).')
+        de = '> **Aktuelle Version: 0.4.0** - x'
+        self.assertEqual(rn.set_readme_version(de, '1.0.0', True), '> **Aktuelle Version: 1.0.0** (Vorabversion) - x')
+        with self.assertRaises(ValueError):
+            rn.set_readme_version('no version line', '0.4.1', False)
+        for name in ('README.md', 'README.de.md'):
+            with open(os.path.join(rn.ROOT, name), encoding='utf-8') as f:
+                rn.set_readme_version(f.read(), '9.9.9', True)
+
     def test_pick_version(self):
         tags = ['v0.3.0', 'v0.3.1', 'v0.3.2', 'test-x']
         self.assertEqual(rn.pick_version('', False, tags), ('0.3.3', 'v0.3.2'))     # naechster Patch

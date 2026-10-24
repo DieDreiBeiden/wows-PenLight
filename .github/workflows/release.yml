@@ -2,7 +2,8 @@
 # Version: Eingabe oder leer = naechste Patch-Version nach dem neuesten Tag (mit "replace": der
 # neueste Tag). Der Workflow schreibt sie in ForgeBlueprints/PenLightContainer.xml auf main und
 # main-standalone, damit die Mod immer die Release-Version an ModForge meldet, und schiebt "Unreleased"
-# in docs/CHANGELOG.md unter die neue Version (Commits von github-actions auf beide Branches).
+# in docs/CHANGELOG.md unter die neue Version; die Zeile 'Current version' / 'Aktuelle Version' der
+# READMEs folgt ebenfalls (Commits von github-actions auf beide Branches).
 # Danach prueft er beide Fassungen (Tests, Main.py aktuell), baut die Zips aus diesen Commits und legt
 # Tag v<Version> samt Release an. Release-Text: Vorlage docs/RELEASE_NOTES.md mit den Eintraegen aus
 # docs/CHANGELOG.md und einem Vergleichslink zum vorherigen Release.
@@ -78,12 +79,14 @@ jobs:
           git worktree add -B main-standalone ../standalone origin/main-standalone
           python3 -I tools/release_notes.py set-version "$MANIFEST" "$VERSION"
           python3 -I tools/release_notes.py set-version "../standalone/$MANIFEST" "$VERSION"
+          python3 -I tools/release_notes.py set-readme "$VERSION" "$PRERELEASE" README.md README.de.md
+          python3 -I tools/release_notes.py set-readme "$VERSION" "$PRERELEASE" ../standalone/README.md ../standalone/README.de.md
           python3 -I tools/release_notes.py finalize "$VERSION" "$(date -u +%F)"
           if ! git diff --quiet; then
-            git commit -m "Release $VERSION: Version und Changelog" -- "$MANIFEST" docs/CHANGELOG.md
+            git commit -m "Release $VERSION: Version und Changelog" -- "$MANIFEST" docs/CHANGELOG.md README.md README.de.md
           fi
           if ! git -C ../standalone diff --quiet; then
-            git -C ../standalone commit -m "Release $VERSION: Version" -- "$MANIFEST"
+            git -C ../standalone commit -m "Release $VERSION: Version" -- "$MANIFEST" README.md README.de.md
           fi
           if [ "$DRY_RUN" = "true" ]; then
             echo "Probelauf: Commits nur lokal im Lauf, kein Push"
