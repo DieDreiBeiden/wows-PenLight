@@ -44,13 +44,16 @@ LOG_KEEP = 300
 #   Pos1          Position zuruecksetzen
 #   D             Detailansicht: mit Alt <-> immer
 #   F             Farben: Standard <-> Farbenblind
+#   S             Darstellung: Klassisch -> Modern -> Nur Text
 #   + / -         Groesse in 0,1-Schritten (0,5 - 2,0)
 # Zusaetzlich mit der Maus ziehen (Mauszeiger z. B. per Strg): Main.swf legt eine unsichtbare
 # Greifflaeche ueber Granate | Schild (FlashAPI, Kanaele omSetHandle / omDragMove / omDragEnd).
 # Gespeichert im Spielverzeichnis unter ModPrefs/ (ueberlebt Patches), sonst im Mod-Ordner.
 # Ist TTaroModUtils installiert, gilt dessen Optionsseite (ModForge haengt dann die TTaro-Huelle
 # ein); Tastenkuerzel und Greifflaeche von Main.swf sind dann aus, damit nichts doppelt greift.
-DEFAULT_SETTINGS = {'x': 30, 'y': 8, 'detailMode': 0, 'colorMode': 0, 'scale': 1.0}
+DEFAULT_SETTINGS = {'x': 30, 'y': 8, 'detailMode': 0, 'colorMode': 0, 'scale': 1.0, 'style': 1}
+# Darstellung (wie defaultStyle in PenLight.unbound): 0 Klassisch, 1 Modern, 2 Nur Text
+STYLES = 3
 POSITION_STEP = 5
 SCALE_STEP = 0.1
 SCALE_RANGE = (0.5, 2.0)
@@ -58,9 +61,11 @@ SETTINGS_NAME = 'diedreibeiden-penlight.json'
 # Vom Mod-Ordner res_mods/PnFMods/PenLight aus: PnFMods, res_mods, <Build>, bin, Spielverzeichnis.
 SETTINGS_DIRS = ('/../../../../../ModPrefs', '')
 
-# Groesse der Greifflaeche bei Skalierung 1: Granate | Schild (2 x 29 px + 4 px Abstand),
-# dazu ein Rand (links, oben, rechts, unten) wie dragPad* in PenLight.unbound
-HANDLE_SIZE = (62, 29)
+# Groesse der Greifflaeche bei Skalierung 1 je Darstellung (wie PENLIGHT_SETTINGS in PenLight.unbound):
+# Klassisch Granate | Schild (2 x 29 px + 4 px Abstand), Modern zwei Kapseln (72 x 18, 4 px Abstand),
+# Nur Text zwei Zeilen (textWidth x 2 x textLineHeight); dazu ein Rand (links, oben, rechts, unten)
+# wie dragPad*
+HANDLE_SIZES = {0: (62, 29), 1: (72, 40), 2: (180, 42)}
 HANDLE_PAD = (4, 12, 12, 10)
 
 _state = {'data': None, 'disabled': False, 'results': None, 'log': [], 'ui_id': None,
@@ -232,13 +237,15 @@ def _settings_paths():
 def clean_settings(raw):
     """Gelesene Werte pruefen; Unbekanntes oder Kaputtes faellt auf den Standard zurueck."""
     out = dict(DEFAULT_SETTINGS)
-    for key in ('x', 'y', 'detailMode', 'colorMode'):
+    for key in ('x', 'y', 'detailMode', 'colorMode', 'style'):
         try:
             out[key] = int(raw[key])
         except Exception:
             pass
     out['detailMode'] = 1 if out['detailMode'] == 1 else 0
     out['colorMode'] = 1 if out['colorMode'] == 1 else 0
+    if out['style'] not in range(STYLES):
+        out['style'] = DEFAULT_SETTINGS['style']
     try:
         out['scale'] = min(max(round(float(raw['scale']), 2), SCALE_RANGE[0]), SCALE_RANGE[1])
     except Exception:
@@ -290,6 +297,7 @@ def _key_actions():
         (('KEY_UPARROW',), ('move', 0, -1)), (('KEY_DOWNARROW',), ('move', 0, 1)),
         (('KEY_HOME',), ('reset',)),
         (('KEY_D',), ('toggle', 'detailMode')), (('KEY_F',), ('toggle', 'colorMode')),
+        (('KEY_S',), ('cycle', 'style', STYLES)),
         (('KEY_EQUALS',), ('scale', 1)), (('KEY_ADD', 'KEY_NUMPADPLUS'), ('scale', 1)),
         (('KEY_MINUS',), ('scale', -1)), (('KEY_NUMPADMINUS', 'KEY_SUBTRACT'), ('scale', -1)),
     ]
@@ -311,6 +319,8 @@ def apply_action(settings, action, fine=False):
         settings['x'], settings['y'] = DEFAULT_SETTINGS['x'], DEFAULT_SETTINGS['y']
     elif kind == 'toggle':
         settings[action[1]] = 1 - settings[action[1]]
+    elif kind == 'cycle':
+        settings[action[1]] = (settings[action[1]] + 1) % action[2]
     elif kind == 'scale':
         value = round(settings['scale'] + action[1] * SCALE_STEP, 2)
         settings['scale'] = min(max(value, SCALE_RANGE[0]), SCALE_RANGE[1])
@@ -340,10 +350,11 @@ def _update_handle():
         return
     s = _settings()
     left, top, right, bottom = HANDLE_PAD
+    width, height = HANDLE_SIZES.get(s['style'], HANDLE_SIZES[DEFAULT_SETTINGS['style']])
     try:
         flash.call('omSetHandle', [s['x'] - left * s['scale'], s['y'] - top * s['scale'],
-                                   (HANDLE_SIZE[0] + left + right) * s['scale'],
-                                   (HANDLE_SIZE[1] + top + bottom) * s['scale'],
+                                   (width + left + right) * s['scale'],
+                                   (height + top + bottom) * s['scale'],
                                    bool(_state['in_battle']) and not ttaro_installed()])
     except Exception as e:
         _log('flash handle update failed: %r' % (e,))
@@ -379,13 +390,14 @@ def ui_payload(results):
     """Daten fuer PenLight.unbound: Schluessel = Avatar-ID (als Text) bzw. Spielername.
 
     Wert: [granate, schild, [ich->ziel bug, mitte, deck, ziel->ich bug, mitte, deck],
-           bild_granate, bild_schild]  (Bildnamen ohne .png, '' = keine Daten)
+           bild_granate, bild_schild, werte]  (Bildnamen ohne .png, '' = keine Daten;
+           werte = logic.numbers, mm fuer die Alt-Ansicht der Darstellungen Modern und Nur Text)
     Granate und Ziel-Teil gelten fuer die geladene Munition ('ammo': ap / he / sap); bei HE/SAP
     ist die Granate green / bow / deck / red und der Ziel-Teil der Durchschlag statt Overmatch.
     """
     by_id, by_name = {}, {}
     for pid, r in results.items():
-        pair = [r['attack'], r['defense'], r['detail']] + list(detail_icons(r['detail']))
+        pair = [r['attack'], r['defense'], r['detail']] + list(detail_icons(r['detail'])) + [r['numbers']]
         by_id[str(pid)] = pair
         if r.get('player'):
             by_name[r['player']] = pair
@@ -498,7 +510,7 @@ def _register_flash():
         return 'failed: %r' % (e,)
 
 
-_log('Main.py loaded, game version %s, getModDir %s -> %s, keys %d/11, flash %s, settings via %s'
+_log('Main.py loaded, game version %s, getModDir %s -> %s, keys %d/12, flash %s, settings via %s'
      % (utils.getGameVersion(), utils.getModDir(), _mod_dir(), len(_key_actions()), _register_flash(),
         'TTaroModUtils' if ttaro_installed() else 'keys/Main.swf'))
 events.onBattleShown(_on_battle_shown)
