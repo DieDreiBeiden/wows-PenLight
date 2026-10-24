@@ -280,7 +280,9 @@ def _ship_record(ships, player_id):
     if row is None:
         return name, None
     mid = row[4] if len(row) > 4 else None
-    return name, {'class': row[0], 'bow': row[1], 'deck': row[2], 'caliber': row[3], 'mid': mid}
+    airstrike = row[5] if len(row) > 5 else None
+    return name, {'class': row[0], 'bow': row[1], 'deck': row[2], 'caliber': row[3], 'mid': mid,
+                  'airstrike': airstrike}
 
 
 def _self_player_id(players):
@@ -311,7 +313,7 @@ def compute():
         return {}
     own_team = _get(players[own_id], 'teamId')
     own_name, me = _ship_record(ships, own_id)
-    _log('own ship %s, team %s' % (own_name, own_team))
+    _log('own ship %s, team %s, airstrike HE %s mm' % (own_name, own_team, me and me.get('airstrike')))
     if me is None:
         _log('no data for own ship %s' % own_name)
         return {}
@@ -446,6 +448,7 @@ def _selected_ammo():
 def _on_battle_shown(*args, **kwargs):
     _state['in_battle'] = True
     _selected_ammo()
+    _log('probe battle shown -> %s' % _probe_selected())
     _refresh()
 
 
@@ -454,6 +457,83 @@ def _on_battle_quit(*args, **kwargs):
     _state['in_battle'] = False
     _state['ammo'] = ('ap', None, False)
     _remove_ui()
+
+
+# Probe Luftschlag (Branch Test): welche Schnittstellen bietet der Client fuer die Waffenwahl?
+# Schreibt beim Laden die oeffentlichen Namen von battle/events/utils/constants und die Werte von
+# constants.WeaponType ins Log, haengt einen Logger an alle Ereignisse zu Waffe/Munition/Luftschlag
+# und protokolliert bei jedem Ereignis die gewaehlte Munition je Waffentyp (nur bei Aenderung).
+# Fehlt dir() in der Sandbox (wie globals()), gelten die Kandidatenlisten.
+PROBE_EVENT_WORDS = ('eapon', 'mmo', 'irSupport', 'irsupport', 'onsumable', 'Key')
+PROBE_EVENTS = ('onWeaponChanged', 'onWeaponTypeChanged', 'onSelectedWeaponChanged', 'onAirSupportAmmoChanged',
+                'onTorpedoAmmoChanged', 'onConsumableUsed', 'onKeyEvent')
+PROBE_WEAPON_TYPES = ('ARTILLERY', 'ATBA', 'TORPEDO', 'TORPEDOES', 'AIRPLANES', 'AIRSUPPORT', 'AIR_SUPPORT',
+                      'DEPTH_CHARGES', 'DEPTHCHARGES', 'PINGER', 'SUBMARINE_TORPEDO', 'MISSILES', 'SECONDARY')
+PROBE_SELECTED = ('getSelectedWeaponType', 'getSelectedWeapon', 'getCurrentWeaponType', 'getWeaponType')
+
+
+def _probe_names(obj):
+    try:
+        return sorted(a for a in dir(obj) if not a.startswith('_'))
+    except Exception:
+        return None
+
+
+def _probe_selected():
+    out = []
+    for name, value in sorted(_state.get('probe_types', {}).items(), key=lambda kv: kv[1]):
+        try:
+            ammo_id = battle.getSelectedAmmoId(value)
+            params = battle.getAmmoParams(ammo_id) if ammo_id is not None else None
+            out.append('%s=%r/%s/%s' % (name, ammo_id, _get(params, 'ammoType'), _get(params, 'alphaPiercingHE')))
+        except Exception as e:
+            out.append('%s=err %s' % (name, type(e).__name__))
+    for fn in PROBE_SELECTED:
+        f = getattr(battle, fn, None)
+        if f is not None:
+            try:
+                out.append('%s()=%r' % (fn, f()))
+            except Exception as e:
+                out.append('%s()=err %s' % (fn, type(e).__name__))
+    return ', '.join(out)
+
+
+def _probe_handler(name):
+    def handler(*args, **kwargs):
+        try:
+            state = _probe_selected()
+            line = '%s %r -> %s' % (name, args[:3], state)
+            if name != 'onKeyEvent' or state != _state.get('probe_last'):
+                _log('probe event ' + line)
+            _state['probe_last'] = state
+        except Exception as e:
+            _log('probe handler %s failed: %r' % (name, e))
+    return handler
+
+
+def _probe_api():
+    for label, obj in (('battle', battle), ('events', events), ('utils', utils), ('constants', constants)):
+        names = _probe_names(obj)
+        _log('probe %s: %s' % (label, ', '.join(names) if names is not None else 'dir() unavailable'))
+    weapon_type = getattr(constants, 'WeaponType', None) if constants is not None else None
+    types = {}
+    for name in _probe_names(weapon_type) or PROBE_WEAPON_TYPES:
+        value = getattr(weapon_type, name, None)
+        if isinstance(value, int):
+            types[name] = value
+    _state['probe_types'] = types
+    _log('probe WeaponType: %s' % sorted(types.items(), key=lambda kv: kv[1]))
+    names = _probe_names(events)
+    candidates = [n for n in (names or PROBE_EVENTS)
+                  if n.startswith('on') and any(w in n for w in PROBE_EVENT_WORDS) and n != 'onArtilleryAmmoChanged']
+    registered = []
+    for name in candidates:
+        try:
+            getattr(events, name)(_probe_handler(name))
+            registered.append(name)
+        except Exception as e:
+            _log('probe event %s not registered: %r' % (name, e))
+    _log('probe events registered: %s' % ', '.join(registered))
 
 
 _log('Main.py loaded, game version %s, getModDir %s -> %s'
@@ -465,3 +545,7 @@ try:
     events.onArtilleryAmmoChanged(on_ammo_changed)
 except Exception as e:
     _log('ammo events unavailable: %r' % (e,))
+try:
+    _probe_api()
+except Exception as e:
+    _log('probe failed: %r' % (e,))

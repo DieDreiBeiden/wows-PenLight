@@ -28,6 +28,7 @@ SHIPS = {
     'PBSC110_Minotaur': ['Cruiser', 16.0, 16.0, 152.0],
     'PASC510_Alaska': ['Cruiser', 27.0, 36.0, 305.0],
     'PASD013_Gearing': ['Destroyer', 19.0, 19.0, 127.0],
+    'PHSC010_Utrecht': ['Cruiser', 25.0, 30.0, 152.0, None, 36.9],   # Luftschlag HE 36,9 mm
 }
 VERSION = '15,9,0,13357625'
 # Granaten wie battle.getAmmoParams: 1 = AP, 2 = HE (Hawaii 127 mm: 21 mm), 3 = SAP 30 mm, 4 = HE 36 mm
@@ -41,7 +42,7 @@ class ModTest(unittest.TestCase):
     def run_mod(self, own_ship, enemies, data_version=VERSION, ammo=1, he_coeff=1.0):
         root = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, root)
-        mod_dir = os.path.join(root, 'PenLight')
+        mod_dir = self.mod_dir = os.path.join(root, 'PenLight')
         wrong_dir = os.path.join(root, 'OvermatcherProbe')  # getModDir-Befund im Client
         os.mkdir(mod_dir)
         os.mkdir(wrong_dir)
@@ -79,7 +80,8 @@ class ModTest(unittest.TestCase):
             'events': Obj(onBattleShown=lambda f: handlers.setdefault('shown', f),
                           onPlayersListUpdated=lambda f: handlers.setdefault('players', f),
                           onBattleQuit=lambda f: handlers.setdefault('quit', f),
-                          onArtilleryAmmoChanged=lambda f: handlers.setdefault('ammo', f)),
+                          onArtilleryAmmoChanged=lambda f: handlers.setdefault('ammo', f),
+                          onWeaponTypeChanged=lambda f: handlers.setdefault('weapon', f)),
         }
         self.handlers = handlers
         # wie die Client-Sandbox: kein globals()/locals()/vars() (python.log 15.9)
@@ -114,6 +116,16 @@ class ModTest(unittest.TestCase):
             'byName': {'bot10': ['red', 'yellow', [0, 0, 0, 1, 1, 0], 'detail_target_r_r_r', 'detail_me_g_g_r',
                                  [32, 32, 57, 27, 28, 36, 127, 8, 460, 32]]},
         }))
+
+    def test_probe_logs_api_and_weapon_events(self):
+        # Probe Luftschlag: Schnittstellen ins Log, Logger auf Waffen-Ereignisse, Luftschlag des eigenen Schiffs
+        self.run_mod('PHSC010_Utrecht', ['PJSB018_Yamato_1944'])
+        self.assertIn("probe WeaponType: [('ARTILLERY', 0)]", self.log)
+        self.assertIn('probe events registered: onWeaponTypeChanged', self.log)
+        self.assertIn('airstrike HE 36.9 mm', self.log)
+        self.handlers['weapon'](0, 12)
+        with open(os.path.join(self.mod_dir, 'penlight_log.txt')) as f:
+            self.assertIn('probe event onWeaponTypeChanged (0, 12) -> ARTILLERY=', f.read())
 
     def test_he_rates_destroyer(self):
         # Hawaii HE 21 mm gegen Gearing (19 mm): gruen; Schild grau, weil kein Kreuzer/Schlachtschiff
