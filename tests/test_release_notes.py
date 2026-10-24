@@ -92,7 +92,7 @@ class ReleaseNotesTest(unittest.TestCase):
         with open(os.path.join(rn.ROOT, 'mod', 'res_mods', 'ForgeBlueprints', 'PenLightContainer.xml')) as f:
             version = rn.container_version(f.read())
         notes = rn.build_notes(template, changelog, version, 'v0.0.0', 'o/r')
-        self.assertIn('PenLight-%s-standalone.zip' % version, notes)
+        self.assertIn('PenLight-%s.zip' % version, notes)
 
 
 if __name__ == '__main__':

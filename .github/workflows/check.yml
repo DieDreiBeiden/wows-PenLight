@@ -1,13 +1,12 @@
-# Pruefung bei jedem Push (gleiche Datei auf main, main-standalone und Test):
+# Pruefung bei jedem Push (main und Test):
 # - Tests und Main.py aktuell (Python 3)
 # - Main.py und PnFModsLoader.py kompilieren mit Python 2.7 (Spiel-Client, ModsAPI v1.0)
-# - main / main-standalone: gemeinsame Dateien gleich (Ausnahmen in .github/edition-files.txt)
 # - Test: Probe-Paket res_mods als Download am Lauf (14 Tage), kein Release
 name: Check
 
 on:
   push:
-    branches: [main, main-standalone, Test]
+    branches: [main, Test]
   workflow_dispatch:
 
 permissions:
@@ -48,28 +47,6 @@ jobs:
                           print('::error file=%s,line=%s::Python 2.7: %s' % (path, e.lineno, e.msg))
           sys.exit(1 if bad else 0)
           "
-
-  editions:
-    if: github.ref_name == 'main' || github.ref_name == 'main-standalone'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Gemeinsame Dateien main / main-standalone
-        run: |
-          allowed=$(grep -v '^\s*\(#\|$\)' .github/edition-files.txt | sort -u)
-          diff=$(git diff --name-only origin/main origin/main-standalone | sort -u)
-          unexpected=$(comm -23 <(echo "$diff") <(echo "$allowed") | grep . || true)
-          if [ -n "$unexpected" ]; then
-            echo "Unterschiede ausserhalb von .github/edition-files.txt:"
-            for f in $unexpected; do
-              echo "::error file=$f::$f unterscheidet sich zwischen main und main-standalone"
-            done
-            echo "Uebernehmen (Cherry-Pick) oder, falls gewollt, in .github/edition-files.txt eintragen."
-            exit 1
-          fi
-          echo "$(echo "$diff" | grep -c . || true) gewollte Unterschiede, sonst gleich"
 
   probe:
     if: github.ref_name == 'Test'

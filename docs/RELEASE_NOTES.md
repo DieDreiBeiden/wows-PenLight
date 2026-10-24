@@ -4,17 +4,13 @@
 
 ## Downloads
 
-Install only **one** of the two:
-
-- `PenLight-{{VERSION}}-ttaro.zip` – needs [ModForge](https://github.com/AndrewTaro/ModForge) and [TTaroModUtils](https://github.com/AndrewTaro/TTaroModUtils)
-- `PenLight-{{VERSION}}-standalone.zip` – needs [ModForge](https://github.com/AndrewTaro/ModForge); TTaroModUtils optional
+- `PenLight-{{VERSION}}.zip` – needs [ModForge](https://github.com/AndrewTaro/ModForge) and [TTaroModUtils](https://github.com/AndrewTaro/TTaroModUtils)
 
 Unzip into `World of Warships/bin/<highest number>/` and overwrite existing PenLight files. Tested with EU client 15.9.0.13357625.
 
 ## Known issues
 
 - IFHE detection is not yet confirmed in game.
-- Standalone without TTaro: mouse drag is not yet confirmed in game, and the invisible drag area stays active in the third-person view.
 
 {{COMPARE}}
 

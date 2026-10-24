@@ -1,13 +1,13 @@
 # Release von Hand ausloesen: Actions -> Release -> Run workflow (auf main).
 # Version: Eingabe oder leer = naechste Patch-Version nach dem neuesten Tag (mit "replace": der
-# neueste Tag). Der Workflow schreibt sie in ForgeBlueprints/PenLightContainer.xml auf main und
-# main-standalone, damit die Mod immer die Release-Version an ModForge meldet, und schiebt "Unreleased"
-# in docs/CHANGELOG.md unter die neue Version; die Zeile 'Current version' / 'Aktuelle Version' der
-# READMEs folgt ebenfalls (Commits von github-actions auf beide Branches).
-# Danach prueft er beide Fassungen (Tests, Main.py aktuell), baut die Zips aus diesen Commits und legt
-# Tag v<Version> samt Release an. Release-Text: Vorlage docs/RELEASE_NOTES.md mit den Eintraegen aus
+# neueste Tag). Der Workflow schreibt sie in ForgeBlueprints/PenLightContainer.xml, damit die Mod
+# immer die Release-Version an ModForge meldet, und schiebt "Unreleased" in docs/CHANGELOG.md unter
+# die neue Version; die Zeile 'Current version' / 'Aktuelle Version' der READMEs folgt ebenfalls
+# (Commit von github-actions auf main). Danach prueft er Tests und Main.py, baut die Zip
+# PenLight-<Version>.zip (TTaro-Fassung; die Fassung ohne TTaro liegt nur im Branch Test-Standalone)
+# aus diesem Commit und legt Tag v<Version> samt Release an. Release-Text: Vorlage docs/RELEASE_NOTES.md mit den Eintraegen aus
 # docs/CHANGELOG.md und einem Vergleichslink zum vorherigen Release.
-# Probelauf (dry_run): alles wie oben, aber ohne Push und ohne Release; Zips und Release-Text liegen
+# Probelauf (dry_run): alles wie oben, aber ohne Push und ohne Release; Zip und Release-Text liegen
 # dann als Download am Lauf (7 Tage), der Text steht zusaetzlich in der Zusammenfassung des Laufs.
 name: Release
 
@@ -76,42 +76,27 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898297+github-actions[bot]@users.noreply.github.com'
-          git worktree add -B main-standalone ../standalone origin/main-standalone
           python3 -I tools/release_notes.py set-version "$MANIFEST" "$VERSION"
-          python3 -I tools/release_notes.py set-version "../standalone/$MANIFEST" "$VERSION"
           python3 -I tools/release_notes.py set-readme "$VERSION" "$PRERELEASE" README.md README.de.md
-          python3 -I tools/release_notes.py set-readme "$VERSION" "$PRERELEASE" ../standalone/README.md ../standalone/README.de.md
           python3 -I tools/release_notes.py finalize "$VERSION" "$(date -u +%F)"
           if ! git diff --quiet; then
             git commit -m "Release $VERSION: Version und Changelog" -- "$MANIFEST" docs/CHANGELOG.md README.md README.de.md
-          fi
-          if ! git -C ../standalone diff --quiet; then
-            git -C ../standalone commit -m "Release $VERSION: Version" -- "$MANIFEST" README.md README.de.md
           fi
           if [ "$DRY_RUN" = "true" ]; then
             echo "Probelauf: Commits nur lokal im Lauf, kein Push"
             exit 0
           fi
-          git -C ../standalone push origin HEAD:main-standalone
           git push origin HEAD:main
 
-      - name: Tests und Main.py (main)
+      - name: Tests und Main.py
         run: |
           python3 -m unittest discover -s tests
           python3 -I tools/build_mod.py
           git diff --exit-code -- mod/res_mods/PnFMods/PenLight/Main.py
 
-      - name: Tests und Main.py (main-standalone)
+      - name: Paket bauen
         run: |
-          cd ../standalone
-          python3 -m unittest discover -s tests
-          python3 -I tools/build_mod.py
-          git diff --exit-code -- mod/res_mods/PnFMods/PenLight/Main.py
-
-      - name: Pakete bauen
-        run: |
-          git archive --format=zip -o "dist/PenLight-$VERSION-ttaro.zip" HEAD:mod res_mods
-          git -C ../standalone archive --format=zip -o "$PWD/dist/PenLight-$VERSION-standalone.zip" HEAD:mod res_mods
+          git archive --format=zip -o "dist/PenLight-$VERSION.zip" HEAD:mod res_mods
           for z in dist/*.zip; do
             unzip -l "$z" | tail -1
             unzip -p "$z" "res_mods/ForgeBlueprints/PenLightContainer.xml" | grep -q "version=\"$VERSION\"" \
