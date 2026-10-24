@@ -42,9 +42,20 @@
 	# Zusatzplakette IFHE (tag_ifhe.png) links unten an der HE-Granate, wenn IFHE erkannt ist
 	badgeOffsetX: -3,
 	badgeOffsetY: 22,
-	# Probe (Branch Test): Status-Kapseln statt Granate | Schild (capsule/*.png, tools/make_capsule_icons.py).
-	# Oben ich -> Ziel, unten Ziel -> ich; drei Punkte = Bug/Heck, Mitte, Deck. false = bisherige Symbole.
-	useCapsules: true,
+	# Darstellung (Option in TTaro Mod Config, penlight.style), Rueckfall ohne gespeicherte Einstellung:
+	# 0 = Klassisch (Granate | Schild), 1 = Modern (Status-Kapseln, capsule/*.png aus
+	# tools/make_capsule_icons.py; oben ich -> Ziel, unten Ziel -> ich, drei Punkte = Bug/Heck, Mitte, Deck),
+	# 2 = Nur Text (zwei Zeilen in der Ampelfarbe)
+	defaultStyle: 1,
+	# Nur Text: Zeilenhoehe und Breite der Greifflaeche; Alt-Ansicht mit Kopfzeile, Zonenname und Wert
+	textLineHeight: 18,
+	textWidth: 170,
+	textAltWidth: 236,
+	textAltHeight: 48,
+	textAltGap: 6,
+	textZoneStep: 78,
+	textNameTop: 18,
+	textValueTop: 32,
 	capsuleHeight: 18,
 	capsuleGap: 4,
 	# Breite der Kapsel-Bilder (px): normal, mit IFHE-Kennung breiter (feste Groesse wie bei den Symbolen)
@@ -127,6 +138,20 @@
 	grey:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:128,greenOffset:132,blueOffset:136,alphaOffset:0 },
 	base:  { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:40,greenOffset:42,blueOffset:44,alphaOffset:0 }
 })
+# Einfaerbung der Texte (Option "Nur Text"): weisse Schrift x Multiplikator = Ampelfarbe; anders als bei
+# den Silhouetten ohne Offset, damit der dunkle Schatten der Schrift ($FontEnableReadability) dunkel bleibt.
+(def constant PENLIGHT_TEXT_CT {
+	green:  { redMultiplier:0.24,greenMultiplier:0.86,blueMultiplier:0.35,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	yellow: { redMultiplier:1,greenMultiplier:0.55,blueMultiplier:0,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	red:    { redMultiplier:0.91,greenMultiplier:0.28,blueMultiplier:0.2,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	grey:   { redMultiplier:0.62,greenMultiplier:0.64,blueMultiplier:0.66,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 }
+})
+(def constant PENLIGHT_TEXT_CT_CB {
+	green:  { redMultiplier:0.17,greenMultiplier:0.55,blueMultiplier:0.91,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	yellow: { redMultiplier:0.94,greenMultiplier:0.89,blueMultiplier:0.26,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	red:    { redMultiplier:0.84,greenMultiplier:0.37,blueMultiplier:0,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
+	grey:   { redMultiplier:0.62,greenMultiplier:0.64,blueMultiplier:0.66,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 }
+})
 # Farbenblind-Schema (AMPEL_CB in tools/make_ampel_icons.py): blau = Overmatch, orange = kein Overmatch
 (def constant PENLIGHT_CT_CB {
 	green: { redMultiplier:0,greenMultiplier:0,blueMultiplier:0,alphaMultiplier:1,redOffset:43,greenOffset:140,blueOffset:232,alphaOffset:0 },
@@ -169,6 +194,7 @@
 (def constant PENLIGHT_PREF_SCALE 'diedreibeiden.penlight.scale')
 (def constant PENLIGHT_PREF_COLOR_MODE 'diedreibeiden.penlight.colorMode')
 (def constant PENLIGHT_PREF_DETAIL_MODE 'diedreibeiden.penlight.detailMode')
+(def constant PENLIGHT_PREF_STYLE 'diedreibeiden.penlight.style')
 # Seite in TTaro Mod Config = author + '.' + slug aus dem Schema (fuer das eigene Zahnrad)
 (def constant PENLIGHT_MOD_SLUG 'diedreibeiden.penlight')
 
@@ -228,6 +254,11 @@
 		(var isColorBlind:bool = "null != colorModePref && null != colorModePref.value ? colorModePref.value == 1 : false")
 		(macro TT_GET_PREF _varName="'detailModePref'" _key="PENLIGHT_PREF_DETAIL_MODE")
 		(var isDetailAlways:bool = "null != detailModePref && null != detailModePref.value ? detailModePref.value == 1 : false")
+		(macro TT_GET_PREF _varName="'stylePref'" _key="PENLIGHT_PREF_STYLE")
+		(var displayStyle:number = "null != stylePref && null != stylePref.value ? stylePref.value : PENLIGHT_SETTINGS.defaultStyle")
+		(var isClassic:bool = "displayStyle == 0")
+		(var isModern:bool = "displayStyle == 1")
+		(var isTextOnly:bool = "displayStyle == 2")
 		# Farbschema: Dateipraefix der Icons und Einfaerbung der Silhouetten
 		(var palettePrefix:str = "isColorBlind ? 'cb_' : ''")
 		(var palette:dict = "isColorBlind ? PENLIGHT_CT_CB : PENLIGHT_CT")
@@ -303,12 +334,15 @@
 		(var dMid:number = "detail[4] == -1 ? (detail[3] == 1 && detail[5] == 1 ? 1 : 0) : detail[4]")
 		(var attackBits:str = "(detail[0] == 1 ? '1' : '0') + (aMid == 1 ? '1' : '0') + (detail[2] == 1 ? '1' : '0')")
 		(var defenseBits:str = "(detail[3] == 1 ? '1' : '0') + (dMid == 1 ? '1' : '0') + (detail[5] == 1 ? '1' : '0')")
+		# nicht bewertet (Python: 'grey', Zonen -1, z. B. Schild gegen Traeger) -> grau, nicht "000"
+		(var attackRated:bool = "hasVerdict && verdict[0] != 'grey'")
+		(var defenseRated:bool = "hasVerdict && verdict[1] != 'grey'")
 		(var capsuleAmmo:str = "hasIfhe ? 'he_if' : ammo")
-		(var attackCapsule:str = "PENLIGHT_ICON_PATH + 'capsule/atk_' + capsuleAmmo + '_' + (hasVerdict ? palettePrefix + attackBits : 'grey') + '.png'")
-		(var defenseCapsule:str = "PENLIGHT_ICON_PATH + 'capsule/def_' + (hasVerdict ? palettePrefix + defenseBits : 'grey') + '.png'")
+		(var attackCapsule:str = "PENLIGHT_ICON_PATH + 'capsule/atk_' + capsuleAmmo + '_' + (attackRated ? palettePrefix + attackBits : 'grey') + '.png'")
+		(var defenseCapsule:str = "PENLIGHT_ICON_PATH + 'capsule/def_' + (defenseRated ? palettePrefix + defenseBits : 'grey') + '.png'")
 		# Randfaelle: ich komme ueberall durch / Ziel kommt ueberall durch
-		(var attackGlow:str = "hasVerdict && attackBits == '111' ? PENLIGHT_ICON_PATH + 'capsule/glow_atk' + (hasIfhe ? '_if' : '') + (isColorBlind ? '_cb' : '') + '.png' : ''")
-		(var defenseGlow:str = "hasVerdict && defenseBits == '111' ? PENLIGHT_ICON_PATH + 'capsule/glow_def' + (isColorBlind ? '_cb' : '') + '.png' : ''")
+		(var attackGlow:str = "attackRated && attackBits == '111' ? PENLIGHT_ICON_PATH + 'capsule/glow_atk' + (hasIfhe ? '_if' : '') + (isColorBlind ? '_cb' : '') + '.png' : ''")
+		(var defenseGlow:str = "defenseRated && defenseBits == '111' ? PENLIGHT_ICON_PATH + 'capsule/glow_def' + (isColorBlind ? '_cb' : '') + '.png' : ''")
 		# Alt-Ansicht der Kapseln: Werte aus Main.py (logic.numbers), -1 = unbekannt
 		(var nums:array = "verdict.length >= 6 ? verdict[5] : [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1]")
 		# Texte der Alt-Ansicht in der Client-Sprache (texts/<sprache>/penlight.mo, tools/make_texts.py).
@@ -325,10 +359,34 @@
 		# Verteidigung: das Schild links steht fuer den Gegner, daher nur 'AP' (passt in 12 px)
 		(var defenseLine:str = "nums[8] > 0 ? 'AP ' + subst(txtMm, [nums[8]]) + '  /  ' + subst(txtOmUpTo, [nums[9]]) : txtNotRated")
 		(var zoneNames:array = "[txtBowStern, txtMidship, txtDeck]")
-		(var attackState:str = "attackBits == '111' ? 'green' : (attackBits == '000' ? 'red' : 'yellow')")
-		(var defenseState:str = "defenseBits == '111' ? 'red' : (defenseBits == '000' ? 'green' : 'yellow')")
+		(var attackState:str = "!attackRated ? 'grey' : (attackBits == '111' ? 'green' : (attackBits == '000' ? 'red' : 'yellow'))")
+		(var defenseState:str = "!defenseRated ? 'grey' : (defenseBits == '111' ? 'red' : (defenseBits == '000' ? 'green' : 'yellow'))")
 		(var altAmmoLabel:str = "toUpper(ammo)")
-		(var showAltCapsules:bool = "showDetail && PENLIGHT_SETTINGS.useCapsules")
+		(var showAltCapsules:bool = "showDetail && isModern")
+
+		# Option "Nur Text": eine Zeile je Richtung, Zonen mit Durchkommen bzw. Overmatch, Ampelfarbe
+		(var txtEnemyAp:str = "tr('IDS_PENLIGHT_ENEMY_AP') != 'IDS_PENLIGHT_ENEMY_AP' && tr('IDS_PENLIGHT_ENEMY_AP') != '' ? tr('IDS_PENLIGHT_ENEMY_AP') : 'Enemy AP'")
+		(var txtEverywhere:str = "tr('IDS_PENLIGHT_EVERYWHERE') != 'IDS_PENLIGHT_EVERYWHERE' && tr('IDS_PENLIGHT_EVERYWHERE') != '' ? tr('IDS_PENLIGHT_EVERYWHERE') : 'everywhere'")
+		(var txtNowhere:str = "tr('IDS_PENLIGHT_NOWHERE') != 'IDS_PENLIGHT_NOWHERE' && tr('IDS_PENLIGHT_NOWHERE') != '' ? tr('IDS_PENLIGHT_NOWHERE') : 'nowhere'")
+		(var a0:bool = "detail[0] == 1")
+		(var a1:bool = "aMid == 1")
+		(var a2:bool = "detail[2] == 1")
+		(var d0:bool = "detail[3] == 1")
+		(var d1:bool = "dMid == 1")
+		(var d2:bool = "detail[5] == 1")
+		(var attackZones:str = "!attackRated ? '-' : (attackBits == '111' ? txtEverywhere : (attackBits == '000' ? txtNowhere
+								: (a0 ? txtBowStern : '') + (a0 && (a1 || a2) ? ' + ' : '') + (a1 ? txtMidship : '') + (a1 && a2 ? ' + ' : '') + (a2 ? txtDeck : '')))")
+		(var defenseZones:str = "!defenseRated ? '-' : (defenseBits == '111' ? txtEverywhere : (defenseBits == '000' ? txtNowhere
+								: (d0 ? txtBowStern : '') + (d0 && (d1 || d2) ? ' + ' : '') + (d1 ? txtMidship : '') + (d1 && d2 ? ' + ' : '') + (d2 ? txtDeck : '')))")
+		(var textAttack:str = "toUpper(ammo) + (hasIfhe ? ' IFHE' : '') + ': ' + attackZones")
+		(var textDefense:str = "txtEnemyAp + ': ' + defenseZones")
+		(var textCt:dict = "isColorBlind ? PENLIGHT_TEXT_CT_CB : PENLIGHT_TEXT_CT")
+		(var attackCt:dict = "textCt[attackState]")
+		(var defenseCt:dict = "textCt[defenseState]")
+		(var greyCt:dict = "textCt['grey']")
+		(var textAttackHead:str = "toUpper(ammo) + (hasIfhe ? ' IFHE' : '') + '  ' + attackLine")
+		(var textDefenseHead:str = "defenseRated && nums[8] > 0 ? txtEnemyAp + ' ' + subst(txtMm, [nums[8]]) + '  /  ' + subst(txtOmUpTo, [nums[9]]) : txtEnemyAp + ': ' + txtNotRated")
+		(var showTextAlt:bool = "showDetail && isTextOnly")
 	)
 
 	(controller $Repeat renderer='PenLightTargetTracker'
@@ -358,12 +416,12 @@
 			)
 		)
 		(hblock
-			(bind visible "!showDetail && !PENLIGHT_SETTINGS.useCapsules")
+			(bind visible "!showDetail && isClassic")
 			(element PenLightIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey" _tag="attackTag" _badge="attackBadge")
 			(element PenLightIcon _url="defenseIcon" _mark="defenseMark" _pulseKey="targetKey")
 		)
 		(block
-			(bind visible "!showDetail && PENLIGHT_SETTINGS.useCapsules")
+			(bind visible "!showDetail && isModern")
 			(element PenLightCapsule _url="attackCapsule" _glow="attackGlow" _pulseKey="targetKey"
 				_w="capsuleAmmo == 'he_if' ? PENLIGHT_SETTINGS.capsuleWidth : PENLIGHT_SETTINGS.capsuleWidthNarrow")
 			(element PenLightCapsule _url="defenseCapsule" _glow="defenseGlow" _pulseKey="targetKey"
@@ -380,9 +438,30 @@
 				_line="defenseLine" _label="''" _values="[nums[3], nums[4], nums[5]]" _cb="isColorBlind" _pulseKey="targetKey"
 				_names="zoneNames" _mmFmt="txtMm")
 		)
+		# Nur Text: oben ich -> Ziel, unten Ziel -> ich
+		(block
+			(bind visible "!showDetail && isTextOnly")
+			(style (position = "absolute") (left = 0) (top = 0))
+			(element PenLightTextLine _text="textAttack" _ct="attackCt")
+			(block
+				(style (position = "absolute") (left = 0) (bind top "PENLIGHT_SETTINGS.textLineHeight"))
+				(element PenLightTextLine _text="textDefense" _ct="defenseCt")
+			)
+		)
+		(block
+			(bind visible "showTextAlt")
+			(style (position = "absolute") (left = 0) (top = 0))
+			(element PenLightTextAlt _head="textAttackHead" _headCt="attackCt" _z="[a0 ? 1 : 0, a1 ? 1 : 0, a2 ? 1 : 0]"
+				_values="[nums[0], nums[1], nums[2]]" _names="zoneNames" _mmFmt="txtMm" _onCt="attackCt" _offCt="greyCt")
+			(block
+				(style (position = "absolute") (left = 0) (bind top "PENLIGHT_SETTINGS.textAltHeight + PENLIGHT_SETTINGS.textAltGap"))
+				(element PenLightTextAlt _head="textDefenseHead" _headCt="defenseCt" _z="[d0 ? 1 : 0, d1 ? 1 : 0, d2 ? 1 : 0]"
+					_values="[nums[3], nums[4], nums[5]]" _names="zoneNames" _mmFmt="txtMm" _onCt="defenseCt" _offCt="greyCt")
+			)
+		)
 		# absolut an derselben Stelle wie die Symbole, damit nichts springt
 		(block
-			(bind visible "showDetail && !showSilhouettes && !PENLIGHT_SETTINGS.useCapsules")
+			(bind visible "showDetail && !showSilhouettes && isClassic")
 			(style (position = "absolute") (left = 0) (top = 0))
 			# untereinander: oben Target (gehoert zur Granate), unten Me (gehoert zum Schild)
 			(element PenLightShip _url="attackDetail")
@@ -390,7 +469,7 @@
 		)
 		# Prototyp: dieselbe Stelle, Spiel-Silhouetten statt gezeichneter Schiffe
 		(block
-			(bind visible "showSilhouettes && !PENLIGHT_SETTINGS.useCapsules")
+			(bind visible "showSilhouettes && isClassic")
 			(style (position = "absolute") (left = 0) (top = 0))
 			(element PenLightSilhouetteShip _shortName="targetShortName" _label="targetLabel" _nameIDS="targetNameIDS"
 				_bow="tBow" _mid="tMid" _deck="tDeck" _palette="palette")
@@ -405,8 +484,8 @@
 				(position = "absolute")
 				(bind left "0 - PENLIGHT_SETTINGS.dragPadLeft")
 				(bind top "0 - PENLIGHT_SETTINGS.dragPadTop")
-				(bind width "(PENLIGHT_SETTINGS.useCapsules ? PENLIGHT_SETTINGS.capsuleWidth : PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap) + PENLIGHT_SETTINGS.dragPadLeft + PENLIGHT_SETTINGS.dragPadRight")
-				(bind height "(PENLIGHT_SETTINGS.useCapsules ? PENLIGHT_SETTINGS.capsuleHeight * 2 + PENLIGHT_SETTINGS.capsuleGap : PENLIGHT_SETTINGS.iconSize) + PENLIGHT_SETTINGS.dragPadTop + PENLIGHT_SETTINGS.dragPadBottom")
+				(bind width "(isModern ? PENLIGHT_SETTINGS.capsuleWidth : (isTextOnly ? PENLIGHT_SETTINGS.textWidth : PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap)) + PENLIGHT_SETTINGS.dragPadLeft + PENLIGHT_SETTINGS.dragPadRight")
+				(bind height "(isModern ? PENLIGHT_SETTINGS.capsuleHeight * 2 + PENLIGHT_SETTINGS.capsuleGap : (isTextOnly ? PENLIGHT_SETTINGS.textLineHeight * 2 : PENLIGHT_SETTINGS.iconSize)) + PENLIGHT_SETTINGS.dragPadTop + PENLIGHT_SETTINGS.dragPadBottom")
 				(backgroundColor = 0x00FFFFFF)
 				(bind hitTest "!isPositionLocked")
 			)
@@ -743,7 +822,7 @@
 		_path:str, _mmFmt:str = '%d mm') layout=true
 	(scope
 		(var on:bool = "_z[_i] == 1")
-		(var dotUrl:str = "_path + (on ? 'dot_fill_' + _pal + _state : (_nowhere ? 'dot_ring_' + _pal + _state : 'dot_ring_grey')) + '.png'")
+		(var dotUrl:str = "_path + (_state == 'grey' ? 'dot_ring_grey' : (on ? 'dot_fill_' + _pal + _state : (_nowhere ? 'dot_ring_' + _pal + _state : 'dot_ring_grey'))) + '.png'")
 		(var valueText:str = "_values[_i] >= 0 ? subst(_mmFmt, [_values[_i]]) : '-'")
 		(var x:number = "PENLIGHT_SETTINGS.altZoneX + _i * PENLIGHT_SETTINGS.altZoneStep")
 	)
@@ -770,5 +849,55 @@
 			(class $FontEnableReadability)
 			(bind text "valueText")
 		)
+	)
+)
+
+
+# Nur Text: eine Zeile in der Spielschrift, eingefaerbt per colorTransform (PENLIGHT_TEXT_CT).
+(def element PenLightTextLine(_text:str, _ct:dict) layout=true
+	(style (bind height "PENLIGHT_SETTINGS.textLineHeight"))
+	(tf
+		(class $TextDefaultBold13NM)
+		(class $FontEnableReadability)
+		(bind text "_text")
+	)
+	(bind colorTransform "_ct")
+)
+
+# Nur Text, Alt-Ansicht: Kopfzeile in der Ampelfarbe, darunter drei Zonen mit Name und Plattendicke;
+# Werte der Zonen mit Durchkommen bzw. Overmatch in der Ampelfarbe, die uebrigen grau.
+(def element PenLightTextAlt(_head:str, _headCt:dict, _z:array, _values:array, _names:array, _mmFmt:str,
+		_onCt:dict, _offCt:dict) layout=true
+	(style
+		(bind width "PENLIGHT_SETTINGS.textAltWidth")
+		(bind height "PENLIGHT_SETTINGS.textAltHeight")
+	)
+	(block
+		(style (position = "absolute") (left = 0) (top = 0))
+		(element PenLightTextLine _text="_head" _ct="_headCt")
+	)
+	(element PenLightTextZone _i="0" _name="_names[0]" _z="_z" _values="_values" _mmFmt="_mmFmt" _onCt="_onCt" _offCt="_offCt")
+	(element PenLightTextZone _i="1" _name="_names[1]" _z="_z" _values="_values" _mmFmt="_mmFmt" _onCt="_onCt" _offCt="_offCt")
+	(element PenLightTextZone _i="2" _name="_names[2]" _z="_z" _values="_values" _mmFmt="_mmFmt" _onCt="_onCt" _offCt="_offCt")
+)
+
+(def element PenLightTextZone(_i:number, _name:str, _z:array, _values:array, _mmFmt:str, _onCt:dict, _offCt:dict) layout=true
+	(scope
+		(var x:number = "_i * PENLIGHT_SETTINGS.textZoneStep")
+		(var valueText:str = "_values[_i] >= 0 ? subst(_mmFmt, [_values[_i]]) : '-'")
+		(var valueCt:dict = "_z[_i] == 1 ? _onCt : _offCt")
+	)
+	(style (position = "absolute") (left = 0) (top = 0))
+	(block
+		(style (position = "absolute") (bind left "x") (bind top "PENLIGHT_SETTINGS.textNameTop"))
+		(tf
+			(class $TextDefault12NM)
+			(class $FontEnableReadability)
+			(bind text "_name")
+		)
+	)
+	(block
+		(style (position = "absolute") (bind left "x") (bind top "PENLIGHT_SETTINGS.textValueTop"))
+		(element PenLightTextLine _text="valueText" _ct="valueCt")
 	)
 )

@@ -81,6 +81,21 @@ Farbflächen hatten gegen das Metall fast keinen Helligkeitskontrast (1,0–1,3)
 - Farbsegmente auf dunklem Grund mit dunklen Trennlinien (Kontrast Grün 7,1, Orange 5,5, Rot 3,3).
 - Farbenblind-Blau kräftiger (#2B8CE8), damit es sich vom Grau abhebt.
 
+## Darstellung (Option, Probe im Branch `Test`)
+
+Option „Darstellung“ in TTaro Mod Config (`diedreibeiden.penlight.style`, Rückfall
+`PENLIGHT_SETTINGS.defaultStyle`, derzeit Modern):
+
+| Wert | Name | Normal | Mit Alt |
+|---|---|---|---|
+| 0 | Klassisch | Granate / Schild | gezeichnete Schiffe bzw. Silhouetten |
+| 1 | Modern | Status-Kapseln (oben ich → Ziel, unten Ziel → ich, Punkte Bug/Heck, Mitte, Deck) | ausgeklappte Kapseln mit mm-Werten |
+| 2 | Nur Text | zwei Zeilen, z. B. „HE: Bow/Stern“, „Enemy AP: everywhere“, in der Ampelfarbe | Kopfzeile, Zonenname und Wert als Text |
+
+Nicht bewertete Paarungen (Python: `grey`, Zonen −1, z. B. Schild gegen Träger) erscheinen in allen
+Darstellungen grau. Textfarbe per `colorTransform` mit Multiplikatoren (`PENLIGHT_TEXT_CT`), damit
+der Schatten der Schrift dunkel bleibt.
+
 ## Detailansicht (Alt gedrückt)
 
 Layout (rechts unter dem Fadenkreuz, linke obere Ecke Standard x +30, y +8):
