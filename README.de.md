@@ -56,9 +56,9 @@ bewertet werden, hängt von der geladenen Munition ab:
   Schlachtschiffe** sind.
 - **HE und SAP**: von Zerstörern, Kreuzern und Schlachtschiffen gegen Zerstörer, Kreuzer,
   Schlachtschiffe und Träger. Ist die Paarung keine Kreuzer/Schlachtschiff-Paarung, bleibt der
-  Schild grau. Träger werden nur als Ziel bewertet, U-Boote gar nicht.
+  Teil „Ziel → ich“ grau. Träger werden nur als Ziel bewertet, U-Boote gar nicht.
 
-Ohne Ziel oder bei einer nicht bewerteten Paarung bleiben die Symbole grau.
+Ohne Ziel oder bei einer nicht bewerteten Paarung bleibt die Anzeige grau.
 
 ### Overmatch (AP)
 
@@ -76,6 +76,9 @@ zählt nicht als Overmatch.
 <p align="center">
   <img src="docs/images/ampel.png" alt="Granate und Schild in allen Zuständen, Standard- und Farbenblind-Farben" width="610">
 </p>
+
+Die Bilder in diesem Abschnitt zeigen die Darstellung **Klassisch**; Modern und Nur Text nutzen
+dieselben Farben und Zustände (siehe [Darstellung](#darstellung)).
 
 Die Farben zeigen, ob die Lage **gut oder schlecht für dich** ist. Deshalb haben Granate und
 Schild beim gleichen Ergebnis entgegengesetzte Farben:
@@ -100,13 +103,13 @@ Für Rot-Grün-Schwäche gibt es ein Farbschema in Blau/Gelb/Orange (Okabe-Ito-P
 ### HE und SAP
 
 Die Granate bewertet immer die **gerade geladene Munition**. Eine kleine Plakette (AP / HE / SAP)
-wie an den Munitions-Slots im HUD zeigt, welche. HE und SAP haben eigene Zeichnungen nach den
-Munitions-Symbolen des Spiels: HE explodiert auf einer Platte (Rauch und Blitz), SAP schlägt auf
+wie an den Munitions-Slots im HUD zeigt, welche. HE und SAP haben eigene Zeichnungen, angelehnt an die
+Munitions-Symbole des Spiels: HE explodiert auf einer Platte (Rauch und Blitz), SAP schlägt auf
 und splittert.
 
 HE und SAP overmatchen nicht; sie durchschlagen eine Platte, wenn ihr Durchschlagswert mindestens
-so groß ist wie die Plattendicke. PenLight prüft das für **Bug/Heck** und **Deck**, die beiden
-Zonen, auf die man mit HE/SAP meist zielt:
+so groß ist wie die Plattendicke. Die normale Ansicht prüft das für **Bug/Heck** und **Deck**, die
+beiden Zonen, auf die man mit HE/SAP meist zielt; die Detailansicht zeigt zusätzlich die Mitte:
 
 - Durchschlagswerte werden immer auf ganze Millimeter abgerundet; Gleichstand zählt als Durchschlag.
 - Für HE nutzt PenLight den Durchschlags-Modifikator, den das Spiel für dein Schiff meldet; die
@@ -134,7 +137,8 @@ overmatchen kann.
 
 <img src="docs/images/detail.png" alt="Detailansicht: Target oben, Me unten, jeweils im Rahmen mit Beschriftung und Schiffsname" align="right" width="210">
 
-Mit gedrückter **Alt**-Taste ersetzen zwei untereinander stehende Schiffe Granate und Schild:
+In der Darstellung Klassisch ersetzen mit gedrückter **Alt**-Taste zwei untereinander stehende
+Schiffe Granate und Schild:
 
 - **TARGET** oben: durch welche Zonen des Ziels meine geladene Granate kommt (AP: Overmatch,
   HE/SAP: Durchschlag, hier auch für die Mitte).
@@ -152,8 +156,6 @@ Bewusste Vereinfachung: Die Zitadelle wird nicht bewertet. Grün heißt, die äu
 durchschlagen, nicht, dass du die Zitadelle triffst.
 
 <br clear="right">
-
----
 
 ### Darstellung
 
@@ -180,15 +182,20 @@ aufgeschaltete Schiff.
 
 **Was sie im Gefecht liest** (offizielle ModsAPI und Oberflächendaten des Spiels):
 
-- den Schiffstyp jedes Spielers, wie er ohnehin in den Teamlisten steht;
-- welches Schiff du aufgeschaltet hast;
+- die Spielerliste, wie sie ohnehin in den Teamlisten steht: Spieler-ID, Name und Team sowie das
+  Schiff jedes Spielers – ID und Name nur, um das aufgeschaltete Ziel zuzuordnen;
+- welches Schiff du aufgeschaltet hast, dazu dessen Namen und Lebensbalken-Silhouette für die
+  Detailansicht;
 - deine **eigene** geladene Munition der Hauptbewaffnung mit ihren festen Werten und deinen
-  **eigenen** HE-Durchschlags-Modifikator (z. B. die Kapitänsfertigkeit IFHE).
+  **eigenen** HE-Durchschlags-Modifikator (z. B. die Kapitänsfertigkeit IFHE);
+- den Kameramodus (Zielansicht, Alt) und ob dein eigenes Schiff lebt, um die Anzeige ein- oder
+  auszublenden.
 
 **Was sie nicht tut:**
 
-- Über andere Spieler liest sie nichts außer dem Schiffstyp: keine Positionen, Aufklärung,
-  Lebenspunkte, Nachladezeiten, Munition, Verbrauchsgüter oder Ausrüstung.
+- Sonst liest sie über andere Spieler nichts: keine Positionen, Aufklärung, Lebenspunkte,
+  Nachladezeiten, geladene Munition (der Teil „Ziel → ich“ geht immer von der AP des Ziels aus),
+  Verbrauchsgüter oder Ausrüstung.
 - Keine Zielhilfe, keine Vorhalte- oder Flugbahnberechnung, keine automatischen Eingaben.
 - Keine Änderung an Spieldateien, Schiffswerten oder Spielregeln. Keine ausführbaren Dateien oder
   DLLs; alles liegt in `res_mods`, Einstellungen in `ModPrefs`.
@@ -215,10 +222,12 @@ mitgeliefert.
 
 - [ModForge](https://github.com/AndrewTaro/ModForge) – hängt die Anzeige ins Gefecht ein.
 - [TTaroModUtils](https://github.com/AndrewTaro/TTaroModUtils) – Optionsseite, Zahnrad und Verschieben.
+- Optional: AndrewTaros LocalizationLoader – Texte in der Client-Sprache statt Englisch.
 
 **Schritte**
 
-1. `PenLight-<Version>.zip` unter [Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases) herunterladen (bis 0.4.0: `PenLight-<Version>-ttaro.zip`).
+1. `PenLight-<Version>.zip` unter [Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases) herunterladen. Für 0.4.0 ist das
+   `PenLight-0.4.0-ttaro.zip`; die Standalone-Zip dieses Releases wird nicht mehr gepflegt.
 2. Spiel beenden.
 3. Im Spielordner unter `bin/` den Ordner mit der **höchsten Nummer** suchen,
    z. B. `bin/13357625/`.
@@ -316,9 +325,9 @@ docs/                             Konzept, Abbildungen
 - **Panzerung und Kaliber:** `GameParams.data` des Spielclients, ausgewertet mit
   [`tools/gameparams.py`](tools/gameparams.py); Namen der Panzerungsmaterialien aus
   [wowsunpack](https://github.com/landaire/wowsunpack) (MIT).
-- **ModsAPI und ModSDK** von Wargaming/Lesta (offizielle Dokumentation und `wows_library.swc`).
-- **ModForge** und **TTaroModUtils** von [AndrewTaro](https://github.com/AndrewTaro): werden als
-  Abhängigkeiten genutzt, aber nicht mitgeliefert. Ihr Code und der seines PenetrationCalculator
+- **ModsAPI** von Wargaming/Lesta (offizielle Dokumentation).
+- **ModForge**, **TTaroModUtils** und **LocalizationLoader** von [AndrewTaro](https://github.com/AndrewTaro):
+  werden als Abhängigkeiten genutzt (LocalizationLoader optional), aber nicht mitgeliefert. Ihr Code und der seines PenetrationCalculator
   (für die Munitions-API) diente nur als Referenz; übernommen wurde nichts.
 - Die Erkennung des aufgeschalteten Ziels in Unbound folgt dem Muster von XTargetTracker
   (Battle Expert); übernommen wurde kein Code.

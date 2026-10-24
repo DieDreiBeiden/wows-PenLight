@@ -55,10 +55,10 @@ rated depends on the loaded ammunition:
 - **AP** and the **shield**: only if your own ship and the target are both **cruisers or
   battleships**.
 - **HE and SAP**: from destroyers, cruisers and battleships against destroyers, cruisers,
-  battleships and carriers. If the pairing is not a cruiser/battleship pairing, the shield stays
-  grey. Carriers are only rated as a target, submarines not at all.
+  battleships and carriers. If the pairing is not a cruiser/battleship pairing, the part
+  "target → me" stays grey. Carriers are only rated as a target, submarines not at all.
 
-Without a target, or for a pairing that is not rated, the icons stay grey.
+Without a target, or for a pairing that is not rated, the display stays grey.
 
 ### Overmatch (AP)
 
@@ -76,6 +76,9 @@ count as overmatch.
 <p align="center">
   <img src="docs/images/ampel.png" alt="Shell and shield in every state, standard and colour-blind palettes" width="610">
 </p>
+
+The pictures in this section show the **Classic** style; Modern and Text only use the same
+colours and states (see [Display styles](#display-styles)).
 
 The colours show whether the situation is **good or bad for you**. That is why shell and shield
 use opposite colours for the same result:
@@ -100,12 +103,12 @@ colour vision deficiency.
 ### HE and SAP
 
 The shell always rates the **ammunition currently loaded**. A small tag (AP / HE / SAP), like on
-the ammo slots in the HUD, shows which one. HE and SAP have their own drawings based on the game's
+the ammo slots in the HUD, shows which one. HE and SAP have their own drawings, inspired by the game's
 ammo icons: HE explodes on a plate (smoke and flash), SAP hits a plate and splinters.
 
 HE and SAP do not overmatch; they penetrate a plate when their penetration value is at least as
-thick as the plate. PenLight checks this for **bow/stern** and **deck** – the two zones you
-usually aim HE/SAP at:
+thick as the plate. The normal view checks this for **bow/stern** and **deck** – the two zones
+you usually aim HE/SAP at; the detail view also shows midship:
 
 - Penetration values are always rounded down to whole millimetres; a tie counts as penetration.
 - For HE, PenLight uses the penetration modifier the game reports for your ship, so the **IFHE**
@@ -134,7 +137,8 @@ overmatch you.
 
 <img src="docs/images/detail.png" alt="Detail view: Target on top, Me below, each in a frame with label and ship name" align="right" width="210">
 
-Holding **Alt** replaces shell and shield with two ships, one above the other:
+In the Classic style, holding **Alt** replaces shell and shield with two ships, one above the
+other:
 
 - **TARGET** on top: which zones of the target my loaded shell gets through (AP: overmatch,
   HE/SAP: penetration, here including midship).
@@ -153,8 +157,6 @@ Deliberate simplification: the citadel is not rated. Green means the outer plati
 penetrated, not that you hit the citadel.
 
 <br clear="right">
-
----
 
 ### Display styles
 
@@ -180,15 +182,18 @@ answers – "is this plate thinner than what my shell gets through?" – for the
 
 **What it reads in battle** (official ModsAPI and the game's own UI data):
 
-- the ship type of each player, as shown in the team lists anyway;
-- which ship you have locked;
+- the player list as shown in the team lists anyway: player ID, name and team, and which ship each
+  player sails – ID and name only to match the locked target;
+- which ship you have locked, and its name and health-bar silhouette for the detail view;
 - your **own** loaded main-battery ammunition and its fixed values, and your **own** HE
-  penetration modifier (e.g. the IFHE commander skill).
+  penetration modifier (e.g. the IFHE commander skill);
+- the camera mode (aiming view, Alt) and whether your own ship is alive, to show or hide the
+  display.
 
 **What it does not do:**
 
-- It reads nothing about other players beyond their ship type: no positions, spotting, health,
-  reload, ammunition, consumables or builds.
+- It reads nothing else about other players: no positions, spotting, health, reload, loaded
+  ammunition (the "target → me" part always assumes the target's AP), consumables or builds.
 - No aiming help, no lead or trajectory prediction, no automatic input.
 - No changes to game files, ship characteristics or game rules. No executables or DLLs;
   everything lives in `res_mods`, settings in `ModPrefs`.
@@ -214,10 +219,12 @@ Armour and calibres are static ship data. They are extracted offline from the cl
 
 - [ModForge](https://github.com/AndrewTaro/ModForge) – mounts the display in battle.
 - [TTaroModUtils](https://github.com/AndrewTaro/TTaroModUtils) – options page, gear button and dragging.
+- Optional: AndrewTaro's LocalizationLoader – texts in the client language instead of English.
 
 **Steps**
 
-1. Download `PenLight-<version>.zip` from [Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases) (up to 0.4.0: `PenLight-<version>-ttaro.zip`).
+1. Download `PenLight-<version>.zip` from [Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases). For 0.4.0 this is
+   `PenLight-0.4.0-ttaro.zip`; the standalone zip of that release is no longer maintained.
 2. Close the game.
 3. In the game folder, find the folder with the **highest number** under `bin/`,
    e.g. `bin/13357625/`.
@@ -315,9 +322,9 @@ docs/                             concept, images
 - **Armour and calibres:** the client's `GameParams.data`, parsed with
   [`tools/gameparams.py`](tools/gameparams.py); armour material names from
   [wowsunpack](https://github.com/landaire/wowsunpack) (MIT).
-- **ModsAPI and ModSDK** by Wargaming/Lesta (official documentation and `wows_library.swc`).
-- **ModForge** and **TTaroModUtils** by [AndrewTaro](https://github.com/AndrewTaro): used as
-  dependencies, not shipped. Their code, and that of his PenetrationCalculator (for the
+- **ModsAPI** by Wargaming/Lesta (official documentation).
+- **ModForge**, **TTaroModUtils** and **LocalizationLoader** by [AndrewTaro](https://github.com/AndrewTaro):
+  used as dependencies (LocalizationLoader optional), not shipped. Their code, and that of his PenetrationCalculator (for the
   ammunition API), served as reference only; nothing was copied.
 - Detecting the locked target in Unbound is modelled on XTargetTracker (Battle Expert); no code
   was copied.
