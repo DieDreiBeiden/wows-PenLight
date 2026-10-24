@@ -351,6 +351,33 @@
 				(top = 0px)
 			)
 		)
+		# Diagnose (debugCapsules): oberhalb der Anzeige, unabhaengig von allen Sichtbarkeitsbedingungen.
+		# Testbild = feste Kapsel (Ladeweg der Bilder), daneben Zustand und berechnete Bildpfade.
+		(block
+			(bind visible "PENLIGHT_SETTINGS.debugCapsules")
+			(style (position = "absolute") (left = 0px) (top = -64px) (backgroundColor = 0xCC000000))
+			(hblock
+				(block
+					(style
+						(width = 62) (height = 18)
+						(backgroundSize = "fill")
+						(backgroundImage = "PENLIGHT_ICON_PATH + 'capsule/atk_ap_111.png'")
+					)
+				)
+				(block
+					(style (width = 29) (height = 29) (backgroundSize = "fill")
+						(backgroundImage = "PENLIGHT_ICON_PATH + 'shell_green.png'"))
+				)
+				(tf
+					(class $TextDefaultBold13NM)
+					(bind text "'detail ' + (showDetail ? '1' : '0') + ' always ' + (isDetailAlways ? '1' : '0') + ' alt ' + (altVision ? '1' : '0') + ' verdict ' + (hasVerdict ? '1' : '0') + ' caps ' + (PENLIGHT_SETTINGS.useCapsules ? '1' : '0') + ' altcaps ' + (showAltCapsules ? '1' : '0')")
+				)
+			)
+			(tf
+				(class $TextDefaultBold13NM)
+				(bind text "'atk ' + attackCapsule")
+			)
+		)
 		(hblock
 			(bind visible "!showDetail && !PENLIGHT_SETTINGS.useCapsules")
 			(element PenLightIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey" _tag="attackTag" _badge="attackBadge")
