@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Erzeugt die Abbildungen der README (docs/images/), nur aus eigenen Grafiken.
+"""Erzeugt die Abbildungen der README (docs/images/).
 
     python3 -I tools/make_readme_images.py
 
-- ampel.png:  Granate | Schild je Bedeutung (Spalten), Standard- und Farbenblind-Farben, mit Zeichen
-- ammo.png:   Granate je Munition (AP / HE / SAP) mit Plakette und Zeichen, je Zustand (Spalten)
-- styles.png: dieselbe Lage in den Darstellungen Klassisch, Modern und Nur Text (Kapseln aus
-  make_capsule_icons, Text in Ersatzschrift auf der Unterlage wie PenLightTextLine)
+- ampel.png:  Slot-Paar (Munition | Schild) je Bedeutung (Spalten), Standard- und Farbenblind-Farben
+- ammo.png:   Slot je Munition (AP / HE / HE + IFHE / SAP / Luftschlag), je Zustand (Spalten)
+- styles.png: zwei Lagen in den Darstellungen Klassisch, Modern und Nur Text
+  (Munitionsleisten-Design seit 0.5.0; Spiel-Symbole aus ammobar/game/)
 - detail.png: Detailansicht wie im Spiel (Rahmen, farbige Mini-Icons, Schiffsname,
   Target oben, Me unten). Statt der Spiel-Silhouette steht das gezeichnete Schiff aus
   make_detail_icons, damit keine Spielgrafik ins Repository kommt.
@@ -39,130 +39,201 @@ def _icon(name):
     return Image.open(os.path.join(ICONS, name)).convert('RGBA')
 
 
-def _with_mark(icon, mark):
-    """Icon mit Zeichen rechts oben wie in PenLight.unbound (markOffset)."""
-    pad = 8
-    out = Image.new('RGBA', (icon.width + pad, icon.height + pad), (0, 0, 0, 0))
-    out.alpha_composite(icon, (0, pad))
-    if mark:
-        m = _icon(mark)
-        out.alpha_composite(m, (icon.width + pad - m.width, 0))
-    return out
-
-
-def ampel():
-    """Spalten nach Bedeutung: Granate ich -> Ziel, Schild Ziel -> ich (Farbe = gut fuer mich)."""
-    f = ImageFont.truetype(FONT, 13)
-    fs = ImageFont.truetype(FONT_REGULAR, 12)
-    rows = [('Standard', ''), ('Colour-blind', 'cb_')]
-    columns = [('overmatch\neverywhere', 'green', 'red'), ('bow/stern\nonly', 'yellow', 'yellow'),
-               ('no\novermatch', 'red', 'green'), ('no target /\nnot relevant', 'grey', 'grey')]
-    cw = 130
-    im = Image.new('RGBA', (140 + 4 * cw, 44 + 2 * 100), BACKGROUND)
-    d = ImageDraw.Draw(im)
-    for i, (label, _, _) in enumerate(columns):
-        d.multiline_text((140 + i * cw, 6), label, font=fs, fill=(220, 222, 224), spacing=1)
-    for r, (name, prefix) in enumerate(rows):
-        y = 44 + r * 100
-        d.text((14, y + 30), name, font=f, fill=(236, 238, 240))
-        for i, (_, shell_state, shield_state) in enumerate(columns):
-            shell = _with_mark(_icon('shell_%s%s.png' % (prefix, shell_state)),
-                               'mark_star.png' if shell_state == 'green' else None)
-            shield = _with_mark(_icon('shield_%s%s.png' % (prefix, shield_state)),
-                                'mark_warning.png' if shield_state == 'red' else None)
-            for j, icon in enumerate((shell, shield)):
-                big = icon.resize((icon.width * ZOOM, icon.height * ZOOM), Image.LANCZOS)
-                im.alpha_composite(big, (140 + i * cw + j * 60, y))
-    d.text((14, 44 + 2 * 100 - 16), 'left: my shell vs target  -  right: target vs my shield',
-           font=fs, fill=(170, 172, 174))
-    im.save(os.path.join(OUT, 'ampel.png'))
-
-
-def _with_tag(icon, tag, mark, ifhe=False):
-    """Granate mit Plakette links oben (tagOffset), Zeichen rechts oben (markOffset) und
-    optional IFHE-Plakette links unten (badgeOffset)."""
-    ox, oy = 4, 10
-    out = Image.new('RGBA', (icon.width + 12, icon.height + oy + 4), (0, 0, 0, 0))
-    out.alpha_composite(icon, (ox, oy))
-    if mark:
-        m = _icon(mark)
-        out.alpha_composite(m, (ox + icon.width - m.width + 6, oy - 7))
-    out.alpha_composite(_icon(tag), (ox - 2, oy - 9))
-    if ifhe:
-        out.alpha_composite(_icon('tag_ifhe.png'), (ox - 3, oy + 22))
-    return out
-
-
-def ammo():
-    """Zeilen je Munition, Spalten je Zustand; AP kennt kein 'nur Deck'."""
-    f = ImageFont.truetype(FONT, 13)
-    fs = ImageFont.truetype(FONT_REGULAR, 12)
-    columns = [('everywhere', 'green', 'green'), ('bow/stern\nonly', 'yellow', 'bow'),
-               ('deck only\n(HE/SAP)', None, 'deck'), ('nowhere', 'red', 'red'),
-               ('no target /\nnot relevant', 'grey', 'grey')]
-    rows = [('AP', 'shell_', 0, False), ('HE', 'he_', 1, False), ('HE + IFHE', 'he_', 1, True),
-            ('SAP', 'sap_', 1, False)]
-    cw, rh = 104, 88
-    im = Image.new('RGBA', (110 + len(columns) * cw, 44 + len(rows) * rh + 22), BACKGROUND)
-    d = ImageDraw.Draw(im)
-    for i, (label, _, _) in enumerate(columns):
-        d.multiline_text((110 + i * cw, 6), label, font=fs, fill=(220, 222, 224), spacing=1)
-    for r, (name, prefix, idx, ifhe) in enumerate(rows):
-        y = 44 + r * rh
-        d.text((14, y + 30), name, font=f, fill=(236, 238, 240))
-        for i, col in enumerate(columns):
-            state = col[1 + idx]
-            if state is None:
-                continue
-            icon = _with_tag(_icon('%s%s.png' % (prefix, state)), 'tag_%s.png' % name.split()[0].lower(),
-                             'mark_star.png' if state == 'green' else None, ifhe)
-            big = icon.resize((icon.width * ZOOM, icon.height * ZOOM), Image.LANCZOS)
-            im.alpha_composite(big, (110 + i * cw, y))
-    d.text((14, im.height - 20), 'AP: overmatch  -  HE/SAP: penetration >= plate, rounded down; HE incl. IFHE',
-           font=fs, fill=(170, 172, 174))
-    im.save(os.path.join(OUT, 'ammo.png'))
-
-
-CAPSULES = os.path.join(ICONS, 'capsule')
-# Nur Text: Unterlage 0xD90E1012, Textfarben wie PENLIGHT_TEXT_CT (Orange, Rot), Rand textPadX/-Y
+# Munitionsleisten-Design (seit 0.5.0): Teile aus make_ammobar_icons, Symbole aus ammobar/game/ (Kopien aus
+# den Spieldateien, Wargaming). Masse wie PENLIGHT_SETTINGS (ammoBarSlot 46, ammoBarIcon 40, SegGap 3,
+# SegHeight 5, Gap 6, CapWidth 72, CapHeight 22, CapIcon 22, capsuleGap 4, TextIcon 17, glowPad 5,
+# glowRestAlpha 0.45 = Ruhezustand nach dem Pulsieren).
+AMMOBAR = os.path.join(ICONS, 'ammobar')
+GAME = os.path.join(AMMOBAR, 'game')
+SLOT, SLOT_ICON, SEG_GAP, SEG_H, GAP = 46, 40, 3, 5, 6
+CAP_W, CAP_H, CAP_ICON, CAP_GAP, TEXT_ICON, GLOW_PAD, GLOW_REST = 72, 22, 22, 4, 17, 5, 0.45
+# Nur Text: Unterlage 0xD90E1012, Textfarben wie PENLIGHT_TEXT_CT bzw. _CB
 TEXT_PLATE = (14, 16, 18, 217)
-TEXT_COLORS = {'yellow': (255, 140, 0), 'red': (255, 112, 96)}
+TEXT_COLORS = {'': {'green': (61, 220, 90), 'yellow': (255, 140, 0), 'red': (255, 112, 96), 'grey': (176, 181, 186)},
+               'cb_': {'green': (88, 170, 255), 'yellow': (240, 228, 66), 'red': (245, 128, 40),
+                       'grey': (176, 181, 186)}}
+SHIELD = 'planes_ap_damage'
+DIM = (0.38, 0.4, 0.42)   # PENLIGHT_ICON_CT_DIM
 
 
-def _text_line(text, color):
-    f = ImageFont.truetype(FONT, 12)
-    w = int(ImageDraw.Draw(Image.new('RGBA', (1, 1))).textlength(text, font=f))
-    im = Image.new('RGBA', (w + 10, 18), TEXT_PLATE)
-    ImageDraw.Draw(im).text((5, 1), text, font=f, fill=color)
+def _part(name):
+    return Image.open(os.path.join(AMMOBAR, name + '.png')).convert('RGBA')
+
+
+def _game(name, size, dim=False):
+    im = Image.open(os.path.join(GAME, name + '.png')).convert('RGBA').resize((size, size), Image.LANCZOS)
+    if dim:
+        r, g, b, a = im.split()
+        im = Image.merge('RGBA', [c.point(lambda v, k=k: int(v * k)) for c, k in zip((r, g, b), DIM)] + [a])
     return im
 
 
+def _glow(name):
+    g = _part(name)
+    g.putalpha(g.getchannel('A').point(lambda v: int(v * GLOW_REST)))
+    return g
+
+
+def _state(kind, bits, rated=True, airstrike=False):
+    """Zustand wie attackState/defenseState in PenLight.unbound."""
+    if not rated:
+        return 'grey'
+    if airstrike:
+        return 'green' if bits[2] == '1' else 'red'
+    good, bad = ('green', 'red') if kind == 'atk' else ('red', 'green')
+    return good if bits == '111' else (bad if bits == '000' else 'yellow')
+
+
+def _frame_names(kind, bits, pal, rated, airstrike=False):
+    st = _state(kind, bits, rated, airstrike)
+    ext = rated and bits == '111'
+    if not rated:
+        return 'slot_grey', 'seg_grey', 'cap_grey', 'stripe_grey', None, None, st
+    glow = ('green' if kind == 'atk' else 'red') if ext else None
+    return ('slot_%s%s%s' % ('ext_' if ext else '', pal, st), 'seg_%s%s_%s' % (pal, st, bits),
+            'cap_%s%s_%s' % (pal, st, bits), 'stripe_%s%s' % (pal, st),
+            'glow_slot_%s%s' % (pal, glow) if glow else None, 'glow_cap_%s%s' % (pal, glow) if glow else None, st)
+
+
+def ab_slot(kind, icon, bits, pal='', rated=True, airstrike=False, ifhe=False):
+    """Klassisch: Slot mit Spiel-Symbol, darunter drei Zonen-Balken (PenLightAmmoSlot)."""
+    slot, seg, _, _, glow, _, _ = _frame_names(kind, bits, pal, rated, airstrike)
+    p = GLOW_PAD
+    im = Image.new('RGBA', (SLOT + 2 * p, SLOT + SEG_GAP + SEG_H + 2 * p), (0, 0, 0, 0))
+    if glow:
+        im.alpha_composite(_glow(glow), (0, 0))
+    im.alpha_composite(_part(slot), (p, p))
+    o = (SLOT - SLOT_ICON) // 2
+    im.alpha_composite(_game(icon, SLOT_ICON, kind == 'def' and not rated), (p + o, p + o))
+    if ifhe:
+        im.alpha_composite(_icon('tag_ifhe.png'), (p + 2, p + SLOT - 12))
+    im.alpha_composite(_part(seg), (p, p + SLOT + SEG_GAP))
+    return im
+
+
+def ab_capsule(kind, icon, bits, pal='', rated=True, airstrike=False, ifhe=False):
+    """Modern: Kapsel mit Symbol links und drei Punkten (PenLightAmmoCapsule)."""
+    _, _, cap, _, _, glow, _ = _frame_names(kind, bits, pal, rated, airstrike)
+    p = GLOW_PAD
+    im = Image.new('RGBA', (CAP_W + 2 * p, CAP_H + 2 * p), (0, 0, 0, 0))
+    if glow:
+        im.alpha_composite(_glow(glow), (0, 0))
+    im.alpha_composite(_part(cap), (p, p))
+    im.alpha_composite(_game(icon, CAP_ICON, kind == 'def' and not rated), (p + 2, p))
+    if ifhe:
+        im.alpha_composite(_icon('tag_ifhe.png'), (p + 1, p + CAP_H - 9))
+    return im
+
+
+def ab_text(kind, icon, bits, text, pal='', rated=True, airstrike=False):
+    """Nur Text: Unterlage, Farbstreifen, kleines Symbol, Text (PenLightAmmoTextLine)."""
+    _, _, _, stripe, _, _, st = _frame_names(kind, bits, pal, rated, airstrike)
+    f = ImageFont.truetype(FONT, 12)
+    w = int(ImageDraw.Draw(Image.new('RGBA', (1, 1))).textlength(text, font=f))
+    im = Image.new('RGBA', (3 + 3 + TEXT_ICON + 4 + w + 5, 19), TEXT_PLATE)
+    im.alpha_composite(_part(stripe), (0, 0))
+    im.alpha_composite(_game(icon, TEXT_ICON, kind == 'def' and not rated), (6, 1))
+    ImageDraw.Draw(im).text((6 + TEXT_ICON + 4, 1), text, font=f, fill=TEXT_COLORS[pal][st])
+    return im
+
+
+def _pair(a, b, vertical=False, gap=0):
+    if vertical:
+        out = Image.new('RGBA', (max(a.width, b.width), a.height + b.height + gap), (0, 0, 0, 0))
+        out.alpha_composite(a, (0, 0))
+        out.alpha_composite(b, (0, a.height + gap))
+    else:
+        out = Image.new('RGBA', (a.width + b.width + gap, max(a.height, b.height)), (0, 0, 0, 0))
+        out.alpha_composite(a, (0, 0))
+        out.alpha_composite(b, (a.width + gap, 0))
+    return out
+
+
+def _zoom(im):
+    return im.resize((im.width * ZOOM, im.height * ZOOM), Image.LANCZOS)
+
+
+def ampel():
+    """Spalten nach Bedeutung: links mein Schuss -> Ziel, rechts AP des Ziels -> ich (Farbe = gut fuer mich)."""
+    f = ImageFont.truetype(FONT, 13)
+    fs = ImageFont.truetype(FONT_REGULAR, 12)
+    rows = [('Standard', ''), ('Colour-blind', 'cb_')]
+    columns = [('overmatch\neverywhere', '111', True), ('bow/stern\nonly', '100', True),
+               ('no\novermatch', '000', True), ('no target /\nnot rated', '000', False)]
+    cw, rh, x0 = 250, 150, 140
+    im = Image.new('RGBA', (x0 + len(columns) * cw, 44 + len(rows) * rh + 20), BACKGROUND)
+    d = ImageDraw.Draw(im)
+    for i, (label, _, _) in enumerate(columns):
+        d.multiline_text((x0 + i * cw, 6), label, font=fs, fill=(220, 222, 224), spacing=1)
+    for r, (name, pal) in enumerate(rows):
+        y = 44 + r * rh
+        d.text((14, y + 50), name, font=f, fill=(236, 238, 240))
+        for i, (_, bits, rated) in enumerate(columns):
+            pair = _pair(ab_slot('atk', 'ap' if rated else 'ap_inactive', bits, pal, rated),
+                         ab_slot('def', SHIELD, bits, pal, rated), gap=GAP - 2 * GLOW_PAD)
+            im.alpha_composite(_zoom(pair), (x0 + i * cw, y))
+    d.text((14, im.height - 22), 'left: my shell vs target  -  right (shield): target\'s AP vs me  -  '
+           'bars: bow/stern, midship, deck', font=fs, fill=(170, 172, 174))
+    im.save(os.path.join(OUT, 'ampel.png'))
+
+
+def ammo():
+    """Zeilen je Munition, Spalten je Zustand; AP kennt kein 'nur Deck', der Luftschlag nur das Deck."""
+    f = ImageFont.truetype(FONT, 13)
+    fs = ImageFont.truetype(FONT_REGULAR, 12)
+    columns = [('everywhere', '111'), ('bow/stern\nonly', '100'), ('deck only', '001'), ('nowhere', '000'),
+               ('no target /\nnot rated', None)]
+    rows = [('AP', 'ap', ('111', '100', None, '000')), ('HE', 'he', ('111', '100', '001', '000')),
+            ('HE + IFHE', 'he', ('111', '100', '001', '000')), ('SAP', 'cs', ('111', '100', '001', '000')),
+            ('Airstrike', 'airsupport_he', (None, None, '001', '000'))]
+    cw, rh, x0 = 128, 130, 120
+    im = Image.new('RGBA', (x0 + len(columns) * cw, 44 + len(rows) * rh + 24), BACKGROUND)
+    d = ImageDraw.Draw(im)
+    for i, (label, _) in enumerate(columns):
+        d.multiline_text((x0 + i * cw, 6), label, font=fs, fill=(220, 222, 224), spacing=1)
+    for r, (name, icon, allowed) in enumerate(rows):
+        y = 44 + r * rh
+        d.text((14, y + 50), name, font=f, fill=(236, 238, 240))
+        for i, (_, bits) in enumerate(columns):
+            if bits is None:
+                slot = ab_slot('atk', icon + '_inactive', '000', rated=False)
+            elif bits not in allowed:
+                continue
+            else:
+                slot = ab_slot('atk', icon, bits, airstrike=icon == 'airsupport_he', ifhe=name.endswith('IFHE'))
+            im.alpha_composite(_zoom(slot), (x0 + i * cw, y))
+    d.text((14, im.height - 22), 'AP: overmatch  -  HE/SAP: penetration >= plate, rounded down; HE incl. IFHE  -  '
+           'airstrike: deck only', font=fs, fill=(170, 172, 174))
+    im.save(os.path.join(OUT, 'ammo.png'))
+
+
 def styles():
-    """Eine Lage, drei Darstellungen: HE kommt nur an Bug/Heck durch, die AP des Ziels ueberall."""
+    """Zwei Lagen, drei Darstellungen."""
     fs = ImageFont.truetype(FONT_REGULAR, 12)
     f = ImageFont.truetype(FONT, 13)
-    classic = Image.new('RGBA', (80, 50), (0, 0, 0, 0))
-    classic.alpha_composite(_with_tag(_icon('he_bow.png'), 'tag_he.png', None), (0, 0))
-    classic.alpha_composite(_with_mark(_icon('shield_red.png'), 'mark_warning.png'), (38, 7))
-    modern = Image.new('RGBA', (72 + 10, 40 + 10), (0, 0, 0, 0))
-    glow = Image.open(os.path.join(CAPSULES, 'glow_def.png')).convert('RGBA')
-    glow.putalpha(glow.getchannel('A').point(lambda v: int(v * 0.45)))   # Ruhezustand nach dem Pulsieren
-    modern.alpha_composite(Image.open(os.path.join(CAPSULES, 'atk_he_100.png')).convert('RGBA'), (5, 5))
-    modern.alpha_composite(glow, (0, 22))
-    modern.alpha_composite(Image.open(os.path.join(CAPSULES, 'def_111.png')).convert('RGBA'), (5, 27))
-    text = Image.new('RGBA', (170, 42), (0, 0, 0, 0))
-    text.alpha_composite(_text_line('HE: Bow/Stern', TEXT_COLORS['yellow']), (0, 0))
-    text.alpha_composite(_text_line('Enemy AP: everywhere', TEXT_COLORS['red']), (0, 21))
-    columns = [('Classic', classic), ('Modern (default)', modern), ('Text only', text)]
-    cw = 360
-    im = Image.new('RGBA', (20 + len(columns) * cw, 160), BACKGROUND)
+    scenes = [
+        ('HE gets through bow/stern only,\ntarget\'s AP overmatches me everywhere',
+         ('he', '100', False), ('111',), 'HE: Bow/Stern', 'Enemy AP: everywhere'),
+        ('Airstrike selected: bombs get through\nthe deck, target\'s AP bow/stern only',
+         ('airsupport_he', '001', True), ('100',), 'Airstrike: Deck', 'Enemy AP: Bow/Stern'),
+    ]
+    columns = ['Classic', 'Modern (default)', 'Text only']
+    cw, rh, x0 = 260, 150, 290
+    im = Image.new('RGBA', (x0 + (len(columns) - 1) * cw + 2 * 210, 40 + len(scenes) * rh), BACKGROUND)
     d = ImageDraw.Draw(im)
-    for i, (label, part) in enumerate(columns):
-        d.text((20 + i * cw, 10), label, font=f, fill=(236, 238, 240))
-        big = part.resize((part.width * ZOOM, part.height * ZOOM), Image.LANCZOS)
-        im.alpha_composite(big, (20 + i * cw, 36))
-    d.text((20, im.height - 22), 'same situation: my HE gets through bow/stern only  -  the target\'s AP '
-           'overmatches me everywhere', font=fs, fill=(170, 172, 174))
+    for i, label in enumerate(columns):
+        d.text((x0 + i * cw, 10), label, font=f, fill=(236, 238, 240))
+    for r, (title, (icon, abits, air), (dbits,), t_atk, t_def) in enumerate(scenes):
+        y = 40 + r * rh
+        d.multiline_text((14, y + 40), title, font=fs, fill=(220, 222, 224), spacing=3)
+        classic = _pair(ab_slot('atk', icon, abits, airstrike=air), ab_slot('def', SHIELD, dbits),
+                        gap=GAP - 2 * GLOW_PAD)
+        modern = _pair(ab_capsule('atk', icon, abits, airstrike=air), ab_capsule('def', SHIELD, dbits),
+                       vertical=True, gap=CAP_GAP - 2 * GLOW_PAD)
+        text = _pair(ab_text('atk', icon, abits, t_atk, airstrike=air), ab_text('def', SHIELD, dbits, t_def),
+                     vertical=True, gap=2)
+        for i, part in enumerate((classic, modern, text)):
+            im.alpha_composite(_zoom(part), (x0 + i * cw, y))
     im.save(os.path.join(OUT, 'styles.png'))
 
 
