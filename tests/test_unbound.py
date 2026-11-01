@@ -40,14 +40,15 @@ class UnboundTest(unittest.TestCase):
         # Redesign Munitionsleiste: jede Kombination, die PenLight.unbound zusammensetzt, liegt als Bild vor
         import itertools
         folder = os.path.join(os.path.dirname(__file__), '..', 'mod', 'res_mods', 'PnFMods', 'PenLight', 'ammobar')
-        names = {'slot_grey', 'seg_grey', 'cap_grey', 'stripe_grey'}
+        names = {'slot_grey', 'seg_grey', 'cap_grey', 'stripe_grey', 'seg_air_grey', 'cap_air_grey'}
         for pal in ('', 'cb_'):
             for state in ('green', 'yellow', 'red'):
                 names |= {'slot_%s%s' % (pal, state), 'stripe_%s%s' % (pal, state)}
                 for bits in itertools.product('01', repeat=3):
                     names |= {'seg_%s%s_%s' % (pal, state, ''.join(bits)), 'cap_%s%s_%s' % (pal, state, ''.join(bits))}
             for state in ('green', 'red'):
-                names |= {'slot_ext_%s%s' % (pal, state), 'glow_slot_%s%s' % (pal, state), 'glow_cap_%s%s' % (pal, state)}
+                names |= {'slot_ext_%s%s' % (pal, state), 'glow_slot_%s%s' % (pal, state), 'glow_cap_%s%s' % (pal, state),
+                          'seg_air_%s%s' % (pal, state), 'cap_air_%s%s' % (pal, state)}
         # Spiel-Symbole (Kopien aus den Spieldateien): Munition je Zustand und das Schild
         for ammo in ('ap', 'he', 'cs', 'airsupport_he'):
             names |= {'game/' + ammo, 'game/%s_inactive' % ammo}

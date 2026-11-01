@@ -59,7 +59,7 @@
 	ammoBarIcon: 40,
 	ammoBarGap: 6,
 	ammoBarSegGap: 3,
-	ammoBarSegHeight: 5,
+	ammoBarSegHeight: 7,
 	ammoBarCapWidth: 72,
 	ammoBarCapHeight: 22,
 	ammoBarCapIcon: 22,
@@ -438,15 +438,19 @@
 		(var abAttackIcon:str = "PENLIGHT_SETTINGS.gameAmmoPath + abAmmo + (attackRated ? '' : '_inactive') + '.png'")
 		(var abShieldIcon:str = "PENLIGHT_SETTINGS.gameShieldIcon")
 		(var abShieldCt:dict = "defenseRated ? PENLIGHT_ICON_CT_NEUTRAL : PENLIGHT_ICON_CT_DIM")
-		(var abAttackSlot:str = "abPath + (attackRated ? 'slot_' + (attackBits == '111' ? 'ext_' : '') + palettePrefix + attackState : 'slot_grey') + '.png'")
+		# Randfall "ich komme ueberall durch": alle Zonen bzw. beim Luftschlag das Deck
+		(var attackExtreme:bool = "attackRated && (isAirstrike ? detail[2] == 1 : attackBits == '111')")
+		# Balken/Punkte: Bug | Mitte geteilt (oben Deck, unten Mitte) | Heck; Luftschlag eine Sektion (seg_air_/cap_air_)
+		(var abSegKind:str = "isAirstrike ? 'air_' : ''")
+		(var abAttackSlot:str = "abPath + (attackRated ? 'slot_' + (attackExtreme ? 'ext_' : '') + palettePrefix + attackState : 'slot_grey') + '.png'")
 		(var abDefenseSlot:str = "abPath + (defenseRated ? 'slot_' + (defenseBits == '111' ? 'ext_' : '') + palettePrefix + defenseState : 'slot_grey') + '.png'")
-		(var abAttackSeg:str = "abPath + (attackRated ? 'seg_' + palettePrefix + attackState + '_' + attackBits : 'seg_grey') + '.png'")
+		(var abAttackSeg:str = "abPath + 'seg_' + abSegKind + (attackRated ? palettePrefix + attackState + (isAirstrike ? '' : '_' + attackBits) : 'grey') + '.png'")
 		(var abDefenseSeg:str = "abPath + (defenseRated ? 'seg_' + palettePrefix + defenseState + '_' + defenseBits : 'seg_grey') + '.png'")
-		(var abAttackCap:str = "abPath + (attackRated ? 'cap_' + palettePrefix + attackState + '_' + attackBits : 'cap_grey') + '.png'")
+		(var abAttackCap:str = "abPath + 'cap_' + abSegKind + (attackRated ? palettePrefix + attackState + (isAirstrike ? '' : '_' + attackBits) : 'grey') + '.png'")
 		(var abDefenseCap:str = "abPath + (defenseRated ? 'cap_' + palettePrefix + defenseState + '_' + defenseBits : 'cap_grey') + '.png'")
-		(var abAttackGlowSlot:str = "attackRated && attackBits == '111' ? abPath + 'glow_slot_' + palettePrefix + 'green.png' : ''")
+		(var abAttackGlowSlot:str = "attackExtreme ? abPath + 'glow_slot_' + palettePrefix + 'green.png' : ''")
 		(var abDefenseGlowSlot:str = "defenseRated && defenseBits == '111' ? abPath + 'glow_slot_' + palettePrefix + 'red.png' : ''")
-		(var abAttackGlowCap:str = "attackRated && attackBits == '111' ? abPath + 'glow_cap_' + palettePrefix + 'green.png' : ''")
+		(var abAttackGlowCap:str = "attackExtreme ? abPath + 'glow_cap_' + palettePrefix + 'green.png' : ''")
 		(var abDefenseGlowCap:str = "defenseRated && defenseBits == '111' ? abPath + 'glow_cap_' + palettePrefix + 'red.png' : ''")
 		(var abAttackStripe:str = "abPath + 'stripe_' + (attackRated ? palettePrefix + attackState : 'grey') + '.png'")
 		(var abDefenseStripe:str = "abPath + 'stripe_' + (defenseRated ? palettePrefix + defenseState : 'grey') + '.png'")
