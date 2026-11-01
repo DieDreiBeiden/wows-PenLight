@@ -8,19 +8,18 @@
 PenLight shows two small traffic lights right next to your crosshair:
 
 - **My shot → target:** does my **loaded** ammunition get through the target's armour? AP is
-  rated by overmatch, HE and SAP by their penetration value.
+  rated by overmatch, HE and SAP by their penetration value. With the **airstrike** selected
+  (e.g. Dutch cruisers), its HE bombs are rated against the deck.
 - **Target → me:** can the target's AP shells overmatch my armour?
 
-You choose between three [display styles](#display-styles): **Classic** (shell and shield),
-**Modern** (status capsules, default) and **Text only**. Hold **Alt** for a detail view that shows
-the same for each zone of both ships: bow/stern, midship and deck.
+The display uses the look of the game's ammo bar: the icon of your loaded ammunition (or the
+airstrike) and a shield, framed in the traffic-light colour. You choose between three
+[display styles](#display-styles): **Classic** (ammo slots), **Modern** (capsules, default) and
+**Text only**. Hold **Alt** for a detail view that shows the same for each zone of both ships:
+bow/stern, midship and deck.
 
-The display appears only in the **zoomed aiming view** (binoculars / scope). In the normal
-third-person view it is hidden.
-
-<p align="center">
-  <img src="docs/images/styles.png" alt="The same situation in the display styles Classic, Modern and Text only" width="760">
-</p>
+The display appears only in the **zoomed aiming view** (binoculars / scope), and while the
+airstrike is selected. In the normal third-person view it is hidden.
 
 > **Current version: 0.4.0** (pre-release) – [download from Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases).
 >
@@ -57,6 +56,7 @@ rated depends on the loaded ammunition:
 - **HE and SAP**: from destroyers, cruisers and battleships against destroyers, cruisers,
   battleships and carriers. If the pairing is not a cruiser/battleship pairing, the part
   "target → me" stays grey. Carriers are only rated as a target, submarines not at all.
+- **Airstrike** (HE bombs): like HE, but only the **deck** is rated.
 
 Without a target, or for a pairing that is not rated, the display stays grey.
 
@@ -74,64 +74,68 @@ count as overmatch.
 ### The traffic light
 
 <p align="center">
-  <img src="docs/images/ampel.png" alt="Shell and shield in every state, standard and colour-blind palettes" width="610">
+  <img src="docs/images/ampel.png" alt="Ammo slot and shield in every state, standard and colour-blind palettes" width="760">
 </p>
 
 The pictures in this section show the **Classic** style; Modern and Text only use the same
 colours and states (see [Display styles](#display-styles)).
 
-The colours show whether the situation is **good or bad for you**. That is why shell and shield
+- **Left slot – my shot → target:** the icon of the ammunition you have loaded, as in the game's
+  ammo bar.
+- **Right slot – target → me:** a shield (commander-skill icon); it always stands for the
+  **target's AP**.
+
+The colours show whether the situation is **good or bad for you**. That is why the two slots
 use opposite colours for the same result:
 
-| Overmatch on… | Shell (my AP → target) | Shield (target's AP → me) |
+| Overmatch on… | Left slot (my AP → target) | Shield (target's AP → me) |
 |---|---|---|
-| all three zones | **Green + star** – I get through everywhere, even if the target angles | **Red + warning triangle** – the target gets through everywhere, avoid its guns |
-| bow/stern only | **Orange** – aim at bow/stern | **Orange** – keep your bow/stern out of its fire |
-| not even bow/stern | **Red** – only a broadside is worth it | **Green** – angling protects you |
-| no rating | Grey | Grey |
+| all three zones | **Green + glow** – I get through everywhere, even if the target angles | **Red + glow** – the target gets through everywhere, avoid its guns |
+| some zones (e.g. bow/stern) | **Orange** – aim at the zones that are lit | **Orange** – keep those zones out of its fire |
+| no zone | **Red** – only a broadside is worth it | **Green** – angling protects you |
+| no rating | Grey, icons dimmed | Grey, icons dimmed |
 
-The **shape** carries the same message, so it stays readable with colour vision deficiency:
-
-- **Shell:** all segments filled = everywhere, only the tip filled = bow/stern only, slash = nowhere.
-- **Shield:** full and intact = the target does not get through, lower part filled = bow/stern
-  only, **cracked** = the target gets through everywhere.
-- Star and warning triangle flash briefly when you lock a target.
+The **three bars** under each slot carry the same message without colour, so it stays readable
+with colour vision deficiency: from left to right **bow/stern, midship, deck**; a lit bar means
+"gets through here". The glow pulses briefly when you lock a target.
 
 A colour-blind scheme in blue/yellow/orange (Okabe-Ito palette) is available for red-green
 colour vision deficiency.
 
 ### HE and SAP
 
-The shell always rates the **ammunition currently loaded**. A small tag (AP / HE / SAP), like on
-the ammo slots in the HUD, shows which one. HE and SAP have their own drawings, inspired by the game's
-ammo icons: HE explodes on a plate (smoke and flash), SAP hits a plate and splinters.
+The left slot always rates the **ammunition currently loaded** and shows its game icon (AP, HE
+or SAP).
 
 HE and SAP do not overmatch; they penetrate a plate when their penetration value is at least as
-thick as the plate. The normal view checks this for **bow/stern** and **deck** – the two zones
-you usually aim HE/SAP at; the detail view also shows midship:
+thick as the plate:
 
 - Penetration values are always rounded down to whole millimetres; a tie counts as penetration.
 - For HE, PenLight uses the penetration modifier the game reports for your ship, so the **IFHE**
   commander skill is included. When IFHE is active, a small **IFHE** tag appears at the bottom
-  left of the HE shell. SAP is not affected by IFHE.
+  left of the HE icon. SAP is not affected by IFHE.
+- The colour follows the same rule as for AP: green = everywhere, orange = some zones,
+  red = nowhere.
 
 <p align="center">
-  <img src="docs/images/ammo.png" alt="Shell icons for AP, HE (with and without IFHE) and SAP in every state, with ammo tag" width="630">
+  <img src="docs/images/ammo.png" alt="Ammo slot for AP, HE (with and without IFHE), SAP and airstrike in every state" width="640">
 </p>
-
-| Penetrates bow/stern | Penetrates deck | Shell |
-|---|---|---|
-| yes | yes | **Green + star** – tip, band and rear ring filled |
-| yes | no | **Orange** – tip and band filled |
-| no | yes | **Orange** – tip and rear ring filled |
-| no | no | **Red** – slash |
-| – | – | Grey – no rating |
-
-The band stands for bow/stern, the rear ring for the deck. The tip always carries the
-traffic-light colour.
 
 The shield does not depend on your ammunition: it always shows whether the **target's AP** can
 overmatch you.
+
+### Airstrike
+
+Some ships (mostly Dutch cruisers) carry an **airstrike with HE bombs**. When you select it, the
+left slot switches to the airstrike icon and rates the bomb's penetration against the target's
+**deck** only – bombs hit from above:
+
+- **Green**, deck bar lit: the bombs penetrate the deck.
+- **Red**: they do not.
+
+The penetration value is the bomb's own value as reported by the game (IFHE does not apply).
+The display stays visible while the airstrike is selected, also outside the aiming view. When
+you switch back to the main battery, PenLight shows your loaded shells again.
 
 ### Detail view (Alt)
 
@@ -148,8 +152,8 @@ other:
 - In game, the **ship silhouettes from the health bar** are coloured in: the hull is split into
   stern, midship and bow, everything above the deck line counts as deck. The ship name is shown
   underneath.
-- The picture here uses a drawn ship, because no game graphics are shipped with the mod. The
-  same drawn ships are used in game if a silhouette is missing.
+- The picture here uses a drawn ship. The same drawn ships are used in game if a silhouette is
+  missing.
 - Optionally the detail view can be shown permanently instead of the icons. It also follows the
   colour-blind scheme.
 
@@ -164,9 +168,13 @@ In TTaro Mod Config → PenLight → **Display style** you choose how the result
 
 | Style | Normal view | With Alt |
 |---|---|---|
-| **Classic** | shell and shield as shown above | ships per zone as shown above |
-| **Modern** (default) | two status capsules: top = my shot → target, bottom = target's AP → me; three dots for bow/stern, midship and deck | expanded capsules with the plate thickness per zone and the shot (penetration, or calibre and overmatch limit) |
-| **Text only** | two lines on a dark backing, e.g. "HE: Bow/Stern" and "Enemy AP: everywhere", in the traffic-light colours | headline, zone name and plate thickness as text |
+| **Classic** | two ammo slots with bars, as shown above | ships per zone as shown above |
+| **Modern** (default) | two capsules with the ammo icon or shield: top = my shot → target, bottom = target's AP → me; three dots for bow/stern, midship and deck | expanded capsules with the plate thickness per zone and the shot (penetration, or calibre and overmatch limit) |
+| **Text only** | two lines on a dark backing with a colour stripe and a small icon, e.g. "HE: Bow/Stern" and "Enemy AP: everywhere", in the traffic-light colours | headline, zone name and plate thickness as text |
+
+<p align="center">
+  <img src="docs/images/styles.png" alt="Two situations in the display styles Classic, Modern and Text only, the second one with the airstrike selected" width="760">
+</p>
 
 - All styles follow the colour-blind scheme. Pairings that are not rated stay grey.
 - Text only was checked for contrast (at least 4.5 : 1, also in front of bright spray).
@@ -185,8 +193,9 @@ answers – "is this plate thinner than what my shell gets through?" – for the
 - the player list as shown in the team lists anyway: player ID, name and team, and which ship each
   player sails – ID and name only to match the locked target;
 - which ship you have locked, and its name and health-bar silhouette for the detail view;
-- your **own** loaded main-battery ammunition and its fixed values, and your **own** HE
-  penetration modifier (e.g. the IFHE commander skill);
+- your **own** loaded main-battery ammunition and its fixed values, your **own** HE
+  penetration modifier (e.g. the IFHE commander skill), and whether **you** have selected your
+  airstrike, with the fixed values of its bombs;
 - the camera mode (aiming view, Alt) and whether your own ship is alive, to show or hide the
   display.
 
@@ -223,8 +232,7 @@ Armour and calibres are static ship data. They are extracted offline from the cl
 
 **Steps**
 
-1. Download `PenLight-<version>.zip` from [Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases). For 0.4.0 this is
-   `PenLight-0.4.0-ttaro.zip`; the standalone zip of that release is no longer maintained.
+1. Download `PenLight-<version>.zip` from [Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases).
 2. Close the game.
 3. In the game folder, find the folder with the **highest number** under `bin/`,
    e.g. `bin/13357625/`.
@@ -286,6 +294,7 @@ The ship silhouettes come from the game itself and follow every patch automatica
 | Draw shell, shield, HE/SAP icons, tags and marks | `python3 -I tools/make_ampel_icons.py` |
 | Detail images, labels, frames | `python3 -I tools/make_detail_icons.py` |
 | Status capsules and Alt panels (Modern) | `python3 -I tools/make_capsule_icons.py` |
+| Ammo-bar look: slots, bars, capsules, stripes, glows | `python3 -I tools/make_ammobar_icons.py` |
 | README images | `python3 -I tools/make_readme_images.py` |
 | Texts of the TTaro options page | `python3 -I tools/make_texts.py` |
 | To-do list | [`docs/TODO.md`](docs/TODO.md) |
@@ -296,7 +305,8 @@ The ship silhouettes come from the game itself and follow every patch automatica
 
 - The game logic (`src/penlight/logic.py`) runs on Python 2.7 (client) and 3.x (tests).
 - `mod/res_mods/PnFMods/PenLight/Main.py` is generated – edit `src/penlight/` instead.
-- All graphics are drawn by scripts; no game assets are shipped.
+- PenLight's own graphics (frames, bars, capsules, colours) are drawn by scripts. The ammo,
+  airstrike and shield icons are copies from the game files (see [credits](#data-sources-and-credits)).
 - Concept, traffic-light logic and notes on the client (German): [`docs/KONZEPT.md`](docs/KONZEPT.md).
 
 ---
@@ -305,7 +315,8 @@ The ship silhouettes come from the game itself and follow every patch automatica
 
 ```
 mod/res_mods/                     files as they belong in bin/<build>/res_mods/
-  PnFMods/PenLight/               Main.py (generated), ships.json, icons, capsule/
+  PnFMods/PenLight/               Main.py (generated), ships.json, icons, capsule/, ammobar/
+  PnFMods/PenLight/ammobar/game/  ammo, airstrike and shield icons copied from the game
   gui/unbound2/PnFMods/           PenLight*.unbound – the display (Unbound 2)
   ForgeBlueprints/                ModForge manifest
   ModSchemas/, texts/             options page for TTaro Mod Config
@@ -323,6 +334,9 @@ docs/                             concept, images
   [`tools/gameparams.py`](tools/gameparams.py); armour material names from
   [wowsunpack](https://github.com/landaire/wowsunpack) (MIT).
 - **ModsAPI** by Wargaming/Lesta (official documentation).
+- **Ammo, airstrike and shield icons** (`ammobar/game/`): © Wargaming.net, copied unchanged from
+  the client files (ammo bar icons and the commander-skill icon `planes_ap_damage`) so the display
+  matches the game's own HUD, as other mods do. They remain Wargaming's property.
 - **ModForge**, **TTaroModUtils** and **LocalizationLoader** by [AndrewTaro](https://github.com/AndrewTaro):
   used as dependencies (LocalizationLoader optional), not shipped. Their code, and that of his PenetrationCalculator (for the
   ammunition API), served as reference only; nothing was copied.

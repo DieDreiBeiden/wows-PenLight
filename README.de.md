@@ -8,19 +8,18 @@
 PenLight direkt neben dem Fadenkreuz zwei kleine Ampeln:
 
 - **Mein Schuss → Ziel:** Kommt meine **geladene** Munition durch die Panzerung des Ziels? AP wird
-  nach Overmatch bewertet, HE und SAP nach ihrem Durchschlagswert.
+  nach Overmatch bewertet, HE und SAP nach ihrem Durchschlagswert. Ist der **Luftschlag** gewählt
+  (z. B. niederländische Kreuzer), werden seine HE-Bomben gegen das Deck bewertet.
 - **Ziel → ich:** Können die AP-Granaten des Ziels meine Panzerung overmatchen?
 
-Zur Wahl stehen drei [Darstellungen](#darstellung): **Klassisch** (Granate und Schild),
-**Modern** (Status-Kapseln, Standard) und **Nur Text**. Mit gedrückter **Alt**-Taste zeigt eine
-Detailansicht dasselbe für jede Zone beider Schiffe: Bug/Heck, Mitte und Deck.
+Die Anzeige sieht aus wie die Munitionsleiste des Spiels: das Symbol deiner geladenen Munition
+(bzw. des Luftschlags) und ein Schild, eingerahmt in der Ampelfarbe. Zur Wahl stehen drei
+[Darstellungen](#darstellung): **Klassisch** (Munitions-Slots), **Modern** (Kapseln, Standard) und
+**Nur Text**. Mit gedrückter **Alt**-Taste zeigt eine Detailansicht dasselbe für jede Zone beider
+Schiffe: Bug/Heck, Mitte und Deck.
 
-Die Anzeige erscheint nur in der **gezoomten Zielansicht** (Fernglas / Zielfernrohr). In der
-normalen Außenperspektive ist sie ausgeblendet.
-
-<p align="center">
-  <img src="docs/images/styles.png" alt="Dieselbe Lage in den Darstellungen Klassisch, Modern und Nur Text" width="760">
-</p>
+Die Anzeige erscheint nur in der **gezoomten Zielansicht** (Fernglas / Zielfernrohr) und solange
+der Luftschlag gewählt ist. In der normalen Außenperspektive ist sie ausgeblendet.
 
 > **Aktuelle Version: 0.4.0** (Vorabversion) – [Download unter Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases).
 >
@@ -57,6 +56,7 @@ bewertet werden, hängt von der geladenen Munition ab:
 - **HE und SAP**: von Zerstörern, Kreuzern und Schlachtschiffen gegen Zerstörer, Kreuzer,
   Schlachtschiffe und Träger. Ist die Paarung keine Kreuzer/Schlachtschiff-Paarung, bleibt der
   Teil „Ziel → ich“ grau. Träger werden nur als Ziel bewertet, U-Boote gar nicht.
+- **Luftschlag** (HE-Bomben): wie HE, bewertet wird aber nur das **Deck**.
 
 Ohne Ziel oder bei einer nicht bewerteten Paarung bleibt die Anzeige grau.
 
@@ -74,64 +74,67 @@ zählt nicht als Overmatch.
 ### Die Ampel
 
 <p align="center">
-  <img src="docs/images/ampel.png" alt="Granate und Schild in allen Zuständen, Standard- und Farbenblind-Farben" width="610">
+  <img src="docs/images/ampel.png" alt="Munitions-Slot und Schild in allen Zuständen, Standard- und Farbenblind-Farben" width="760">
 </p>
 
 Die Bilder in diesem Abschnitt zeigen die Darstellung **Klassisch**; Modern und Nur Text nutzen
 dieselben Farben und Zustände (siehe [Darstellung](#darstellung)).
 
-Die Farben zeigen, ob die Lage **gut oder schlecht für dich** ist. Deshalb haben Granate und
-Schild beim gleichen Ergebnis entgegengesetzte Farben:
+- **Linker Slot – mein Schuss → Ziel:** das Symbol der geladenen Munition, wie in der
+  Munitionsleiste des Spiels.
+- **Rechter Slot – Ziel → ich:** ein Schild (Symbol einer Kapitänsfertigkeit); er steht immer für
+  die **AP des Ziels**.
 
-| Overmatch auf … | Granate (meine AP → Ziel) | Schild (AP des Ziels → ich) |
+Die Farben zeigen, ob die Lage **gut oder schlecht für dich** ist. Deshalb haben die beiden Slots
+beim gleichen Ergebnis entgegengesetzte Farben:
+
+| Overmatch auf … | Linker Slot (meine AP → Ziel) | Schild (AP des Ziels → ich) |
 |---|---|---|
-| allen drei Zonen | **Grün + Stern** – ich komme überall durch, auch wenn das Ziel anwinkelt | **Rot + Warndreieck** – das Ziel kommt überall durch, seinen Geschützen ausweichen |
-| nur Bug/Heck | **Orange** – auf Bug/Heck zielen | **Orange** – Bug/Heck aus seinem Feuer halten |
-| nicht einmal Bug/Heck | **Rot** – nur die Breitseite lohnt | **Grün** – Anwinkeln schützt dich |
-| keine Bewertung | Grau | Grau |
+| allen drei Zonen | **Grün + Leuchten** – ich komme überall durch, auch wenn das Ziel anwinkelt | **Rot + Leuchten** – das Ziel kommt überall durch, seinen Geschützen ausweichen |
+| einigen Zonen (z. B. Bug/Heck) | **Orange** – auf die leuchtenden Zonen zielen | **Orange** – diese Zonen aus seinem Feuer halten |
+| keiner Zone | **Rot** – nur die Breitseite lohnt | **Grün** – Anwinkeln schützt dich |
+| keine Bewertung | Grau, Symbole abgedunkelt | Grau, Symbole abgedunkelt |
 
-Die **Form** trägt dieselbe Aussage, damit alles auch bei Farbsehschwäche lesbar bleibt:
-
-- **Granate:** alle Segmente gefüllt = überall, nur die Spitze gefüllt = nur Bug/Heck,
-  Schrägstrich = nirgends.
-- **Schild:** voll und heil = das Ziel kommt nicht durch, unterer Teil gefüllt = nur Bug/Heck,
-  **gerissen** = das Ziel kommt überall durch.
-- Stern und Warndreieck blinken beim Aufschalten kurz auf.
+Die **drei Balken** unter jedem Slot tragen dieselbe Aussage ohne Farbe, damit alles auch bei
+Farbsehschwäche lesbar bleibt: von links nach rechts **Bug/Heck, Mitte, Deck**; ein leuchtender
+Balken heißt „kommt hier durch“. Das Leuchten pulsiert beim Aufschalten kurz.
 
 Für Rot-Grün-Schwäche gibt es ein Farbschema in Blau/Gelb/Orange (Okabe-Ito-Palette).
 
 ### HE und SAP
 
-Die Granate bewertet immer die **gerade geladene Munition**. Eine kleine Plakette (AP / HE / SAP)
-wie an den Munitions-Slots im HUD zeigt, welche. HE und SAP haben eigene Zeichnungen, angelehnt an die
-Munitions-Symbole des Spiels: HE explodiert auf einer Platte (Rauch und Blitz), SAP schlägt auf
-und splittert.
+Der linke Slot bewertet immer die **gerade geladene Munition** und zeigt ihr Spiel-Symbol (AP, HE
+oder SAP).
 
 HE und SAP overmatchen nicht; sie durchschlagen eine Platte, wenn ihr Durchschlagswert mindestens
-so groß ist wie die Plattendicke. Die normale Ansicht prüft das für **Bug/Heck** und **Deck**, die
-beiden Zonen, auf die man mit HE/SAP meist zielt; die Detailansicht zeigt zusätzlich die Mitte:
+so groß ist wie die Plattendicke:
 
 - Durchschlagswerte werden immer auf ganze Millimeter abgerundet; Gleichstand zählt als Durchschlag.
 - Für HE nutzt PenLight den Durchschlags-Modifikator, den das Spiel für dein Schiff meldet; die
-  Kapitänsfertigkeit **IFHE** ist also enthalten. Ist IFHE aktiv, erscheint links unten an der
-  HE-Granate eine kleine Plakette **IFHE**. SAP ist von IFHE nicht betroffen.
+  Kapitänsfertigkeit **IFHE** ist also enthalten. Ist IFHE aktiv, erscheint links unten am
+  HE-Symbol eine kleine Plakette **IFHE**. SAP ist von IFHE nicht betroffen.
+- Die Farbe folgt derselben Regel wie bei AP: Grün = überall, Orange = einige Zonen,
+  Rot = nirgends.
 
 <p align="center">
-  <img src="docs/images/ammo.png" alt="Granaten-Symbole für AP, HE (mit und ohne IFHE) und SAP in allen Zuständen, mit Munitions-Plakette" width="630">
+  <img src="docs/images/ammo.png" alt="Munitions-Slot für AP, HE (mit und ohne IFHE), SAP und Luftschlag in allen Zuständen" width="640">
 </p>
-
-| Durchschlag Bug/Heck | Durchschlag Deck | Granate |
-|---|---|---|
-| ja | ja | **Grün + Stern** – Spitze, Band und hinterer Ring gefüllt |
-| ja | nein | **Orange** – Spitze und Band gefüllt |
-| nein | ja | **Orange** – Spitze und hinterer Ring gefüllt |
-| nein | nein | **Rot** – Schrägstrich |
-| – | – | Grau – keine Bewertung |
-
-Das Band steht für Bug/Heck, der hintere Ring für das Deck. Die Spitze trägt immer die Ampelfarbe.
 
 Der Schild hängt nicht von deiner Munition ab: Er zeigt immer, ob die **AP des Ziels** dich
 overmatchen kann.
+
+### Luftschlag
+
+Einige Schiffe (vor allem niederländische Kreuzer) haben einen **Luftschlag mit HE-Bomben**.
+Wählst du ihn, wechselt der linke Slot auf das Luftschlag-Symbol und bewertet den Durchschlag der
+Bombe nur gegen das **Deck** des Ziels – Bomben treffen von oben:
+
+- **Grün**, Deck-Balken leuchtet: Die Bomben durchschlagen das Deck.
+- **Rot**: Sie tun es nicht.
+
+Der Durchschlag ist der Wert der Bombe, wie ihn das Spiel meldet (IFHE wirkt hier nicht). Die
+Anzeige bleibt sichtbar, solange der Luftschlag gewählt ist, auch außerhalb der Zielansicht.
+Wechselst du zurück auf die Hauptbewaffnung, zeigt PenLight wieder die geladene Granate.
 
 ### Detailansicht (Alt)
 
@@ -148,8 +151,8 @@ Schiffe Granate und Schild:
 - Im Spiel werden die **Schiffs-Silhouetten aus dem Lebensbalken** eingefärbt: der Rumpf geteilt
   in Heck, Mitte und Bug, alles oberhalb der Decklinie zählt als Deck. Darunter steht der
   Schiffsname.
-- Die Abbildung hier zeigt ein gezeichnetes Schiff, weil keine Spielgrafiken mitgeliefert werden.
-  Dieselben gezeichneten Schiffe springen im Spiel ein, wenn eine Silhouette fehlt.
+- Die Abbildung hier zeigt ein gezeichnetes Schiff. Dieselben gezeichneten Schiffe springen im
+  Spiel ein, wenn eine Silhouette fehlt.
 - Optional ersetzt die Detailansicht die Symbole dauerhaft; das Farbenblind-Schema gilt auch hier.
 
 Bewusste Vereinfachung: Die Zitadelle wird nicht bewertet. Grün heißt, die äußere Beplankung wird
@@ -163,9 +166,13 @@ In TTaro Mod Config → PenLight → **Darstellung** wählst du, wie das Ergebni
 
 | Darstellung | Normale Ansicht | Mit Alt |
 |---|---|---|
-| **Klassisch** | Granate und Schild wie oben | Schiffe je Zone wie oben |
-| **Modern** (Standard) | zwei Status-Kapseln: oben mein Schuss → Ziel, unten AP des Ziels → ich; drei Punkte für Bug/Heck, Mitte und Deck | ausgeklappte Kapseln mit Plattendicke je Zone und dem Schuss (Durchschlag bzw. Kaliber und Overmatch-Grenze) |
-| **Nur Text** | zwei Zeilen auf dunkler Unterlage, z. B. „HE: Bug/Heck“ und „Gegner-AP: überall“, in den Ampelfarben | Kopfzeile, Zonenname und Plattendicke als Text |
+| **Klassisch** | zwei Munitions-Slots mit Balken wie oben | Schiffe je Zone wie oben |
+| **Modern** (Standard) | zwei Kapseln mit Munitions-Symbol bzw. Schild: oben mein Schuss → Ziel, unten AP des Ziels → ich; drei Punkte für Bug/Heck, Mitte und Deck | ausgeklappte Kapseln mit Plattendicke je Zone und dem Schuss (Durchschlag bzw. Kaliber und Overmatch-Grenze) |
+| **Nur Text** | zwei Zeilen auf dunkler Unterlage mit Farbstreifen und kleinem Symbol, z. B. „HE: Bug/Heck“ und „Gegner-AP: überall“, in den Ampelfarben | Kopfzeile, Zonenname und Plattendicke als Text |
+
+<p align="center">
+  <img src="docs/images/styles.png" alt="Zwei Lagen in den Darstellungen Klassisch, Modern und Nur Text, die zweite mit gewähltem Luftschlag" width="760">
+</p>
 
 - Alle Darstellungen folgen dem Farbenblind-Schema. Nicht bewertete Paarungen bleiben grau.
 - „Nur Text“ ist auf Kontrast geprüft (mindestens 4,5 : 1, auch vor heller Gischt).
@@ -186,8 +193,9 @@ aufgeschaltete Schiff.
   Schiff jedes Spielers – ID und Name nur, um das aufgeschaltete Ziel zuzuordnen;
 - welches Schiff du aufgeschaltet hast, dazu dessen Namen und Lebensbalken-Silhouette für die
   Detailansicht;
-- deine **eigene** geladene Munition der Hauptbewaffnung mit ihren festen Werten und deinen
-  **eigenen** HE-Durchschlags-Modifikator (z. B. die Kapitänsfertigkeit IFHE);
+- deine **eigene** geladene Munition der Hauptbewaffnung mit ihren festen Werten, deinen
+  **eigenen** HE-Durchschlags-Modifikator (z. B. die Kapitänsfertigkeit IFHE) und ob **du** deinen
+  Luftschlag gewählt hast, mit den festen Werten seiner Bomben;
 - den Kameramodus (Zielansicht, Alt) und ob dein eigenes Schiff lebt, um die Anzeige ein- oder
   auszublenden.
 
@@ -226,8 +234,7 @@ mitgeliefert.
 
 **Schritte**
 
-1. `PenLight-<Version>.zip` unter [Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases) herunterladen. Für 0.4.0 ist das
-   `PenLight-0.4.0-ttaro.zip`; die Standalone-Zip dieses Releases wird nicht mehr gepflegt.
+1. `PenLight-<Version>.zip` unter [Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases) herunterladen.
 2. Spiel beenden.
 3. Im Spielordner unter `bin/` den Ordner mit der **höchsten Nummer** suchen,
    z. B. `bin/13357625/`.
@@ -289,6 +296,7 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 | Icons für Granate, Schild, HE/SAP, Plaketten und Zeichen zeichnen | `python3 -I tools/make_ampel_icons.py` |
 | Detail-Bilder, Beschriftungen, Rahmen | `python3 -I tools/make_detail_icons.py` |
 | Status-Kapseln und Alt-Flächen (Modern) | `python3 -I tools/make_capsule_icons.py` |
+| Munitionsleisten-Design: Slots, Balken, Kapseln, Streifen, Leuchtringe | `python3 -I tools/make_ammobar_icons.py` |
 | Abbildungen der README | `python3 -I tools/make_readme_images.py` |
 | Texte der TTaro-Optionsseite | `python3 -I tools/make_texts.py` |
 | To-Do-Liste | [`docs/TODO.md`](docs/TODO.md) |
@@ -299,7 +307,9 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 
 - Die Spiel-Logik (`src/penlight/logic.py`) läuft unter Python 2.7 (Client) und 3.x (Tests).
 - `mod/res_mods/PnFMods/PenLight/Main.py` ist generiert – Änderungen in `src/penlight/`.
-- Alle Grafiken werden per Skript gezeichnet; es werden keine Spielgrafiken mitgeliefert.
+- PenLights eigene Grafiken (Rahmen, Balken, Kapseln, Farben) werden per Skript gezeichnet. Die
+  Symbole für Munition, Luftschlag und Schild sind Kopien aus den Spieldateien (siehe
+  [Quellen](#datenquellen-und-danksagungen)).
 - Konzept, Ampel-Logik und gesammelte Befunde zum Client: [`docs/KONZEPT.md`](docs/KONZEPT.md).
 
 ---
@@ -308,7 +318,8 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 
 ```
 mod/res_mods/                     Dateien so, wie sie in bin/<Build>/res_mods/ gehören
-  PnFMods/PenLight/               Main.py (generiert), ships.json, Icons, capsule/
+  PnFMods/PenLight/               Main.py (generiert), ships.json, Icons, capsule/, ammobar/
+  PnFMods/PenLight/ammobar/game/  Symbole für Munition, Luftschlag und Schild, aus dem Spiel kopiert
   gui/unbound2/PnFMods/           PenLight*.unbound – die Anzeige (Unbound 2)
   ForgeBlueprints/                ModForge-Manifest
   ModSchemas/, texts/             Optionsseite für TTaro Mod Config
@@ -326,6 +337,10 @@ docs/                             Konzept, Abbildungen
   [`tools/gameparams.py`](tools/gameparams.py); Namen der Panzerungsmaterialien aus
   [wowsunpack](https://github.com/landaire/wowsunpack) (MIT).
 - **ModsAPI** von Wargaming/Lesta (offizielle Dokumentation).
+- **Symbole für Munition, Luftschlag und Schild** (`ammobar/game/`): © Wargaming.net, unverändert
+  aus den Client-Dateien kopiert (Symbole der Munitionsleiste und das Fertigkeitssymbol
+  `planes_ap_damage`), damit die Anzeige zum HUD des Spiels passt – wie bei anderen Mods üblich.
+  Sie bleiben Eigentum von Wargaming.
 - **ModForge**, **TTaroModUtils** und **LocalizationLoader** von [AndrewTaro](https://github.com/AndrewTaro):
   werden als Abhängigkeiten genutzt (LocalizationLoader optional), aber nicht mitgeliefert. Ihr Code und der seines PenetrationCalculator
   (für die Munitions-API) diente nur als Referenz; übernommen wurde nichts.
