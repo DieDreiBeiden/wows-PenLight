@@ -11,6 +11,7 @@ Unzip into `World of Warships/bin/<highest number>/` and overwrite existing PenL
 ## Known issues
 
 - IFHE detection is not yet confirmed in game.
+- Airstrike: possible penetration modifiers on the bombs (e.g. from commander skills) are not taken into account; the bombs' base value is used.
 
 {{COMPARE}}
 

@@ -5,6 +5,9 @@ workflow uses them as "What's new" and then moves them under the new version.
 
 ## Unreleased
 
+- New look for all display styles, modelled on the game's ammo bar: the icon of your loaded ammunition (AP / HE / SAP) and a shield, framed in the traffic-light colour, with three bars or dots for bow/stern, midship and deck. Extreme cases glow. The ammo, airstrike and shield icons are taken from the game files.
+- New: airstrike support. When you select an airstrike with HE bombs (e.g. Dutch cruisers), PenLight shows the airstrike icon and rates the bombs' penetration against the target's deck only. The display stays visible while the airstrike is selected and switches back to your loaded shells when you return to the main battery.
+- Text only now shows a colour stripe and a small ammo icon in front of each line.
 - The edition without TTaroModUtils (standalone) is no longer released; releases contain one zip, `PenLight-<version>.zip`, which needs ModForge and TTaroModUtils. If you used the standalone edition, delete `gui/unbound2/PnFMods/PenLightTTaro.unbound` and `PnFMods/PenLight/Main.swf`.
 
 ## 0.4.0 – 2026-10-24

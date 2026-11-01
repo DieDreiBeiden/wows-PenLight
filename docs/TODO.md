@@ -1,23 +1,13 @@
 # PenLight – To-Do
 
-Stand: 2026-10-24. Probe-Builds entstehen im Branch `Test`, übernommen wird erst nach Freigabe.
+Stand: 2026-11-01. Probe-Builds entstehen im Branch `Test`, übernommen wird erst nach Freigabe.
 
 ## Neue Funktionen
 
-- [ ] **HE-Luftschlag gegen das Deck**
-  - Daten: `gameparams.py` liest je Schiff den HE-Bomben-Durchschlag des Luftschlags
-    (`A_AirSupport` → Flugzeug → `bombName`, `alphaPiercingHE`) und schreibt ihn nach `ships.json`.
-    Betrifft rund 20 Flugzeugtypen, fast nur niederländische Kreuzer (z. B. Gouden Leeuw 37 mm,
-    Prins van Oranje 46,3 mm); die übrigen Luftschläge sind Wasserbomben gegen U-Boote.
-  - Anzeige: bei gewähltem Luftschlag bewertet die obere Kapsel nur das Deck (eigenes Kürzel, z. B.
-    „AS“), Alt-Ansicht mit Bomben-Durchschlag und Deckdicke.
-  - [x] Probe (python.log 2026-11-01): `events.onWeaponTypeChanged(neuer_typ)`, `WeaponType.AIR_SUPPORT = 12`,
-    `battle.getSelectedAmmoId(12)` liefert die Bombe (Utrecht HE 36,9 mm).
-  - [ ] Probe 2 auf `Test`: Erkennung beim Waffenwechsel (Kürzel „AS“ bzw. „Airstrike“, Spiel-Symbol
-    `airsupport_he`, nur Deck-Punkt/-Balken), Anzeige auch außerhalb der Zielansicht solange der Luftschlag
-    gewählt ist; prüfen, ob in der Luftschlag-Ansicht ein Ziel aufgeschaltet bleibt (Diagnosezeile).
-  - [ ] Danach Diagnosezeile (`probeAirstrike`) entfernen.
-  - Offen: Modifikatoren (Kapitänsfertigkeiten) auf den Bomben-Durchschlag.
+- [x] **HE-Luftschlag gegen das Deck** – im Spiel getestet (Utrecht), in 0.5.0 übernommen (2026-11-01).
+  Erkennung über `events.onWeaponTypeChanged` (`WeaponType.AIR_SUPPORT = 12`), Bombe aus
+  `battle.getSelectedAmmoId(12)`, Rückfall auf `ships.json`.
+  - Offen: Modifikatoren (Kapitänsfertigkeiten) auf den Bomben-Durchschlag; derzeit ohne Faktor.
 - [ ] **PenLight für Flugzeugträger**
   - Entscheidung offen: Teil von PenLight oder eigene Mod „PenLightCV“.
   - Zu klären: was bewertet wird (Bomben, Raketen, Torpedos bzw. Durchschlag gegen Deck und
@@ -30,25 +20,18 @@ Stand: 2026-10-24. Probe-Builds entstehen im Branch `Test`, übernommen wird ers
 - [ ] Texte in der Client-Sprache mit LocalizationLoader im Spiel prüfen; Übersetzungen für
       Thai, Koreanisch und Türkisch von Muttersprachlern prüfen lassen
 - [ ] Munitionskürzel in den Kapseln lokalisieren (spieleigene `IDS_AMMOTYPE_*`), optional
-- [ ] README-Bilder für Modern und Nur Text (eigener Hintergrund, keine Spielgrafik)
+- [x] README-Bilder für Modern und Nur Text (`styles.png`, seit 0.5.0 im Munitionsleisten-Design)
 - [ ] Standard-Darstellung für Bestandsnutzer festlegen (derzeit Modern)
 
-## Redesign „Munitionsleiste“ (Variante 1, vorgemerkt 2026-11-01)
+## Munitionsleisten-Design (seit 0.5.0)
 
-- [ ] Alle Darstellungen (Klassisch, Modern, Nur Text, Alt-Ansicht) im Stil der Munitionsleiste:
-      Spiel-Symbol der geladenen Munition (AP / HE / SAP, Luftschlag: HE-Bombe) in Farbe im Slot,
-      Ampelfarbe im Rahmen, drei Zonen-Balken bzw. -Punkte; ohne Ziel die `inactive`-Symbole.
-- [x] Spiel-Symbole per `img://` nicht erreichbar (Probe a87b0b9). Entscheidung 2026-11-01: Kopien der
-      benötigten Symbole liegen in `PnFMods/PenLight/ammobar/game/` (aus dem WoWs Unpacker)
-- [ ] Vor Übernahme nach `main`: README, Fair-Play-Abschnitt und CLAUDE.md anpassen („keine
-      Spielgrafiken“ gilt nicht mehr), Quellenangabe Wargaming, in der Freigabe-Anfrage nennen
-- [ ] Unterer Teil „Ziel → ich“: Schild der Kapitänsfertigkeit `planes_ap_damage`
-      (`crew_commander/skills/`), neutral hellgrau wie die Granaten, ohne Ziel abgedunkelt;
-      Ampelfarbe nur in Rahmen, Balken und Punkten. Ausgewählt 2026-11-01. Rückfall bei fehlendem
-      Bild: eigenes Schild.
+- [x] Alle Darstellungen (Klassisch, Modern, Nur Text, Alt-Ansicht) im Stil der Munitionsleiste, Schild
+      `planes_ap_damage`, Spiel-Symbole als Kopien in `PnFMods/PenLight/ammobar/game/` – im Spiel getestet,
+      in 0.5.0 übernommen (2026-11-01); README, Fair Play und Quellenangabe angepasst.
+- [ ] In der Freigabe-Anfrage an Wargaming die mitgelieferten Spiel-Symbole nennen
 - [ ] Optional IFHE-Plakette: Fertigkeitssymbol `he_penetration` (IFHE) statt eigener Plakette
-- [ ] Probe 1 auf `Test` (Schalter `ammoBarDesign`): Pfade der Spiel-Symbole, Aussehen aller Darstellungen
-      im Spiel prüfen
+- [ ] Alte Symbole (Granate / Schild, Status-Kapseln) entfernen, falls der Schalter `ammoBarDesign`
+      nicht mehr gebraucht wird
 
 ## Standalone (Branch `Test-Standalone`, Experiment, nicht veröffentlicht)
 
