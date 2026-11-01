@@ -50,6 +50,22 @@
 	# Probe Luftschlag (Branch Test): Anzeige auch ausserhalb der Zielansicht und Diagnosezeile mit
 	# Kameramodus, Zielansicht, Taktikkarte, aufgeschaltetem Ziel und Bewertung (false = aus)
 	probeAirstrike: true,
+	# Redesign "Munitionsleiste" (Probe, Branch Test; false = bisheriges Aussehen): Spiel-Symbol der geladenen
+	# Munition bzw. Schild der Kapitaensfertigkeit planes_ap_damage (zur Laufzeit per img:// aus dem Spiel,
+	# nicht mitgeliefert; Pfade sind zu pruefen), Ampelfarbe nur in Rahmen, Balken, Punkten und Streifen
+	# (ammobar/*.png aus tools/make_ammobar_icons.py). Gilt fuer Klassisch, Modern, Nur Text und Alt-Ansicht.
+	ammoBarDesign: true,
+	gameAmmoPath: 'img://gui/ammo/',
+	gameShieldIcon: 'img://gui/crew_commander/skills/planes_ap_damage.png',
+	ammoBarSlot: 46,
+	ammoBarIcon: 40,
+	ammoBarGap: 6,
+	ammoBarSegGap: 3,
+	ammoBarSegHeight: 5,
+	ammoBarCapWidth: 72,
+	ammoBarCapHeight: 22,
+	ammoBarCapIcon: 22,
+	ammoBarTextIcon: 17,
 	# Nur Text: jede Zeile auf einer dunklen Unterlage (0xD90E1012 in PenLightTextLine/-Alt, ARGB,
 	# 85 % Deckkraft), damit der Kontrast auch vor heller Gischt oder Explosionen mindestens 4,5 : 1
 	# erreicht (WCAG AA, gemessen an Screenshots); Zeilenhoehe inkl. Unterlage, Rand um den Text.
@@ -153,6 +169,8 @@
 # Textfarben heller als die der Symbole, damit sie auf der Unterlage >= 4,5 : 1 erreichen:
 # gruen #3DDC5A, orange #FF8C00, rot #FF7060, grau #B0B5BA; farbenblind blau #58AAFF, gelb #F0E442,
 # orange #F58028.
+(def constant PENLIGHT_ICON_CT_NEUTRAL { redMultiplier:1,greenMultiplier:1,blueMultiplier:1,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 })
+(def constant PENLIGHT_ICON_CT_DIM { redMultiplier:0.38,greenMultiplier:0.4,blueMultiplier:0.42,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 })
 (def constant PENLIGHT_TEXT_CT {
 	green:  { redMultiplier:0.24,greenMultiplier:0.86,blueMultiplier:0.35,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
 	yellow: { redMultiplier:1,greenMultiplier:0.55,blueMultiplier:0,alphaMultiplier:1,redOffset:0,greenOffset:0,blueOffset:0,alphaOffset:0 },
@@ -405,6 +423,26 @@
 		(var textAttackHead:str = "toUpper(ammo) + (hasIfhe ? ' IFHE' : '') + '  ' + attackLine")
 		(var textDefenseHead:str = "defenseRated && nums[8] > 0 ? txtEnemyAp + ' ' + subst(txtMm, [nums[8]]) + '  /  ' + subst(txtOmUpTo, [nums[9]]) : txtEnemyAp + ': ' + txtNotRatedShort")
 		(var showTextAlt:bool = "showDetail && isTextOnly")
+
+		# Redesign Munitionsleiste: Spiel-Symbole und eigene Rahmen/Balken/Kapseln je Zustand
+		(var isAmmoBar:bool = "PENLIGHT_SETTINGS.ammoBarDesign")
+		(var abPath:str = "PENLIGHT_ICON_PATH + 'ammobar/'")
+		(var abAmmo:str = "ammo == 'sap' ? 'cs' : ammo")
+		(var abAttackIcon:str = "PENLIGHT_SETTINGS.gameAmmoPath + abAmmo + (attackRated ? '' : '_inactive') + '.png'")
+		(var abShieldIcon:str = "PENLIGHT_SETTINGS.gameShieldIcon")
+		(var abShieldCt:dict = "defenseRated ? PENLIGHT_ICON_CT_NEUTRAL : PENLIGHT_ICON_CT_DIM")
+		(var abAttackSlot:str = "abPath + (attackRated ? 'slot_' + (attackBits == '111' ? 'ext_' : '') + palettePrefix + attackState : 'slot_grey') + '.png'")
+		(var abDefenseSlot:str = "abPath + (defenseRated ? 'slot_' + (defenseBits == '111' ? 'ext_' : '') + palettePrefix + defenseState : 'slot_grey') + '.png'")
+		(var abAttackSeg:str = "abPath + (attackRated ? 'seg_' + palettePrefix + attackState + '_' + attackBits : 'seg_grey') + '.png'")
+		(var abDefenseSeg:str = "abPath + (defenseRated ? 'seg_' + palettePrefix + defenseState + '_' + defenseBits : 'seg_grey') + '.png'")
+		(var abAttackCap:str = "abPath + (attackRated ? 'cap_' + palettePrefix + attackState + '_' + attackBits : 'cap_grey') + '.png'")
+		(var abDefenseCap:str = "abPath + (defenseRated ? 'cap_' + palettePrefix + defenseState + '_' + defenseBits : 'cap_grey') + '.png'")
+		(var abAttackGlowSlot:str = "attackRated && attackBits == '111' ? abPath + 'glow_slot_' + palettePrefix + 'green.png' : ''")
+		(var abDefenseGlowSlot:str = "defenseRated && defenseBits == '111' ? abPath + 'glow_slot_' + palettePrefix + 'red.png' : ''")
+		(var abAttackGlowCap:str = "attackRated && attackBits == '111' ? abPath + 'glow_cap_' + palettePrefix + 'green.png' : ''")
+		(var abDefenseGlowCap:str = "defenseRated && defenseBits == '111' ? abPath + 'glow_cap_' + palettePrefix + 'red.png' : ''")
+		(var abAttackStripe:str = "abPath + 'stripe_' + (attackRated ? palettePrefix + attackState : 'grey') + '.png'")
+		(var abDefenseStripe:str = "abPath + 'stripe_' + (defenseRated ? palettePrefix + defenseState : 'grey') + '.png'")
 	)
 
 	(controller $Repeat renderer='PenLightTargetTracker'
@@ -433,6 +471,10 @@
 				(class $TextDefaultBold13NM)
 				(bind text "'cam ' + toString(probeCameraMode) + '  bino ' + (probeBinocular ? '1' : '0') + '  map ' + (probeTactical ? '1' : '0') + '  target ' + (targetKey != '' ? targetKey : '-') + '  verdict ' + (hasVerdict ? '1' : '0') + '  ammo ' + ammo")
 			)
+			(tf
+				(class $TextDefaultBold13NM)
+				(bind text "'icon ' + abAttackIcon")
+			)
 		)
 		# eigenes Zahnrad links neben der Anzeige, sichtbar bei aktivem Mauszeiger (Strg);
 		# oeffnet TTaro Mod Config direkt auf der PenLight-Seite (wie BuildViewer)
@@ -443,12 +485,26 @@
 			)
 		)
 		(hblock
-			(bind visible "!showDetail && isClassic")
+			(bind visible "!showDetail && isClassic && !isAmmoBar")
 			(element PenLightIcon _url="attackIcon" _mark="attackMark" _pulseKey="targetKey" _tag="attackTag" _badge="attackBadge")
 			(element PenLightIcon _url="defenseIcon" _mark="defenseMark" _pulseKey="targetKey")
 		)
+		(hblock
+			(bind visible "!showDetail && isClassic && isAmmoBar")
+			(element PenLightAmmoSlot _frame="abAttackSlot" _icon="abAttackIcon" _iconCt="PENLIGHT_ICON_CT_NEUTRAL" _seg="abAttackSeg"
+				_glow="abAttackGlowSlot" _pulseKey="targetKey" _badge="attackBadge")
+			(element PenLightAmmoSlot _frame="abDefenseSlot" _icon="abShieldIcon" _iconCt="abShieldCt" _seg="abDefenseSeg"
+				_glow="abDefenseGlowSlot" _pulseKey="targetKey" _badge="''")
+		)
 		(block
-			(bind visible "!showDetail && isModern")
+			(bind visible "!showDetail && isModern && isAmmoBar")
+			(element PenLightAmmoCapsule _frame="abAttackCap" _icon="abAttackIcon" _iconCt="PENLIGHT_ICON_CT_NEUTRAL"
+				_glow="abAttackGlowCap" _pulseKey="targetKey" _badge="attackBadge")
+			(element PenLightAmmoCapsule _frame="abDefenseCap" _icon="abShieldIcon" _iconCt="abShieldCt"
+				_glow="abDefenseGlowCap" _pulseKey="targetKey" _badge="''")
+		)
+		(block
+			(bind visible "!showDetail && isModern && !isAmmoBar")
 			(element PenLightCapsule _url="attackCapsule" _glow="attackGlow" _pulseKey="targetKey"
 				_w="capsuleAmmo == 'he_if' ? PENLIGHT_SETTINGS.capsuleWidth : PENLIGHT_SETTINGS.capsuleWidthNarrow")
 			(element PenLightCapsule _url="defenseCapsule" _glow="defenseGlow" _pulseKey="targetKey"
@@ -460,19 +516,30 @@
 			(style (position = "absolute") (left = 0) (top = 0))
 			(element PenLightAltPanel _kind="'atk'" _state="attackState" _z="[detail[0] == 1 ? 1 : 0, aMid, detail[2] == 1 ? 1 : 0]"
 				_line="attackLine" _label="altAmmoLabel" _values="[nums[0], nums[1], nums[2]]" _cb="isColorBlind" _pulseKey="targetKey"
-				_names="zoneNames" _mmFmt="txtMm")
+				_names="zoneNames" _mmFmt="txtMm" _icon="isAmmoBar ? abAttackIcon : ''" _iconDim="false")
 			(element PenLightAltPanel _kind="'def'" _state="defenseState" _z="[detail[3] == 1 ? 1 : 0, dMid, detail[5] == 1 ? 1 : 0]"
 				_line="defenseLine" _label="''" _values="[nums[3], nums[4], nums[5]]" _cb="isColorBlind" _pulseKey="targetKey"
-				_names="zoneNames" _mmFmt="txtMm")
+				_names="zoneNames" _mmFmt="txtMm" _icon="isAmmoBar ? abShieldIcon : ''" _iconDim="!defenseRated")
 		)
 		# Nur Text: oben ich -> Ziel, unten Ziel -> ich
 		(block
-			(bind visible "!showDetail && isTextOnly")
+			(bind visible "!showDetail && isTextOnly && !isAmmoBar")
 			(style (position = "absolute") (left = 0) (top = 0))
 			(element PenLightTextLine _text="textAttack" _ct="attackCt")
 			(block
 				(style (position = "absolute") (left = 0) (bind top "PENLIGHT_SETTINGS.textLineHeight"))
 				(element PenLightTextLine _text="textDefense" _ct="defenseCt")
+			)
+		)
+		(block
+			(bind visible "!showDetail && isTextOnly && isAmmoBar")
+			(style (position = "absolute") (left = 0) (top = 0))
+			(element PenLightAmmoTextLine _text="textAttack" _ct="attackCt" _stripe="abAttackStripe" _icon="abAttackIcon"
+				_iconCt="PENLIGHT_ICON_CT_NEUTRAL")
+			(block
+				(style (position = "absolute") (left = 0) (bind top "PENLIGHT_SETTINGS.textLineHeight"))
+				(element PenLightAmmoTextLine _text="textDefense" _ct="defenseCt" _stripe="abDefenseStripe" _icon="abShieldIcon"
+					_iconCt="abShieldCt")
 			)
 		)
 		(block
@@ -511,8 +578,8 @@
 				(position = "absolute")
 				(bind left "0 - PENLIGHT_SETTINGS.dragPadLeft")
 				(bind top "0 - PENLIGHT_SETTINGS.dragPadTop")
-				(bind width "(isModern ? PENLIGHT_SETTINGS.capsuleWidth : (isTextOnly ? PENLIGHT_SETTINGS.textWidth : PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap)) + PENLIGHT_SETTINGS.dragPadLeft + PENLIGHT_SETTINGS.dragPadRight")
-				(bind height "(isModern ? PENLIGHT_SETTINGS.capsuleHeight * 2 + PENLIGHT_SETTINGS.capsuleGap : (isTextOnly ? PENLIGHT_SETTINGS.textLineHeight * 2 : PENLIGHT_SETTINGS.iconSize)) + PENLIGHT_SETTINGS.dragPadTop + PENLIGHT_SETTINGS.dragPadBottom")
+				(bind width "(isModern ? PENLIGHT_SETTINGS.capsuleWidth : (isTextOnly ? PENLIGHT_SETTINGS.textWidth : (isAmmoBar ? PENLIGHT_SETTINGS.ammoBarSlot * 2 + PENLIGHT_SETTINGS.ammoBarGap : PENLIGHT_SETTINGS.iconSize * 2 + PENLIGHT_SETTINGS.iconGap))) + PENLIGHT_SETTINGS.dragPadLeft + PENLIGHT_SETTINGS.dragPadRight")
+				(bind height "(isModern ? (isAmmoBar ? PENLIGHT_SETTINGS.ammoBarCapHeight : PENLIGHT_SETTINGS.capsuleHeight) * 2 + PENLIGHT_SETTINGS.capsuleGap : (isTextOnly ? PENLIGHT_SETTINGS.textLineHeight * 2 : (isAmmoBar ? PENLIGHT_SETTINGS.ammoBarSlot + PENLIGHT_SETTINGS.ammoBarSegGap + PENLIGHT_SETTINGS.ammoBarSegHeight : PENLIGHT_SETTINGS.iconSize))) + PENLIGHT_SETTINGS.dragPadTop + PENLIGHT_SETTINGS.dragPadBottom")
 				(backgroundColor = 0x00FFFFFF)
 				(bind hitTest "!isPositionLocked")
 			)
@@ -773,7 +840,8 @@
 # Schild, Erklaerung) und drei Zonen (Punkt, Name, Plattendicke). Randfaelle mit Rahmen und
 # Leuchtring, der wie bei den Kapseln beim Aufschalten pulsiert.
 (def element PenLightAltPanel(_kind:str, _state:str, _z:array, _line:str, _label:str, _values:array,
-		_cb:bool = false, _pulseKey:str = '', _names:array = ['Bow/Stern', 'Midship', 'Deck'], _mmFmt:str = '%d mm') layout=true
+		_cb:bool = false, _pulseKey:str = '', _names:array = ['Bow/Stern', 'Midship', 'Deck'], _mmFmt:str = '%d mm',
+		_icon:str = '', _iconDim:bool = false) layout=true
 	(scope
 		(var path:str = "PENLIGHT_ICON_PATH + 'capsule/alt/'")
 		(var cbSuffix:str = "_cb ? '_cb' : ''")
@@ -814,7 +882,12 @@
 	)
 	# Kopfzeile: Munitionskuerzel (oben) bzw. Schild (unten), daneben die Erklaerung
 	(block
-		(bind visible "_kind == 'atk'")
+		(bind visible "_icon != ''")
+		(style (position = "absolute") (bind left "PENLIGHT_SETTINGS.altLabelX - 4") (bind top "PENLIGHT_SETTINGS.altLabelTop - 1"))
+		(element PenLightImage _url="_icon" _w="26" _h="26" _ct="_iconDim ? PENLIGHT_ICON_CT_DIM : PENLIGHT_ICON_CT_NEUTRAL")
+	)
+	(block
+		(bind visible "_kind == 'atk' && _icon == ''")
 		(style (position = "absolute") (bind left "PENLIGHT_SETTINGS.altLabelX") (bind top "PENLIGHT_SETTINGS.altLabelTop"))
 		(tf
 			(class $TextDefaultBold17NM)
@@ -822,7 +895,7 @@
 		)
 	)
 	(block
-		(bind visible "_kind == 'def'")
+		(bind visible "_kind == 'def' && _icon == ''")
 		(style
 			(position = "absolute") (bind left "PENLIGHT_SETTINGS.altLabelX + 1") (bind top "PENLIGHT_SETTINGS.altLabelTop + 4")
 			(backgroundSize = "autosize")
@@ -938,5 +1011,147 @@
 	(block
 		(style (position = "absolute") (bind left "x") (bind top "PENLIGHT_SETTINGS.textValueTop"))
 		(element PenLightTextInk _text="valueText" _ct="valueCt")
+	)
+)
+
+
+# Redesign Munitionsleiste: Bild fester Groesse mit Farbumwandlung (Spiel-Symbole neutral oder abgedunkelt)
+(def element PenLightImage(_url:str, _w:number, _h:number, _ct:dict) layout=true
+	(style
+		(bind width "_w") (bind height "_h")
+		(backgroundSize = "fill")
+		(bind backgroundImage "_url")
+	)
+	(bind colorTransform "_ct")
+)
+
+# Klassisch: Slot wie in der Munitionsleiste (Rahmen in der Ampelfarbe), Spiel-Symbol darin, darunter drei
+# Zonen-Balken; Randfaelle mit pulsierendem Leuchtring wie bei den Kapseln.
+(def element PenLightAmmoSlot(_frame:str, _icon:str, _iconCt:dict, _seg:str, _glow:str, _pulseKey:str, _badge:str) layout=true
+	(style
+		(bind width "PENLIGHT_SETTINGS.ammoBarSlot")
+		(bind height "PENLIGHT_SETTINGS.ammoBarSlot + PENLIGHT_SETTINGS.ammoBarSegGap + PENLIGHT_SETTINGS.ammoBarSegHeight")
+		(bind marginRight "PENLIGHT_SETTINGS.ammoBarGap")
+	)
+	(block
+		(bind visible "_glow != ''")
+		(style
+			(position = "absolute")
+			(bind left "0 - PENLIGHT_SETTINGS.glowPad") (bind top "0 - PENLIGHT_SETTINGS.glowPad")
+			(bind width "PENLIGHT_SETTINGS.ammoBarSlot + PENLIGHT_SETTINGS.glowPad * 2")
+			(bind height "PENLIGHT_SETTINGS.ammoBarSlot + PENLIGHT_SETTINGS.glowPad * 2")
+			(backgroundSize = "fill")
+			(bind backgroundImage "_glow")
+			(bind alpha "PENLIGHT_SETTINGS.glowRestAlpha")
+		)
+		(controller $Animation
+			(bindcall play duration="PENLIGHT_SETTINGS.glowPulse" from="{alpha: 1}" to="{alpha: PENLIGHT_SETTINGS.glowRestAlpha}"
+				repeatCount="PENLIGHT_SETTINGS.glowPulseCount" action="killAll" easing="Easing.quad_out"
+				init=false (bind trigger "_pulseKey + _glow"))
+		)
+	)
+	(block
+		(style
+			(position = "absolute") (left = 0) (top = 0)
+			(bind width "PENLIGHT_SETTINGS.ammoBarSlot") (bind height "PENLIGHT_SETTINGS.ammoBarSlot")
+			(backgroundSize = "fill")
+			(bind backgroundImage "_frame")
+		)
+	)
+	(block
+		(style
+			(position = "absolute")
+			(bind left "(PENLIGHT_SETTINGS.ammoBarSlot - PENLIGHT_SETTINGS.ammoBarIcon) / 2")
+			(bind top "(PENLIGHT_SETTINGS.ammoBarSlot - PENLIGHT_SETTINGS.ammoBarIcon) / 2")
+		)
+		(element PenLightImage _url="_icon" _w="PENLIGHT_SETTINGS.ammoBarIcon" _h="PENLIGHT_SETTINGS.ammoBarIcon" _ct="_iconCt")
+	)
+	(block
+		(bind visible "_badge != ''")
+		(style
+			(position = "absolute") (left = 2) (bind top "PENLIGHT_SETTINGS.ammoBarSlot - 12")
+			(backgroundSize = "autosize")
+			(bind backgroundImage "_badge")
+		)
+	)
+	(block
+		(style
+			(position = "absolute") (left = 0)
+			(bind top "PENLIGHT_SETTINGS.ammoBarSlot + PENLIGHT_SETTINGS.ammoBarSegGap")
+			(bind width "PENLIGHT_SETTINGS.ammoBarSlot") (bind height "PENLIGHT_SETTINGS.ammoBarSegHeight")
+			(backgroundSize = "fill")
+			(bind backgroundImage "_seg")
+		)
+	)
+)
+
+# Modern: Kapsel mit Symbol-Slot links (Spiel-Symbol bzw. Schild) und drei Punkten in der Ampelfarbe.
+(def element PenLightAmmoCapsule(_frame:str, _icon:str, _iconCt:dict, _glow:str, _pulseKey:str, _badge:str) layout=true
+	(style
+		(bind width "PENLIGHT_SETTINGS.ammoBarCapWidth")
+		(bind height "PENLIGHT_SETTINGS.ammoBarCapHeight")
+		(bind marginBottom "PENLIGHT_SETTINGS.capsuleGap")
+	)
+	(block
+		(bind visible "_glow != ''")
+		(style
+			(position = "absolute")
+			(bind left "0 - PENLIGHT_SETTINGS.glowPad") (bind top "0 - PENLIGHT_SETTINGS.glowPad")
+			(bind width "PENLIGHT_SETTINGS.ammoBarCapWidth + PENLIGHT_SETTINGS.glowPad * 2")
+			(bind height "PENLIGHT_SETTINGS.ammoBarCapHeight + PENLIGHT_SETTINGS.glowPad * 2")
+			(backgroundSize = "fill")
+			(bind backgroundImage "_glow")
+			(bind alpha "PENLIGHT_SETTINGS.glowRestAlpha")
+		)
+		(controller $Animation
+			(bindcall play duration="PENLIGHT_SETTINGS.glowPulse" from="{alpha: 1}" to="{alpha: PENLIGHT_SETTINGS.glowRestAlpha}"
+				repeatCount="PENLIGHT_SETTINGS.glowPulseCount" action="killAll" easing="Easing.quad_out"
+				init=false (bind trigger "_pulseKey + _glow"))
+		)
+	)
+	(block
+		(style
+			(position = "absolute") (left = 0) (top = 0)
+			(bind width "PENLIGHT_SETTINGS.ammoBarCapWidth") (bind height "PENLIGHT_SETTINGS.ammoBarCapHeight")
+			(backgroundSize = "fill")
+			(bind backgroundImage "_frame")
+		)
+		(controller $Animation
+			(bindcall play duration="PENLIGHT_SETTINGS.capsuleFade" from="{alpha: 0.35}" to="{alpha: 1}"
+				action="killAll" easing="Easing.quad_out" init=false (bind trigger "_frame"))
+		)
+	)
+	(block
+		(style (position = "absolute") (left = 2) (top = 0))
+		(element PenLightImage _url="_icon" _w="PENLIGHT_SETTINGS.ammoBarCapIcon" _h="PENLIGHT_SETTINGS.ammoBarCapIcon" _ct="_iconCt")
+	)
+	(block
+		(bind visible "_badge != ''")
+		(style
+			(position = "absolute") (left = 1) (bind top "PENLIGHT_SETTINGS.ammoBarCapHeight - 9")
+			(backgroundSize = "autosize")
+			(bind backgroundImage "_badge")
+		)
+	)
+)
+
+# Nur Text: Zeile auf dunkler Unterlage mit Farbstreifen links, kleinem Spiel-Symbol bzw. Schild und Text.
+(def element PenLightAmmoTextLine(_text:str, _ct:dict, _stripe:str, _icon:str, _iconCt:dict) layout=true
+	(style (backgroundColor = 0xD90E1012))
+	(hblock
+		(block
+			(style (width = 3) (height = 19) (backgroundSize = "fill") (bind backgroundImage "_stripe"))
+		)
+		(block
+			(style (marginLeft = 3) (marginTop = 1))
+			(element PenLightImage _url="_icon" _w="PENLIGHT_SETTINGS.ammoBarTextIcon" _h="PENLIGHT_SETTINGS.ammoBarTextIcon" _ct="_iconCt")
+		)
+		(block
+			(style
+				(marginLeft = 4) (bind marginRight "PENLIGHT_SETTINGS.textPadX")
+				(bind marginTop "PENLIGHT_SETTINGS.textPadY")
+			)
+			(element PenLightTextInk _text="_text" _ct="_ct")
+		)
 	)
 )

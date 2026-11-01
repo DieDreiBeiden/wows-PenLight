@@ -36,5 +36,20 @@ class UnboundTest(unittest.TestCase):
             self.assertEqual(depth, 0, os.path.basename(path))
 
 
+    def test_ammobar_images_complete(self):
+        # Redesign Munitionsleiste: jede Kombination, die PenLight.unbound zusammensetzt, liegt als Bild vor
+        import itertools
+        folder = os.path.join(os.path.dirname(__file__), '..', 'mod', 'res_mods', 'PnFMods', 'PenLight', 'ammobar')
+        names = {'slot_grey', 'seg_grey', 'cap_grey', 'stripe_grey'}
+        for pal in ('', 'cb_'):
+            for state in ('green', 'yellow', 'red'):
+                names |= {'slot_%s%s' % (pal, state), 'stripe_%s%s' % (pal, state)}
+                for bits in itertools.product('01', repeat=3):
+                    names |= {'seg_%s%s_%s' % (pal, state, ''.join(bits)), 'cap_%s%s_%s' % (pal, state, ''.join(bits))}
+            for state in ('green', 'red'):
+                names |= {'slot_ext_%s%s' % (pal, state), 'glow_slot_%s%s' % (pal, state), 'glow_cap_%s%s' % (pal, state)}
+        missing = sorted(n for n in names if not os.path.exists(os.path.join(folder, n + '.png')))
+        self.assertEqual(missing, [])
+
 if __name__ == '__main__':
     unittest.main()

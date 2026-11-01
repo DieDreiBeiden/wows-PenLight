@@ -41,7 +41,8 @@ Stand: 2026-10-24. Probe-Builds entstehen im Branch `Test`, übernommen wird ers
       Ampelfarbe nur in Rahmen, Balken und Punkten. Ausgewählt 2026-11-01. Rückfall bei fehlendem
       Bild: eigenes Schild.
 - [ ] Optional IFHE-Plakette: Fertigkeitssymbol `he_penetration` (IFHE) statt eigener Plakette
-- [ ] Erst nach dem Luftschlag-Test als Probe auf `Test` beginnen
+- [ ] Probe 1 auf `Test` (Schalter `ammoBarDesign`): Pfade der Spiel-Symbole, Aussehen aller Darstellungen
+      im Spiel prüfen
 
 ## Standalone (Branch `Test-Standalone`, Experiment, nicht veröffentlicht)
 
