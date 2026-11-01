@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Zeichnet die eigenen Teile des Redesigns "Munitionsleiste" (Probe im Branch Test).
+"""Zeichnet die eigenen Teile des Munitionsleisten-Designs (seit 0.5.0).
 
     python3 -I tools/make_ammobar_icons.py
 
-Die Symbole selbst (geladene Munition, Schild der Kapitaensfertigkeit) kommen zur Laufzeit per img://
-aus dem Spiel und werden nicht mitgeliefert. Hier entstehen nur Rahmen, Zonen-Balken, Kapseln mit
-Punkten, Farbstreifen und Leuchtringe; die Ampelfarbe sitzt ausschliesslich in diesen Teilen.
+Die Symbole selbst (geladene Munition, Luftschlag, Schild der Kapitaensfertigkeit) sind Kopien aus den
+Spieldateien (Wargaming) in ammobar/game/; per img:// sind sie aus Mods nicht erreichbar. Hier entstehen nur
+Rahmen, Zonen-Balken, Kapseln mit Punkten, Farbstreifen und Leuchtringe; die Ampelfarbe sitzt ausschliesslich
+in diesen Teilen.
 
 Ausgabe: mod/res_mods/PnFMods/PenLight/ammobar/
   slot_<pal><state>.png, slot_ext_<pal><green|red>.png, slot_grey.png     Slot 46 x 46 (Klassisch)
