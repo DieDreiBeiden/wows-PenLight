@@ -29,6 +29,19 @@ Stand: 2026-10-24. Probe-Builds entstehen im Branch `Test`, übernommen wird ers
 - [ ] README-Bilder für Modern und Nur Text (eigener Hintergrund, keine Spielgrafik)
 - [ ] Standard-Darstellung für Bestandsnutzer festlegen (derzeit Modern)
 
+## Redesign „Munitionsleiste“ (Variante 1, vorgemerkt 2026-11-01)
+
+- [ ] Alle Darstellungen (Klassisch, Modern, Nur Text, Alt-Ansicht) im Stil der Munitionsleiste:
+      Spiel-Symbol der geladenen Munition (AP / HE / SAP, Luftschlag: HE-Bombe) in Farbe im Slot,
+      Ampelfarbe im Rahmen, drei Zonen-Balken bzw. -Punkte; ohne Ziel die `inactive`-Symbole.
+- [ ] Spiel-Symbole nur zur Laufzeit per `img://` (nicht mitliefern); Pfad per Probe prüfen
+      (vermutlich `gui/ammo/<name>.png`, `gui/consumables/…`)
+- [ ] Unterer Teil „Ziel → ich“: gespiegelte AP (Spiegeln in Unbound ungeprüft) oder
+      `consumable_PXY624_ArmorBuff` (Panzerplatten mit Schild; Event-Symbol, kann mit einem Patch
+      wegfallen → eigenes Schild als Rückfall)
+- [ ] IFHE-Plakette weiter aus eigenen Grafiken
+- [ ] Erst nach dem Luftschlag-Test als Probe auf `Test` beginnen
+
 ## Standalone (Branch `Test-Standalone`, Experiment, nicht veröffentlicht)
 
 - [ ] Darstellungen per Strg+Alt+S und Flash-Greiffläche je Darstellung im Spiel testen, mit und
