@@ -95,9 +95,12 @@ beim gleichen Ergebnis entgegengesetzte Farben:
 | keiner Zone | **Rot** – nur die Breitseite lohnt | **Grün** – Anwinkeln schützt dich |
 | keine Bewertung | Grau, Symbole abgedunkelt | Grau, Symbole abgedunkelt |
 
-Die **drei Balken** unter jedem Slot tragen dieselbe Aussage ohne Farbe, damit alles auch bei
-Farbsehschwäche lesbar bleibt: von links nach rechts **Bug/Heck, Mitte, Deck**; ein leuchtender
-Balken heißt „kommt hier durch“. Das Leuchten pulsiert beim Aufschalten kurz.
+Die **Balken** unter jedem Slot tragen dieselbe Aussage ohne Farbe, damit alles auch bei
+Farbsehschwäche lesbar bleibt. Sie sind angeordnet wie ein Schiff von der Seite: links **Bug**,
+rechts **Heck** (beide stehen für Bug/Heck), in der Mitte eine geteilte Sektion – **obere Hälfte
+Deck, untere Hälfte Mitte**. Eine leuchtende Sektion heißt „kommt hier durch“. Modern nutzt Punkte
+in derselben Reihenfolge, der mittlere Punkt ist genauso geteilt. Das Leuchten pulsiert beim
+Aufschalten kurz.
 
 Für Rot-Grün-Schwäche gibt es ein Farbschema in Blau/Gelb/Orange (Okabe-Ito-Palette).
 
@@ -129,8 +132,10 @@ Einige Schiffe (vor allem niederländische Kreuzer) haben einen **Luftschlag mit
 Wählst du ihn, wechselt der linke Slot auf das Luftschlag-Symbol und bewertet den Durchschlag der
 Bombe nur gegen das **Deck** des Ziels – Bomben treffen von oben:
 
-- **Grün**, Deck-Balken leuchtet: Die Bomben durchschlagen das Deck.
-- **Rot**: Sie tun es nicht.
+- **Grün** mit Leuchten, die einzelne Deck-Sektion leuchtet: Die Bomben durchschlagen das Deck.
+- **Rot**, Sektion leer: Sie tun es nicht.
+
+Statt drei Sektionen zeigen Balken (Klassisch) bzw. Kapsel (Modern) nur diese eine.
 
 Der Durchschlag ist der Wert der Bombe, wie ihn das Spiel meldet (IFHE wirkt hier nicht). Die
 Anzeige bleibt sichtbar, solange der Luftschlag gewählt ist, auch außerhalb der Zielansicht.
@@ -167,7 +172,7 @@ In TTaro Mod Config → PenLight → **Darstellung** wählst du, wie das Ergebni
 | Darstellung | Normale Ansicht | Mit Alt |
 |---|---|---|
 | **Klassisch** | zwei Munitions-Slots mit Balken wie oben | Schiffe je Zone wie oben |
-| **Modern** (Standard) | zwei Kapseln mit Munitions-Symbol bzw. Schild: oben mein Schuss → Ziel, unten AP des Ziels → ich; drei Punkte für Bug/Heck, Mitte und Deck | ausgeklappte Kapseln mit Plattendicke je Zone und dem Schuss (Durchschlag bzw. Kaliber und Overmatch-Grenze) |
+| **Modern** (Standard) | zwei Kapseln mit Munitions-Symbol bzw. Schild: oben mein Schuss → Ziel, unten AP des Ziels → ich; Punkte für Bug, Deck/Mitte (geteilt) und Heck | ausgeklappte Kapseln mit Plattendicke je Zone und dem Schuss (Durchschlag bzw. Kaliber und Overmatch-Grenze) |
 | **Nur Text** | zwei Zeilen auf dunkler Unterlage mit Farbstreifen und kleinem Symbol, z. B. „HE: Bug/Heck“ und „Gegner-AP: überall“, in den Ampelfarben | Kopfzeile, Zonenname und Plattendicke als Text |
 
 <p align="center">

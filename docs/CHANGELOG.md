@@ -5,6 +5,9 @@ workflow uses them as "What's new" and then moves them under the new version.
 
 ## Unreleased
 
+- Bars (Classic) and dots (Modern) are now arranged like a ship seen from the side: bow on the left, stern on the right, and a split middle section – upper half deck, lower half midship. Before, "bow/stern + deck" and "bow/stern + midship" were hard to tell apart.
+- Airstrike: shows a single deck section instead of three, green with glow when the bombs penetrate the deck.
+
 ## 0.5.0 – 2026-11-01
 
 - New look for all display styles, modelled on the game's ammo bar: the icon of your loaded ammunition (AP / HE / SAP) and a shield, framed in the traffic-light colour, with three bars or dots for bow/stern, midship and deck. Extreme cases glow. The ammo, airstrike and shield icons are taken from the game files.

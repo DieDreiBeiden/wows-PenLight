@@ -95,9 +95,11 @@ use opposite colours for the same result:
 | no zone | **Red** – only a broadside is worth it | **Green** – angling protects you |
 | no rating | Grey, icons dimmed | Grey, icons dimmed |
 
-The **three bars** under each slot carry the same message without colour, so it stays readable
-with colour vision deficiency: from left to right **bow/stern, midship, deck**; a lit bar means
-"gets through here". The glow pulses briefly when you lock a target.
+The **bars** under each slot carry the same message without colour, so it stays readable with
+colour vision deficiency. They are arranged like a ship seen from the side: **bow** on the left,
+**stern** on the right (both stand for bow/stern), and in the middle a split section – **upper
+half deck, lower half midship**. A lit section means "gets through here". Modern uses dots in the
+same order, with the middle dot split the same way. The glow pulses briefly when you lock a target.
 
 A colour-blind scheme in blue/yellow/orange (Okabe-Ito palette) is available for red-green
 colour vision deficiency.
@@ -130,8 +132,10 @@ Some ships (mostly Dutch cruisers) carry an **airstrike with HE bombs**. When yo
 left slot switches to the airstrike icon and rates the bomb's penetration against the target's
 **deck** only – bombs hit from above:
 
-- **Green**, deck bar lit: the bombs penetrate the deck.
-- **Red**: they do not.
+- **Green** with glow, the single deck section lit: the bombs penetrate the deck.
+- **Red**, section empty: they do not.
+
+Instead of three sections, the bar (Classic) or the capsule (Modern) shows just this one.
 
 The penetration value is the bomb's own value as reported by the game (IFHE does not apply).
 The display stays visible while the airstrike is selected, also outside the aiming view. When
@@ -169,7 +173,7 @@ In TTaro Mod Config → PenLight → **Display style** you choose how the result
 | Style | Normal view | With Alt |
 |---|---|---|
 | **Classic** | two ammo slots with bars, as shown above | ships per zone as shown above |
-| **Modern** (default) | two capsules with the ammo icon or shield: top = my shot → target, bottom = target's AP → me; three dots for bow/stern, midship and deck | expanded capsules with the plate thickness per zone and the shot (penetration, or calibre and overmatch limit) |
+| **Modern** (default) | two capsules with the ammo icon or shield: top = my shot → target, bottom = target's AP → me; dots for bow, deck/midship (split) and stern | expanded capsules with the plate thickness per zone and the shot (penetration, or calibre and overmatch limit) |
 | **Text only** | two lines on a dark backing with a colour stripe and a small icon, e.g. "HE: Bow/Stern" and "Enemy AP: everywhere", in the traffic-light colours | headline, zone name and plate thickness as text |
 
 <p align="center">

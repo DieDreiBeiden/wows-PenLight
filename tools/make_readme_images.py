@@ -41,11 +41,11 @@ def _icon(name):
 
 # Munitionsleisten-Design (seit 0.5.0): Teile aus make_ammobar_icons, Symbole aus ammobar/game/ (Kopien aus
 # den Spieldateien, Wargaming). Masse wie PENLIGHT_SETTINGS (ammoBarSlot 46, ammoBarIcon 40, SegGap 3,
-# SegHeight 5, Gap 6, CapWidth 72, CapHeight 22, CapIcon 22, capsuleGap 4, TextIcon 17, glowPad 5,
+# SegHeight 7, Gap 6, CapWidth 72, CapHeight 22, CapIcon 22, capsuleGap 4, TextIcon 17, glowPad 5,
 # glowRestAlpha 0.45 = Ruhezustand nach dem Pulsieren).
 AMMOBAR = os.path.join(ICONS, 'ammobar')
 GAME = os.path.join(AMMOBAR, 'game')
-SLOT, SLOT_ICON, SEG_GAP, SEG_H, GAP = 46, 40, 3, 5, 6
+SLOT, SLOT_ICON, SEG_GAP, SEG_H, GAP = 46, 40, 3, 7, 6
 CAP_W, CAP_H, CAP_ICON, CAP_GAP, TEXT_ICON, GLOW_PAD, GLOW_REST = 72, 22, 22, 4, 17, 5, 0.45
 # Nur Text: Unterlage 0xD90E1012, Textfarben wie PENLIGHT_TEXT_CT bzw. _CB
 TEXT_PLATE = (14, 16, 18, 217)
@@ -86,12 +86,14 @@ def _state(kind, bits, rated=True, airstrike=False):
 
 def _frame_names(kind, bits, pal, rated, airstrike=False):
     st = _state(kind, bits, rated, airstrike)
-    ext = rated and bits == '111'
+    ext = rated and (bits[2] == '1' if airstrike else bits == '111')
+    air = 'air_' if airstrike else ''
     if not rated:
-        return 'slot_grey', 'seg_grey', 'cap_grey', 'stripe_grey', None, None, st
+        return 'slot_grey', 'seg_%sgrey' % air, 'cap_%sgrey' % air, 'stripe_grey', None, None, st
     glow = ('green' if kind == 'atk' else 'red') if ext else None
-    return ('slot_%s%s%s' % ('ext_' if ext else '', pal, st), 'seg_%s%s_%s' % (pal, st, bits),
-            'cap_%s%s_%s' % (pal, st, bits), 'stripe_%s%s' % (pal, st),
+    suffix = '' if airstrike else '_' + bits
+    return ('slot_%s%s%s' % ('ext_' if ext else '', pal, st), 'seg_%s%s%s%s' % (air, pal, st, suffix),
+            'cap_%s%s%s%s' % (air, pal, st, suffix), 'stripe_%s%s' % (pal, st),
             'glow_slot_%s%s' % (pal, glow) if glow else None, 'glow_cap_%s%s' % (pal, glow) if glow else None, st)
 
 
@@ -173,7 +175,7 @@ def ampel():
                          ab_slot('def', SHIELD, bits, pal, rated), gap=GAP - 2 * GLOW_PAD)
             im.alpha_composite(_zoom(pair), (x0 + i * cw, y))
     d.text((14, im.height - 22), 'left: my shell vs target  -  right (shield): target\'s AP vs me  -  '
-           'bars: bow/stern, midship, deck', font=fs, fill=(170, 172, 174))
+           'bars: bow | upper deck, lower midship | stern', font=fs, fill=(170, 172, 174))
     im.save(os.path.join(OUT, 'ampel.png'))
 
 
@@ -181,12 +183,12 @@ def ammo():
     """Zeilen je Munition, Spalten je Zustand; AP kennt kein 'nur Deck', der Luftschlag nur das Deck."""
     f = ImageFont.truetype(FONT, 13)
     fs = ImageFont.truetype(FONT_REGULAR, 12)
-    columns = [('everywhere', '111'), ('bow/stern\nonly', '100'), ('deck only', '001'), ('nowhere', '000'),
-               ('no target /\nnot rated', None)]
-    rows = [('AP', 'ap', ('111', '100', None, '000')), ('HE', 'he', ('111', '100', '001', '000')),
-            ('HE + IFHE', 'he', ('111', '100', '001', '000')), ('SAP', 'cs', ('111', '100', '001', '000')),
-            ('Airstrike', 'airsupport_he', (None, None, '001', '000'))]
-    cw, rh, x0 = 128, 130, 120
+    columns = [('everywhere', '111'), ('bow/stern\n+ midship', '110'), ('bow/stern', '100'),
+               ('deck\n(airstrike)', '001'), ('nowhere', '000'), ('no target /\nnot rated', None)]
+    common = ('111', '110', '100', '000')
+    rows = [('AP', 'ap', common), ('HE', 'he', common), ('HE + IFHE', 'he', common), ('SAP', 'cs', common),
+            ('Airstrike', 'airsupport_he', ('001', '000'))]
+    cw, rh, x0 = 124, 134, 120
     im = Image.new('RGBA', (x0 + len(columns) * cw, 44 + len(rows) * rh + 24), BACKGROUND)
     d = ImageDraw.Draw(im)
     for i, (label, _) in enumerate(columns):
@@ -196,14 +198,14 @@ def ammo():
         d.text((14, y + 50), name, font=f, fill=(236, 238, 240))
         for i, (_, bits) in enumerate(columns):
             if bits is None:
-                slot = ab_slot('atk', icon + '_inactive', '000', rated=False)
+                slot = ab_slot('atk', icon + '_inactive', '000', rated=False, airstrike=icon == 'airsupport_he')
             elif bits not in allowed:
                 continue
             else:
                 slot = ab_slot('atk', icon, bits, airstrike=icon == 'airsupport_he', ifhe=name.endswith('IFHE'))
             im.alpha_composite(_zoom(slot), (x0 + i * cw, y))
-    d.text((14, im.height - 22), 'AP: overmatch  -  HE/SAP: penetration >= plate, rounded down; HE incl. IFHE  -  '
-           'airstrike: deck only', font=fs, fill=(170, 172, 174))
+    d.text((14, im.height - 22), 'bars: bow | upper deck, lower midship | stern  -  HE/SAP: penetration >= plate, '
+           'HE incl. IFHE  -  airstrike: deck only', font=fs, fill=(170, 172, 174))
     im.save(os.path.join(OUT, 'ammo.png'))
 
 
