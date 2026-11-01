@@ -94,6 +94,34 @@ class ReleaseNotesTest(unittest.TestCase):
         notes = rn.build_notes(template, changelog, version, 'v0.0.0', 'o/r')
         self.assertIn('PenLight-%s.zip' % version, notes)
 
+    def test_game_version_from_ships(self):
+        self.assertEqual(rn.game_version('{"gameVersion": "15,9,0,13357625", "ships": {}}'), '15.9.0.13357625')
+        with self.assertRaises(ValueError):
+            rn.game_version('{"gameVersion": "15.9"}')
+        notes = rn.build_notes(TEMPLATE + '{{GAME_VERSION}}', CHANGELOG, '0.3.2', 'v0.3.1', 'o/r', '15.9.0.1')
+        self.assertIn('15.9.0.1', notes)
+
+    def test_add_change(self):
+        out = rn.add_change(CHANGELOG, 'Ship data updated  for 15.10.')
+        self.assertIn('- Fixed: deck\n- Ship data updated for 15.10.\n\n## 0.3.1', out)
+        empty = rn.add_change('## Unreleased\n\n## 0.3.1\n', 'x')
+        self.assertEqual(empty, '## Unreleased\n\n- x\n\n## 0.3.1\n')
+        with self.assertRaises(ValueError):
+            rn.add_change('## 0.3.1\n', 'x')
+
+
+class ShipsDiffTest(unittest.TestCase):
+    def test_report(self):
+        import ships_diff
+        old = {'gameVersion': '1,0,0,1', 'ships': {'A': ['Cruiser', 25.0, 30.0, 152.0, 25.0, None],
+                                                    'B': ['Destroyer', 19.0, 19.0, 127.0, 19.0, None]}}
+        new = {'gameVersion': '1,0,0,2', 'ships': {'A': ['Cruiser', 25.0, 32.0, 152.0, 25.0, 36.9],
+                                                    'C': ['Battleship', 32.0, 57.0, 460.0, 32.0, None]}}
+        self.assertEqual(ships_diff.diff(old, new)[:2], (['C'], ['B']))
+        text = ships_diff.report(old, new)
+        self.assertIn('2 ships, 1 new, 1 removed, 1 changed', text)
+        self.assertIn('| A | deck 30 -> 32, airstrike - -> 36.9 |', text)
+
 
 if __name__ == '__main__':
     unittest.main()

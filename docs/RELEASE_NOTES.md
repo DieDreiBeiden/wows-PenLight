@@ -6,7 +6,7 @@
 
 - `PenLight-{{VERSION}}.zip` – needs [ModForge](https://github.com/AndrewTaro/ModForge) and [TTaroModUtils](https://github.com/AndrewTaro/TTaroModUtils)
 
-Unzip into `World of Warships/bin/<highest number>/` and overwrite existing PenLight files. Tested with EU client 15.9.0.13357625.
+Unzip into `World of Warships/bin/<highest number>/` and overwrite existing PenLight files. Ship data for game client build {{GAME_VERSION}}; PenLight switches itself off on any other build until the data is updated.
 
 ## Known issues
 

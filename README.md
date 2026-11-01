@@ -275,6 +275,22 @@ Armour and calibres come from the game file `content/GameParams.data` and apply 
 game version. If `ships.json` does not match the running version, the mod switches itself off
 (better nothing than wrong colours) and says so in its log.
 
+**With the Data update workflow (recommended):**
+
+1. Extract `content/GameParams.data` from the client with the WoWs Unpack Tool.
+2. Attach it as `GameParams.data` to the release with the tag `gameparams-input` (create that
+   release once as a pre-release, later just replace the file), or put it somewhere with a direct
+   download link.
+3. GitHub: Actions → **Data update** → Run workflow on `main`, with the game version as written in
+   `python.log` (e.g. `15,10,0,13500000`) and, if used, the download link.
+
+The workflow builds `ships.json`, lists the new, removed and changed ships in the run summary,
+runs the tests, adds "Ship data updated for …" to the changelog, commits to `main` and starts the
+Release workflow (next patch version). With `dry_run` it only shows the comparison and offers
+`ships.json` as a download.
+
+**By hand:**
+
 ```bash
 # 1. Extract GameParams.data from the client with the WoWs Unpack Tool
 # 2. Build the table (version as written in python.log)
@@ -304,6 +320,7 @@ The ship silhouettes come from the game itself and follow every patch automatica
 | To-do list | [`docs/TODO.md`](docs/TODO.md) |
 | Release | GitHub: Actions → Release → Run workflow (on `main`). Version = next patch unless given; the workflow writes it into `ForgeBlueprints/PenLightContainer.xml` and the README version line, so ModForge always sees the release version. What's new = "Unreleased" in `docs/CHANGELOG.md`, frame in `docs/RELEASE_NOTES.md` |
 | Release preview | Same workflow with `dry_run`: notes in the run summary, zip as download on the run, nothing pushed or published |
+| Ship data after a game patch | GitHub: Actions → Data update (see [After a game patch](#after-a-game-patch)); comparison of two tables: `python3 -I tools/ships_diff.py OLD.json NEW.json` |
 | Checks on every push | Workflow Check: tests, `Main.py` up to date, Python 2.7 syntax |
 | Probe build from `Test` / `Test-Standalone` | Workflow Check after each push: `res_mods` as download on the run (14 days), no release |
 

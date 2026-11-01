@@ -1,0 +1,129 @@
+# Schiffsdaten nach einem Spiel-Patch: Actions -> Data update -> Run workflow (auf main).
+# Vorher GameParams.data mit dem WoWs Unpack Tool aus dem Client holen (content/GameParams.data) und
+# bereitstellen, entweder
+#   a) als Datei-Anhang "GameParams.data" am Release mit dem Tag "gameparams-input" (einmal als
+#      Vorabversion anlegen, danach nur den Anhang ersetzen), oder
+#   b) unter einer direkten Download-Adresse (Eingabe "source_url").
+# Der Workflow erzeugt daraus mod/res_mods/PnFMods/PenLight/ships.json fuer die angegebene Spielversion,
+# zeigt die Unterschiede zur bisherigen Tabelle in der Zusammenfassung des Laufs, prueft Tests und
+# Main.py, traegt "Ship data updated for ..." unter "Unreleased" in docs/CHANGELOG.md ein, committet auf
+# main und startet danach den Release-Workflow (naechste Patch-Version, sofern "release" an ist).
+# Probelauf (dry_run): nichts committen, nichts ausloesen; ships.json und Vergleich als Download (7 Tage).
+name: Data update
+
+on:
+  workflow_dispatch:
+    inputs:
+      game_version:
+        description: 'Spielversion wie im python.log, z. B. 15,10,0,13500000'
+        required: true
+      source_url:
+        description: 'Direkte Adresse von GameParams.data (leer = Anhang am Release gameparams-input)'
+        required: false
+        default: ''
+      release:
+        description: 'Danach Release-Workflow starten (naechste Patch-Version)'
+        type: boolean
+        default: true
+      prerelease:
+        description: 'Release als Vorabversion markieren'
+        type: boolean
+        default: true
+      dry_run:
+        description: 'Probelauf: nichts committen, nichts ausloesen'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  data:
+    runs-on: ubuntu-latest
+    env:
+      GAME_VERSION: ${{ inputs.game_version }}
+      SOURCE_URL: ${{ inputs.source_url }}
+      SHIPS: mod/res_mods/PnFMods/PenLight/ships.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Eingaben pruefen
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::Nur von main ausloesen (aktuell $GITHUB_REF)"
+            exit 1
+          fi
+          if ! printf '%s' "$GAME_VERSION" | grep -Eq '^[0-9]+(,[0-9]+){3}$'; then
+            echo "::error::Spielversion '$GAME_VERSION' ungueltig; Format wie im python.log: 15,10,0,13500000"
+            exit 1
+          fi
+
+      - name: GameParams.data holen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p work dist
+          if [ -n "$SOURCE_URL" ]; then
+            curl -fsSL --retry 3 -o work/GameParams.data "$SOURCE_URL"
+          else
+            gh release download gameparams-input -p GameParams.data -D work \
+              || { echo "::error::Kein Anhang GameParams.data am Release gameparams-input und keine source_url"; exit 1; }
+          fi
+          ls -l work/GameParams.data
+
+      - name: Schiffstabelle erzeugen und vergleichen
+        run: |
+          cp "$SHIPS" work/ships_old.json
+          python3 -I tools/gameparams.py work/GameParams.data dist/ships_full.json "$SHIPS" "$GAME_VERSION"
+          python3 -I tools/ships_diff.py work/ships_old.json "$SHIPS" | tee dist/diff.md >> "$GITHUB_STEP_SUMMARY"
+          cp "$SHIPS" dist/ships.json
+          COUNT=$(python3 -c "import json,sys; print(len(json.load(open(sys.argv[1]))['ships']))" "$SHIPS")
+          if [ "$COUNT" -lt 500 ]; then
+            echo "::error::Nur $COUNT Schiffe erkannt - GameParams.data falsch oder Format geaendert"
+            exit 1
+          fi
+
+      - name: Tests und Main.py
+        run: |
+          python3 -m unittest discover -s tests
+          python3 -I tools/build_mod.py
+          git diff --exit-code -- mod/res_mods/PnFMods/PenLight/Main.py
+
+      - name: Probelauf hochladen
+        if: inputs.dry_run
+        uses: actions/upload-artifact@v4
+        with:
+          name: ships-${{ inputs.game_version }}-probelauf
+          path: |
+            dist/ships.json
+            dist/diff.md
+          retention-days: 7
+
+      - name: Committen
+        if: ${{ !inputs.dry_run }}
+        run: |
+          if git diff --quiet -- "$SHIPS"; then
+            echo "ships.json unveraendert - nichts zu tun"
+            echo "UNCHANGED=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          DOTTED=$(printf '%s' "$GAME_VERSION" | tr ',' '.')
+          python3 -I tools/release_notes.py add-change "Ship data updated for game client build $DOTTED."
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898297+github-actions[bot]@users.noreply.github.com'
+          git commit -m "Schiffsdaten fuer Spielversion $DOTTED" -- "$SHIPS" docs/CHANGELOG.md
+          git push origin HEAD:main
+
+      - name: Release-Workflow starten
+        if: ${{ !inputs.dry_run && inputs.release && env.UNCHANGED != 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          gh workflow run release.yml --ref main -f prerelease="$PRERELEASE"
+          echo "Release-Workflow gestartet (naechste Patch-Version)" >> "$GITHUB_STEP_SUMMARY"

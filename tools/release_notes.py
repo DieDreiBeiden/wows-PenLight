@@ -6,6 +6,7 @@
     python3 -I tools/release_notes.py set-readme VERSION PRERELEASE README.md [README.de.md ...]
     python3 -I tools/release_notes.py notes VERSION VORHERIGER_TAG OWNER/REPO > notes.md
     python3 -I tools/release_notes.py finalize VERSION DATUM
+    python3 -I tools/release_notes.py add-change TEXT
 
 Version: GEWUENSCHT (z. B. 0.4.0) oder leer = naechste Patch-Version nach dem neuesten Tag; leer mit
 REPLACE=true = neuester Tag (Release wird ersetzt). 'set-version' schreibt sie ins ModForge-Manifest,
@@ -14,7 +15,9 @@ damit die Mod immer die Release-Version meldet. 'set-readme' schreibt sie in die
 Release-Text: neue Eintraege kommen unter '## Unreleased' in docs/CHANGELOG.md. 'notes' nimmt den
 Abschnitt '## VERSION', falls es ihn schon gibt (Release wird ersetzt), sonst 'Unreleased'.
 'finalize' macht aus 'Unreleased' den Abschnitt '## VERSION – DATUM' und legt ein leeres
-'Unreleased' an. Vorlage docs/RELEASE_NOTES.md: {{VERSION}}, {{CHANGES}}, {{COMPARE}}.
+'Unreleased' an. 'add-change' haengt einen Eintrag unter 'Unreleased' an (Workflow "Data update").
+Vorlage docs/RELEASE_NOTES.md: {{VERSION}}, {{CHANGES}}, {{COMPARE}}, {{GAME_VERSION}} (Spielversion der
+Schiffsdaten aus ships.json, mit Punkten: 15.9.0.13357625).
 """
 import os
 import re
@@ -23,6 +26,7 @@ import sys
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 CHANGELOG = os.path.join(ROOT, 'docs', 'CHANGELOG.md')
 TEMPLATE = os.path.join(ROOT, 'docs', 'RELEASE_NOTES.md')
+SHIPS = os.path.join(ROOT, 'mod', 'res_mods', 'PnFMods', 'PenLight', 'ships.json')
 UNRELEASED = 'Unreleased'
 _VERSION = re.compile(r'^v?([0-9]+)\.([0-9]+)\.([0-9]+)$')
 _MANIFEST_VERSION = re.compile(r'(<mod\b[^>]*\bversion=")([0-9]+\.[0-9]+\.[0-9]+)(")')
@@ -111,14 +115,40 @@ def changes_for(changelog, version):
     return text
 
 
-def build_notes(template, changelog, version, previous, repo):
+def game_version(ships_json):
+    """Spielversion der Schiffsdaten ('15,9,0,13357625') mit Punkten."""
+    import json
+    value = json.loads(ships_json).get('gameVersion') or ''
+    if not re.match(r'^[0-9]+(,[0-9]+){3}$', value):
+        raise ValueError('ships.json: gameVersion %r ungueltig' % value)
+    return value.replace(',', '.')
+
+
+def add_change(changelog, text):
+    """Eintrag als letzte Zeile unter '## Unreleased'."""
+    text = ' '.join(text.split())
+    if not text:
+        raise ValueError('leerer Eintrag')
+    heading = '## %s\n' % UNRELEASED
+    if heading not in changelog:
+        raise ValueError('docs/CHANGELOG.md: Abschnitt "## %s" fehlt' % UNRELEASED)
+    start = changelog.index(heading) + len(heading)
+    nxt = changelog.find('\n## ', start)
+    end = len(changelog) if nxt < 0 else nxt + 1
+    body = changelog[start:end].rstrip('\n')
+    body = (body + '\n' if body.strip() else '\n') + '- %s\n\n' % text
+    return changelog[:start] + body + changelog[end:]
+
+
+def build_notes(template, changelog, version, previous, repo, game=''):
     compare = ''
     if previous:
         compare = 'All changes since %s: [%s...v%s](https://github.com/%s/compare/%s...v%s)' % (
             previous, previous, version, repo, previous, version)
     notes = (template.replace('{{VERSION}}', version)
              .replace('{{CHANGES}}', changes_for(changelog, version))
-             .replace('{{COMPARE}}', compare))
+             .replace('{{COMPARE}}', compare)
+             .replace('{{GAME_VERSION}}', game))
     if '{{' in notes:
         raise ValueError('unbekannter Platzhalter in docs/RELEASE_NOTES.md')
     return re.sub(r'\n{3,}', '\n\n', notes).strip() + '\n'
@@ -156,9 +186,12 @@ def main(argv):
             for path in argv[4:]:
                 _write(path, set_readme_version(_read(path), argv[2], argv[3] == 'true'))
         elif cmd == 'notes' and len(argv) == 5:
-            sys.stdout.write(build_notes(_read(TEMPLATE), _read(CHANGELOG), argv[2], argv[3], argv[4]))
+            sys.stdout.write(build_notes(_read(TEMPLATE), _read(CHANGELOG), argv[2], argv[3], argv[4],
+                                         game_version(_read(SHIPS))))
         elif cmd == 'finalize' and len(argv) == 4:
             _write(CHANGELOG, finalize(_read(CHANGELOG), argv[2], argv[3]))
+        elif cmd == 'add-change' and len(argv) == 3:
+            _write(CHANGELOG, add_change(_read(CHANGELOG), argv[2]))
         else:
             sys.stderr.write(__doc__)
             return 2

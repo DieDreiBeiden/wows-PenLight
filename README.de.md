@@ -278,6 +278,22 @@ Panzerung und Kaliber stammen aus der Spieldatei `content/GameParams.data` und g
 eine Spielversion. Passt `ships.json` nicht zur laufenden Version, schaltet sich die Mod ab
 (lieber nichts anzeigen als falsche Farben) und schreibt das ins Log.
 
+**Mit dem Workflow „Data update“ (empfohlen):**
+
+1. `content/GameParams.data` mit dem WoWs Unpack Tool aus dem Client extrahieren.
+2. Als `GameParams.data` an den Release mit dem Tag `gameparams-input` anhängen (diesen Release
+   einmal als Vorabversion anlegen, danach nur die Datei ersetzen) oder unter einem direkten
+   Download-Link ablegen.
+3. GitHub: Actions → **Data update** → Run workflow auf `main`, mit der Spielversion wie im
+   `python.log` (z. B. `15,10,0,13500000`) und ggf. dem Download-Link.
+
+Der Workflow erzeugt `ships.json`, listet neue, entfallene und geänderte Schiffe in der
+Zusammenfassung des Laufs, prüft die Tests, trägt „Ship data updated for …“ ins Changelog ein,
+committet auf `main` und startet den Release-Workflow (nächste Patch-Version). Mit `dry_run` zeigt
+er nur den Vergleich und bietet `ships.json` zum Download an.
+
+**Von Hand:**
+
 ```bash
 # 1. GameParams.data mit dem WoWs Unpack Tool aus dem Client extrahieren
 # 2. Tabelle erzeugen (Version so, wie sie im python.log steht)
@@ -307,6 +323,7 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 | To-Do-Liste | [`docs/TODO.md`](docs/TODO.md) |
 | Release | GitHub: Actions → Release → Run workflow (auf `main`). Version = nächste Patch-Version, sofern nicht angegeben; der Workflow schreibt sie in `ForgeBlueprints/PenLightContainer.xml` und in die Versionszeile der README, ModForge sieht also immer die Release-Version. Neuerungen = „Unreleased“ in `docs/CHANGELOG.md`, Rahmen in `docs/RELEASE_NOTES.md` |
 | Release-Vorschau | Gleicher Workflow mit `dry_run`: Text in der Zusammenfassung des Laufs, Zip als Download am Lauf, nichts gepusht oder veröffentlicht |
+| Schiffsdaten nach einem Spiel-Patch | GitHub: Actions → Data update (siehe [Nach einem Spiel-Patch](#nach-einem-spiel-patch)); Vergleich zweier Tabellen: `python3 -I tools/ships_diff.py ALT.json NEU.json` |
 | Prüfung bei jedem Push | Workflow Check: Tests, `Main.py` aktuell, Python-2.7-Syntax |
 | Probe-Build aus `Test` / `Test-Standalone` | Workflow Check nach jedem Push: `res_mods` als Download am Lauf (14 Tage), kein Release |
 
