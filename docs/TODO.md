@@ -30,14 +30,20 @@ Stand: 2026-11-01. Probe-Builds entstehen im Branch `Test`, übernommen wird ers
       in 0.5.0 übernommen (2026-11-01); README, Fair Play und Quellenangabe angepasst.
 - [ ] In der Freigabe-Anfrage an Wargaming die mitgelieferten Spiel-Symbole nennen
 - [ ] Optional IFHE-Plakette: Fertigkeitssymbol `he_penetration` (IFHE) statt eigener Plakette
-- [ ] Alte Symbole (Granate / Schild, Status-Kapseln) entfernen, falls der Schalter `ammoBarDesign`
-      nicht mehr gebraucht wird
+- [x] Alte Symbole (Granate / Schild, Status-Kapseln) und Schalter `ammoBarDesign` entfernt (Test, 2026-11-01)
 
 ## Standalone (Branch `Test-Standalone`, Experiment, nicht veröffentlicht)
 
 - [ ] Darstellungen per Strg+Alt+S und Flash-Greiffläche je Darstellung im Spiel testen, mit und
       ohne TTaroModUtils; Ziehen mit der Maus ohne TTaro bestätigen
 - [ ] Alten Branch `main-standalone` auf GitHub löschen (manuell; Inhalt steckt in `Test-Standalone`)
+
+## Daten
+
+- [x] Workflow „Data update“: GameParams.data → ships.json, Vergleich, Commit, Release (Test, 2026-11-01)
+- [ ] „Mitte“ vereinheitlichen: bei 175 von 701 CA/BB ist `Cas_Belt` (Hauptgürtel) statt der Außenhaut
+      erfasst (z. B. KGV 356, Fort Worth 191, Tiger 152 mm); erst in der Panzerungsansicht im Hafen prüfen
+- [ ] HE-Gesamtbewertung (`pen_state`) mit Mitte, passend zur Anzeige
 
 ## Prüfen und Korrigieren
 

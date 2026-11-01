@@ -160,10 +160,23 @@ Schiffe Granate und Schild:
   Spiel ein, wenn eine Silhouette fehlt.
 - Optional ersetzt die Detailansicht die Symbole dauerhaft; das Farbenblind-Schema gilt auch hier.
 
-Bewusste Vereinfachung: Die Zitadelle wird nicht bewertet. Grün heißt, die äußere Beplankung wird
-durchschlagen, nicht, dass du die Zitadelle triffst.
-
 <br clear="right">
+
+### Bewusste Vereinfachungen
+
+PenLight vergleicht feste Plattendicken. Damit die Anzeige klein und ehrlich bleibt, lässt sie weg:
+
+- **Bug und Heck sind ein Wert:** die Bugbeplankung (die Heckbeplankung nur, wenn ein Schiff in den
+  Spieldaten keine Bugplatte hat). Ist das Heck dünner oder dicker als der Bug, wird das nicht
+  eigens gezeigt.
+- **Mitte** ist die dünnste Mittschiffsplatte aus den Spieldaten. Bei manchen Schiffen ist das der
+  Hauptgürtel statt der dünnen Beplankung darüber; dort leuchtet die Mitte praktisch nie.
+- **Keine Zitadelle, kein Gürteldurchschlag:** Grün heißt, die äußere Beplankung wird overmatcht
+  bzw. durchschlagen, nicht, dass du die Zitadelle triffst. AP wird nur nach Overmatch bewertet,
+  nicht nach seinem Durchschlag gegen den Gürtel.
+- **Keine Winkel, Entfernung oder Abpraller:** Overmatch und HE-Durchschlag hängen nicht davon ab;
+  Abprallwinkel von SAP und die übrige AP-Mechanik gehören nicht zur Anzeige.
+- **Luftschlag:** Grundwert des Bomben-Durchschlags, ohne mögliche Modifikatoren.
 
 ### Darstellung
 
@@ -314,9 +327,9 @@ Die Schiffs-Silhouetten liefert das Spiel selbst; sie passen sich jedem Patch au
 |---|---|
 | Tests | `python3 -m unittest discover -s tests` |
 | `Main.py` erzeugen (aus `src/penlight/`) | `python3 -I tools/build_mod.py` |
-| Icons für Granate, Schild, HE/SAP, Plaketten und Zeichen zeichnen | `python3 -I tools/make_ampel_icons.py` |
+| IFHE-Plakette (und Granate/Schild für die Beschriftungen der Detailansicht) | `python3 -I tools/make_ampel_icons.py` |
 | Detail-Bilder, Beschriftungen, Rahmen | `python3 -I tools/make_detail_icons.py` |
-| Status-Kapseln und Alt-Flächen (Modern) | `python3 -I tools/make_capsule_icons.py` |
+| Alt-Flächen (Modern) | `python3 -I tools/make_capsule_icons.py` |
 | Munitionsleisten-Design: Slots, Balken, Kapseln, Streifen, Leuchtringe | `python3 -I tools/make_ammobar_icons.py` |
 | Abbildungen der README | `python3 -I tools/make_readme_images.py` |
 | Texte der TTaro-Optionsseite | `python3 -I tools/make_texts.py` |

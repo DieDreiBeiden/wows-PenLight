@@ -161,10 +161,24 @@ other:
 - Optionally the detail view can be shown permanently instead of the icons. It also follows the
   colour-blind scheme.
 
-Deliberate simplification: the citadel is not rated. Green means the outer plating is
-penetrated, not that you hit the citadel.
-
 <br clear="right">
+
+### Deliberate simplifications
+
+PenLight compares fixed plate thicknesses. To keep the display small and honest, it leaves out:
+
+- **Bow and stern are one value:** the bow plating (the stern plating only if a ship has no bow
+  plate in the game data). If the stern is thinner or thicker than the bow, that is not shown
+  separately.
+- **Midship** is the thinnest midship plate in the game data. For some ships this is the main
+  armour belt rather than the thin plating above it; there the midship section practically never
+  lights up.
+- **No citadel, no belt penetration:** green means the outer plating is overmatched or penetrated,
+  not that you hit the citadel. AP is rated only by overmatch, not by its penetration against the
+  belt.
+- **No angles, range or ricochets:** overmatch and HE penetration do not depend on them; SAP
+  ricochet angles and the rest of the AP mechanics are out of scope.
+- **Airstrike:** the bombs' base penetration, without possible modifiers.
 
 ### Display styles
 
@@ -311,9 +325,9 @@ The ship silhouettes come from the game itself and follow every patch automatica
 |---|---|
 | Tests | `python3 -m unittest discover -s tests` |
 | Generate `Main.py` (from `src/penlight/`) | `python3 -I tools/build_mod.py` |
-| Draw shell, shield, HE/SAP icons, tags and marks | `python3 -I tools/make_ampel_icons.py` |
+| IFHE tag (and shell/shield drawing for the detail labels) | `python3 -I tools/make_ampel_icons.py` |
 | Detail images, labels, frames | `python3 -I tools/make_detail_icons.py` |
-| Status capsules and Alt panels (Modern) | `python3 -I tools/make_capsule_icons.py` |
+| Alt panels (Modern) | `python3 -I tools/make_capsule_icons.py` |
 | Ammo-bar look: slots, bars, capsules, stripes, glows | `python3 -I tools/make_ammobar_icons.py` |
 | README images | `python3 -I tools/make_readme_images.py` |
 | Texts of the TTaro options page | `python3 -I tools/make_texts.py` |
