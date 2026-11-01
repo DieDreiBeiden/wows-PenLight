@@ -37,8 +37,9 @@ Stand: 2026-10-24. Probe-Builds entstehen im Branch `Test`, übernommen wird ers
 - [ ] Spiel-Symbole nur zur Laufzeit per `img://` (nicht mitliefern); Pfad per Probe prüfen
       (vermutlich `gui/ammo/<name>.png`, `gui/crew_commander/skills/<name>.png`)
 - [ ] Unterer Teil „Ziel → ich“: Schild der Kapitänsfertigkeit `planes_ap_damage`
-      (`crew_commander/skills/`, weiß → per `colorTransform` in der Ampelfarbe, ohne Ziel grau);
-      ausgewählt 2026-11-01. Rückfall bei fehlendem Bild: eigenes Schild.
+      (`crew_commander/skills/`), neutral hellgrau wie die Granaten, ohne Ziel abgedunkelt;
+      Ampelfarbe nur in Rahmen, Balken und Punkten. Ausgewählt 2026-11-01. Rückfall bei fehlendem
+      Bild: eigenes Schild.
 - [ ] Optional IFHE-Plakette: Fertigkeitssymbol `he_penetration` (IFHE) statt eigener Plakette
 - [ ] Erst nach dem Luftschlag-Test als Probe auf `Test` beginnen
 
