@@ -16,7 +16,7 @@ Schild (Ziel -> ich), Form = Schutz:
   gelb   nur Bug/Heck            -> Fuss + unterer Sparren
   rot    Ziel kommt ueberall durch -> voll, aber gebrochen (Spalt)
 grey (kein Ziel / keine Bewertung) -> alle Segmente leer
-Dazu mark_star.png / mark_warning.png fuer die Extremfaelle (P3).
+Seit 0.5.0 erzeugt main() nur noch tag_ifhe.png; Granate/Schild dienen make_detail_icons.
 Geladene HE/SAP: eigene Granaten he_*.png / sap_*.png nach dem Spiel-HUD (HE: Aufschlag mit Rauch
 und Blitz; SAP: Aufschlag mit Splittern), Zustaende green, bow, deck, red, grey (Spitze in
 Ampelfarbe, dazu Band = Bug/Heck, Ring = Deck), Plaketten tag_ap/he/sap.png.
@@ -269,42 +269,6 @@ def _line_mask(points, width):
 # Hervorhebung der Extremfaelle (Variante P3), als eigene Bilder rechts oben am Symbol:
 # Stern = ich komme ueberall durch (Granate gruen), Warndreieck = Ziel kommt ueberall durch
 # (Schild rot). Weiss mit dunklem Rand, also unabhaengig von Farbschema und Farbsehen.
-MARK_SIZE = 16
-MARK_DARK = (16, 18, 20, 255)
-MARK_LIGHT = (250, 250, 250, 255)
-
-
-def mark_star():
-    S = MARK_SIZE * SUPERSAMPLE
-    im = Image.new('RGBA', (S, S), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    c, r = S / 2, S * 0.36
-    pts = []
-    for i in range(8):
-        ang = np.pi / 4 * i - np.pi / 2
-        rr = r if i % 2 == 0 else r * 0.32
-        pts.append((c + rr * np.cos(ang), c + rr * np.sin(ang)))
-    d.polygon([(c + (x - c) * 1.35, c + (y - c) * 1.35) for x, y in pts], fill=MARK_DARK)
-    d.polygon(pts, fill=MARK_LIGHT)
-    return im.reduce(SUPERSAMPLE)
-
-
-def mark_warning():
-    S = MARK_SIZE * SUPERSAMPLE
-    im = Image.new('RGBA', (S, S), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    cx, top, size, rim = S / 2, S * 0.10, S * 0.80, S * 0.07
-    d.polygon([(cx, top - rim * 1.4), (cx + size / 2 + rim * 1.3, top + size * 0.87 + rim * 0.75),
-               (cx - size / 2 - rim * 1.3, top + size * 0.87 + rim * 0.75)], fill=MARK_DARK)
-    d.polygon([(cx, top), (cx + size / 2, top + size * 0.87), (cx - size / 2, top + size * 0.87)], fill=MARK_LIGHT)
-    w = size * 0.15
-    d.rounded_rectangle([cx - w / 2, top + size * 0.30, cx + w / 2, top + size * 0.62], radius=w / 2, fill=MARK_DARK)
-    d.ellipse([cx - w / 2, top + size * 0.68, cx + w / 2, top + size * 0.68 + w], fill=MARK_DARK)
-    return im.reduce(SUPERSAMPLE)
-
-
-# Plakette wie die Munitions-Slots im HUD: weisse Versalien auf dunklem Grund, in Zielgroesse
-# gezeichnet (scharf). Sitzt in PenLight.unbound links oben an der Granate.
 TAG_FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'  # DejaVu-Lizenz, frei
 TAG_SIZE = 8
 TAG_HEIGHT = 10
@@ -327,28 +291,10 @@ AMMO_STATES = {'he': ('green', 'bow', 'deck', 'red', 'grey'), 'sap': ('green', '
 
 
 def main():
-    written = []
-    for ammo, states in sorted(AMMO_STATES.items()):
-        for prefix, palette in sorted(PALETTES.items()):
-            for state in states:
-                name = '%s_%s%s.png' % (ammo, prefix, state)
-                shell(state, palette, ammo).reduce(SUPERSAMPLE).save(os.path.join(TARGET_DIR, name))
-                written.append(name)
-    for ammo in ('ap', 'he', 'sap'):
-        tag(ammo.upper()).save(os.path.join(TARGET_DIR, 'tag_%s.png' % ammo))
-        written.append('tag_%s.png' % ammo)
+    """Seit 0.5.0 (Munitionsleisten-Design) liefert dieses Skript nur noch die IFHE-Plakette; Granate und
+    Schild bleiben als Zeichenfunktionen fuer make_detail_icons (Beschriftungen der Detailansicht)."""
     tag('IFHE', IFHE_SIZE, IFHE_HEIGHT).save(os.path.join(TARGET_DIR, 'tag_ifhe.png'))
-    written.append('tag_ifhe.png')
-    for kind, draw in (('shell', shell), ('shield', shield)):
-        for prefix, palette in sorted(PALETTES.items()):
-            for state in palette:
-                name = '%s_%s%s.png' % (kind, prefix, state)
-                draw(state, palette).reduce(SUPERSAMPLE).save(os.path.join(TARGET_DIR, name))
-                written.append(name)
-    for name, draw in (('mark_star.png', mark_star), ('mark_warning.png', mark_warning)):
-        draw().save(os.path.join(TARGET_DIR, name))
-        written.append(name)
-    print('%d Icons, %dx%d: %s' % (len(written), SIZE, SIZE, ' '.join(written)))
+    print('tag_ifhe.png')
     return 0
 
 
