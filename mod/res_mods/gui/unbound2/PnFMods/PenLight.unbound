@@ -47,8 +47,8 @@
 	# tools/make_capsule_icons.py; oben ich -> Ziel, unten Ziel -> ich, drei Punkte = Bug/Heck, Mitte, Deck),
 	# 2 = Nur Text (zwei Zeilen in der Ampelfarbe)
 	defaultStyle: 1,
-	# Probe Luftschlag (Branch Test): Anzeige auch ausserhalb der Zielansicht und Diagnosezeile mit
-	# Kameramodus, Zielansicht, Taktikkarte, aufgeschaltetem Ziel und Bewertung (false = aus)
+	# Probe Luftschlag (Branch Test): Diagnosezeile ueber der Anzeige mit Kameramodus, Zielansicht,
+	# Taktikkarte, aufgeschaltetem Ziel, Bewertung und Munition (false = aus)
 	probeAirstrike: true,
 	# Redesign "Munitionsleiste" (Probe, Branch Test; false = bisheriges Aussehen): Spiel-Symbol der geladenen
 	# Munition bzw. Schild der Kapitaensfertigkeit planes_ap_damage. Die Symbole stammen aus den Spieldateien
@@ -251,6 +251,12 @@
 		(var isAlive:bool = "healthComponent ? healthComponent.isAlive : false" (event "healthComponent.evIsAliveChanged"))
 
 		(var isCrosshairVisible:bool = "isAlive && isBinocular && !isCameraTrackingShell && !isTactical")
+		# Luftschlag gewaehlt (Main.py: ammo 'as'): Anzeige auch ausserhalb der Zielansicht
+		(var visWatcher:gfx = "$datahub.getPrimWatcher(CC.mods_DataComponent, PENLIGHT_COMPONENT_KEY)")
+		(var visEntity:gfx = "visWatcher.entity" (event "visWatcher.event"))
+		(var visComponent:gfx = "visEntity ? visEntity.mods_DataComponent : null")
+		(var visData:dict = "visComponent ? visComponent.data : {}" (event "visComponent.evDataChanged"))
+		(var isAirstrikeSelected:bool = "'ammo' in visData && visData.ammo == 'as'")
 	)
 
 	(style
@@ -263,7 +269,7 @@
 		(bind enabled "isAlive")
 		(exprs
 			(style (position = "absolute") (left = 0) (top = 0))
-			(bind visible "isCrosshairVisible || PENLIGHT_SETTINGS.probeAirstrike")
+			(bind visible "isCrosshairVisible || (isAlive && isAirstrikeSelected)")
 		)
 	)
 )
@@ -325,8 +331,14 @@
 		(var probeTactical:bool = "cameraEntity.camera.isTactical" (event "cameraEntity.camera.evTacticalStateChanged"))
 		# geladene Munition aus Main.py: ap (Overmatch), he / sap (Durchschlag Bug/Heck und Deck)
 		(var ammo:str = "'ammo' in omData && null != omData.ammo ? omData.ammo : 'ap'")
-		(var attackIcon:str = "PENLIGHT_ICON_PATH + (ammo == 'ap' ? 'shell_' : ammo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
-		(var attackTag:str = "PENLIGHT_ICON_PATH + 'tag_' + ammo + '.png'")
+		# Luftschlag ('as', HE-Bomben): nur das Deck wird bewertet; die alten Symbole (ohne Redesign)
+		# zeigen dafuer die HE-Granate, das Redesign das Spiel-Symbol des Luftschlags
+		(var isAirstrike:bool = "ammo == 'as'")
+		(var legacyAmmo:str = "isAirstrike ? 'he' : ammo")
+		(var txtAirstrike:str = "tr('IDS_PENLIGHT_AIRSTRIKE') != 'IDS_PENLIGHT_AIRSTRIKE' && tr('IDS_PENLIGHT_AIRSTRIKE') != '' ? tr('IDS_PENLIGHT_AIRSTRIKE') : 'Airstrike'")
+		(var ammoLabel:str = "isAirstrike ? txtAirstrike : toUpper(ammo)")
+		(var attackIcon:str = "PENLIGHT_ICON_PATH + (ammo == 'ap' ? 'shell_' : legacyAmmo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
+		(var attackTag:str = "PENLIGHT_ICON_PATH + 'tag_' + legacyAmmo + '.png'")
 		# IFHE erkannt (Main.py: HE-Faktor des eigenen Schiffs > 1) -> Zusatzplakette an der HE-Granate
 		(var hasIfhe:bool = "ammo == 'he' && ('ifhe' in omData && null != omData.ifhe ? omData.ifhe : false)")
 		(var attackBadge:str = "hasIfhe ? PENLIGHT_ICON_PATH + 'tag_ifhe.png' : ''")
@@ -361,7 +373,7 @@
 		(var mMid:str = "detail[4] == 1 ? 'green' : (detail[4] == 0 ? 'red' : 'grey')")
 		(var mDeck:str = "detail[5] == 1 ? 'green' : (detail[5] == 0 ? 'red' : 'grey')")
 		# Mini-Icons der Beschriftung in der Ampelfarbe von Granate bzw. Schild
-		(var targetLabel:str = "PENLIGHT_ICON_PATH + 'label_target_' + (ammo == 'ap' ? '' : ammo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
+		(var targetLabel:str = "PENLIGHT_ICON_PATH + 'label_target_' + (ammo == 'ap' ? '' : legacyAmmo + '_') + palettePrefix + (hasVerdict ? verdict[0] : 'grey') + '.png'")
 		(var ownLabel:str = "PENLIGHT_ICON_PATH + 'label_me_' + palettePrefix + (hasVerdict ? verdict[1] : 'grey') + '.png'")
 		# Status-Kapseln: Zonen als Bits (Bug/Heck, Mitte, Deck); Mitte unbekannt (-1) zaehlt wie
 		# "Bug/Heck und Deck" (wie in der Overmatch-Logik ohne Mittelwert)
@@ -372,7 +384,7 @@
 		# nicht bewertet (Python: 'grey', Zonen -1, z. B. Schild gegen Traeger) -> grau, nicht "000"
 		(var attackRated:bool = "hasVerdict && verdict[0] != 'grey'")
 		(var defenseRated:bool = "hasVerdict && verdict[1] != 'grey'")
-		(var capsuleAmmo:str = "hasIfhe ? 'he_if' : ammo")
+		(var capsuleAmmo:str = "hasIfhe ? 'he_if' : legacyAmmo")
 		(var attackCapsule:str = "PENLIGHT_ICON_PATH + 'capsule/atk_' + capsuleAmmo + '_' + (attackRated ? palettePrefix + attackBits : 'grey') + '.png'")
 		(var defenseCapsule:str = "PENLIGHT_ICON_PATH + 'capsule/def_' + (defenseRated ? palettePrefix + defenseBits : 'grey') + '.png'")
 		# Randfaelle: ich komme ueberall durch / Ziel kommt ueberall durch
@@ -394,9 +406,9 @@
 		# Verteidigung: das Schild links steht fuer den Gegner, daher nur 'AP' (passt in 12 px)
 		(var defenseLine:str = "nums[8] > 0 ? 'AP ' + subst(txtMm, [nums[8]]) + '  /  ' + subst(txtOmUpTo, [nums[9]]) : txtNotRated")
 		(var zoneNames:array = "[txtBowStern, txtMidship, txtDeck]")
-		(var attackState:str = "!attackRated ? 'grey' : (attackBits == '111' ? 'green' : (attackBits == '000' ? 'red' : 'yellow'))")
+		(var attackState:str = "!attackRated ? 'grey' : (isAirstrike ? (detail[2] == 1 ? 'green' : 'red') : (attackBits == '111' ? 'green' : (attackBits == '000' ? 'red' : 'yellow'))))")
 		(var defenseState:str = "!defenseRated ? 'grey' : (defenseBits == '111' ? 'red' : (defenseBits == '000' ? 'green' : 'yellow'))")
-		(var altAmmoLabel:str = "toUpper(ammo)")
+		(var altAmmoLabel:str = "isAirstrike ? 'AS' : toUpper(ammo)")
 		(var showAltCapsules:bool = "showDetail && isModern")
 
 		# Option "Nur Text": eine Zeile je Richtung, Zonen mit Durchkommen bzw. Overmatch, Ampelfarbe
@@ -415,20 +427,20 @@
 		(var defenseZones:str = "!defenseRated ? txtNotRatedShort : (defenseBits == '111' ? txtEverywhere : (defenseBits == '000' ? txtNowhere
 								: (d0 ? txtBowStern : '') + (d0 && (d1 || d2) ? ' + ' : '') + (d1 ? txtMidship : '') + (d1 && d2 ? ' + ' : '') + (d2 ? txtDeck : '')))")
 		# ohne Ziel nur die Bezeichnung (grau); mit Ziel, aber nicht bewertet: 'not rated'
-		(var textAttack:str = "toUpper(ammo) + (hasIfhe ? ' IFHE' : '') + (hasVerdict ? ': ' + attackZones : '')")
+		(var textAttack:str = "ammoLabel + (hasIfhe ? ' IFHE' : '') + (hasVerdict ? ': ' + attackZones : '')")
 		(var textDefense:str = "txtEnemyAp + (hasVerdict ? ': ' + defenseZones : '')")
 		(var textCt:dict = "isColorBlind ? PENLIGHT_TEXT_CT_CB : PENLIGHT_TEXT_CT")
 		(var attackCt:dict = "textCt[attackState]")
 		(var defenseCt:dict = "textCt[defenseState]")
 		(var greyCt:dict = "textCt['grey']")
-		(var textAttackHead:str = "toUpper(ammo) + (hasIfhe ? ' IFHE' : '') + '  ' + attackLine")
+		(var textAttackHead:str = "ammoLabel + (hasIfhe ? ' IFHE' : '') + '  ' + attackLine")
 		(var textDefenseHead:str = "defenseRated && nums[8] > 0 ? txtEnemyAp + ' ' + subst(txtMm, [nums[8]]) + '  /  ' + subst(txtOmUpTo, [nums[9]]) : txtEnemyAp + ': ' + txtNotRatedShort")
 		(var showTextAlt:bool = "showDetail && isTextOnly")
 
 		# Redesign Munitionsleiste: Spiel-Symbole und eigene Rahmen/Balken/Kapseln je Zustand
 		(var isAmmoBar:bool = "PENLIGHT_SETTINGS.ammoBarDesign")
 		(var abPath:str = "PENLIGHT_ICON_PATH + 'ammobar/'")
-		(var abAmmo:str = "ammo == 'sap' ? 'cs' : ammo")
+		(var abAmmo:str = "ammo == 'sap' ? 'cs' : (isAirstrike ? 'airsupport_he' : ammo)")
 		(var abAttackIcon:str = "PENLIGHT_SETTINGS.gameAmmoPath + abAmmo + (attackRated ? '' : '_inactive') + '.png'")
 		(var abShieldIcon:str = "PENLIGHT_SETTINGS.gameShieldIcon")
 		(var abShieldCt:dict = "defenseRated ? PENLIGHT_ICON_CT_NEUTRAL : PENLIGHT_ICON_CT_DIM")

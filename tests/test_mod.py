@@ -66,10 +66,10 @@ class ModTest(unittest.TestCase):
             'battle': Obj(getPlayersInfo=lambda: players,
                           getPlayerShipInfo=lambda pid: Obj(name=ship_names[pid]),
                           getSelfPlayerInfo=lambda: {'id': 1},
-                          getSelectedAmmoId=lambda weapon: ammo,
+                          getSelectedAmmoId=lambda weapon: ammo[weapon] if isinstance(ammo, dict) else ammo,
                           getAmmoParams=lambda ammo_id: AMMO[ammo_id],
                           getAmmoModifiers=lambda: Obj(GMPenetrationCoeffHE=he_coeff)),
-            'constants': Obj(WeaponType=Obj(ARTILLERY=0)),
+            'constants': Obj(WeaponType=Obj(ARTILLERY=0, AIR_SUPPORT=12)),
             'open': client_open,
             'ui': Obj(createUiElement=lambda: 7,
                       addDataComponentWithId=lambda uid, cid, data: self.ui_data.append((cid, data)),
@@ -117,15 +117,29 @@ class ModTest(unittest.TestCase):
                                  [32, 32, 57, 27, 28, 36, 127, 8, 460, 32]]},
         }))
 
-    def test_probe_logs_api_and_weapon_events(self):
-        # Probe Luftschlag: Schnittstellen ins Log, Logger auf Waffen-Ereignisse, Luftschlag des eigenen Schiffs
-        self.run_mod('PHSC010_Utrecht', ['PJSB018_Yamato_1944'])
-        self.assertIn("probe WeaponType: [('ARTILLERY', 0)]", self.log)
-        self.assertIn('probe events registered: onWeaponTypeChanged', self.log)
+    def test_airstrike_rates_deck_only(self):
+        # Waffenwechsel auf Luftschlag (WeaponType 12): Bombe HE 36 mm, nur das Deck zaehlt
+        self.run_mod('PHSC010_Utrecht', ['PJSB018_Yamato_1944', 'PBSC110_Minotaur'], ammo={0: 1, 12: 4})
         self.assertIn('airstrike HE 36.9 mm', self.log)
-        self.handlers['weapon'](0, 12)
+        self.handlers['weapon'](12)
+        entry = self.ui_data[-1][1]
+        self.assertEqual(entry['ammo'], 'as')
+        self.assertFalse(entry['ifhe'])
+        self.assertEqual(entry['byId']['10'][:3], ['red', 'red', [-1, -1, 0, 1, -1, 1]])      # 36 < 57 Deck
+        self.assertEqual(entry['byId']['11'][:3], ['green', 'green', [-1, -1, 1, 0, -1, 0]])  # 36 >= 16 Deck
+        self.assertEqual(entry['byId']['11'][5][6:8], [36, -1])
+        self.handlers['ammo'](2)                       # Hauptbatterie wechselt im Hintergrund: Luftschlag bleibt
+        self.assertEqual(self.ui_data[-1][1]['ammo'], 'as')
+        self.handlers['weapon'](0)                     # zurueck zur Hauptbatterie
+        self.assertEqual(self.ui_data[-1][1]['ammo'], 'ap')
+
+    def test_airstrike_falls_back_to_ship_table(self):
+        self.run_mod('PHSC010_Utrecht', ['PBSC110_Minotaur'], ammo={0: 1, 12: 1})   # Bombe nicht lesbar (AP)
+        self.handlers['weapon'](12)
+        self.assertEqual(self.ui_data[-1][1]['ammo'], 'as')
+        self.assertEqual(self.ui_data[-1][1]['byId']['10'][5][6], 36)
         with open(os.path.join(self.mod_dir, 'penlight_log.txt')) as f:
-            self.assertIn('probe event onWeaponTypeChanged (0, 12) -> ARTILLERY=', f.read())
+            self.assertIn('ammo as, penetration 36 mm', f.read())
 
     def test_he_rates_destroyer(self):
         # Hawaii HE 21 mm gegen Gearing (19 mm): gruen; Schild grau, weil kein Kreuzer/Schlachtschiff

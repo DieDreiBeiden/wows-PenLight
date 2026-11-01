@@ -26,7 +26,7 @@ LOG_FILE = 'penlight_log.txt'
 LOG_KEEP = 300
 
 _state = {'data': None, 'disabled': False, 'results': None, 'log': [], 'ui_id': None,
-          'in_battle': False, 'ammo': ('ap', None, False)}
+          'in_battle': False, 'ammo': ('ap', None, False), 'weapon': None}
 
 # Geladene Munition (ModsAPI: battle.getSelectedAmmoId, battle.getAmmoParams,
 # events.onArtilleryAmmoChanged; wie PenetrationCalculator). ammoType -> Kurzname und Feld
@@ -255,11 +255,17 @@ def _read_ammo(ammo_id):
 
 
 def on_ammo_changed(ammo_id=None, *args):
+    if _state['weapon'] == _weapon_type('AIR_SUPPORT', AIR_SUPPORT_DEFAULT):
+        return  # Luftschlag gewaehlt; die Hauptbatterie wird beim Zurueckwechseln neu gelesen
     try:
         ammo = _read_ammo(ammo_id)
     except Exception as e:
         _log('ammo %r not readable: %r' % (ammo_id, e))
         ammo = ('ap', None, False)
+    _set_ammo(ammo)
+
+
+def _set_ammo(ammo):
     if ammo != _state['ammo']:
         _state['ammo'] = ammo
         _log('ammo %s, penetration %s mm, ifhe %s' % ammo)
@@ -269,15 +275,60 @@ def on_ammo_changed(ammo_id=None, *args):
 
 def _selected_ammo():
     try:
-        on_ammo_changed(battle.getSelectedAmmoId(constants.WeaponType.ARTILLERY))
+        on_ammo_changed(battle.getSelectedAmmoId(_weapon_type('ARTILLERY', 0)))
     except Exception as e:
         _log('selected ammo not readable: %r' % (e,))
 
 
+# Waffenwahl (python.log 15.9): events.onWeaponTypeChanged(neuer_typ), constants.WeaponType.ARTILLERY = 0,
+# AIR_SUPPORT = 12; battle.getSelectedAmmoId(AIR_SUPPORT) liefert die Bombe des Luftschlags (ammoType HE,
+# alphaPiercingHE). IFHE (GMPenetrationCoeffHE) gilt fuer die Hauptbatterie, nicht fuer die Bomben.
+AIR_SUPPORT_DEFAULT = 12
+
+
+def _weapon_type(name, default):
+    try:
+        value = getattr(constants.WeaponType, name)
+        return value if isinstance(value, int) else default
+    except Exception:
+        return default
+
+
+def _airstrike_ammo():
+    """('as', durchschlag_mm, False) der Luftschlag-Bombe; nicht lesbar -> Wert aus ships.json."""
+    try:
+        params = battle.getAmmoParams(battle.getSelectedAmmoId(_weapon_type('AIR_SUPPORT', AIR_SUPPORT_DEFAULT)))
+        pen = floor_mm(float(_get(params, 'alphaPiercingHE')))
+        if pen:
+            return (AIRSTRIKE, pen, False)
+    except Exception as e:
+        _log('airstrike ammo not readable: %r' % (e,))
+    pen = None
+    try:
+        players = battle.getPlayersInfo()
+        own_id = _self_player_id(players)
+        pen = _ship_record(_load_data() or {}, own_id)[1]['airstrike']
+    except Exception:
+        pass
+    return (AIRSTRIKE, floor_mm(pen), False) if pen else None
+
+
+def on_weapon_changed(weapon_type=None, *args):
+    _state['weapon'] = weapon_type
+    _log('weapon type %r' % (weapon_type,))
+    if weapon_type == _weapon_type('AIR_SUPPORT', AIR_SUPPORT_DEFAULT):
+        ammo = _airstrike_ammo()
+        if ammo is not None:
+            _set_ammo(ammo)
+            return
+    if _state['ammo'][0] == AIRSTRIKE or weapon_type == _weapon_type('ARTILLERY', 0):
+        _selected_ammo()
+
+
 def _on_battle_shown(*args, **kwargs):
     _state['in_battle'] = True
+    _state['weapon'] = None
     _selected_ammo()
-    _log('probe battle shown -> %s' % _probe_selected())
     _refresh()
 
 
@@ -285,84 +336,8 @@ def _on_battle_quit(*args, **kwargs):
     _state['results'] = None
     _state['in_battle'] = False
     _state['ammo'] = ('ap', None, False)
+    _state['weapon'] = None
     _remove_ui()
-
-
-# Probe Luftschlag (Branch Test): welche Schnittstellen bietet der Client fuer die Waffenwahl?
-# Schreibt beim Laden die oeffentlichen Namen von battle/events/utils/constants und die Werte von
-# constants.WeaponType ins Log, haengt einen Logger an alle Ereignisse zu Waffe/Munition/Luftschlag
-# und protokolliert bei jedem Ereignis die gewaehlte Munition je Waffentyp (nur bei Aenderung).
-# Fehlt dir() in der Sandbox (wie globals()), gelten die Kandidatenlisten.
-PROBE_EVENT_WORDS = ('eapon', 'mmo', 'irSupport', 'irsupport', 'onsumable', 'Key')
-PROBE_EVENTS = ('onWeaponChanged', 'onWeaponTypeChanged', 'onSelectedWeaponChanged', 'onAirSupportAmmoChanged',
-                'onTorpedoAmmoChanged', 'onConsumableUsed', 'onKeyEvent')
-PROBE_WEAPON_TYPES = ('ARTILLERY', 'ATBA', 'TORPEDO', 'TORPEDOES', 'AIRPLANES', 'AIRSUPPORT', 'AIR_SUPPORT',
-                      'DEPTH_CHARGES', 'DEPTHCHARGES', 'PINGER', 'SUBMARINE_TORPEDO', 'MISSILES', 'SECONDARY')
-PROBE_SELECTED = ('getSelectedWeaponType', 'getSelectedWeapon', 'getCurrentWeaponType', 'getWeaponType')
-
-
-def _probe_names(obj):
-    try:
-        return sorted(a for a in dir(obj) if not a.startswith('_'))
-    except Exception:
-        return None
-
-
-def _probe_selected():
-    out = []
-    for name, value in sorted(_state.get('probe_types', {}).items(), key=lambda kv: kv[1]):
-        try:
-            ammo_id = battle.getSelectedAmmoId(value)
-            params = battle.getAmmoParams(ammo_id) if ammo_id is not None else None
-            out.append('%s=%r/%s/%s' % (name, ammo_id, _get(params, 'ammoType'), _get(params, 'alphaPiercingHE')))
-        except Exception as e:
-            out.append('%s=err %s' % (name, type(e).__name__))
-    for fn in PROBE_SELECTED:
-        f = getattr(battle, fn, None)
-        if f is not None:
-            try:
-                out.append('%s()=%r' % (fn, f()))
-            except Exception as e:
-                out.append('%s()=err %s' % (fn, type(e).__name__))
-    return ', '.join(out)
-
-
-def _probe_handler(name):
-    def handler(*args, **kwargs):
-        try:
-            state = _probe_selected()
-            line = '%s %r -> %s' % (name, args[:3], state)
-            if name != 'onKeyEvent' or state != _state.get('probe_last'):
-                _log('probe event ' + line)
-            _state['probe_last'] = state
-        except Exception as e:
-            _log('probe handler %s failed: %r' % (name, e))
-    return handler
-
-
-def _probe_api():
-    for label, obj in (('battle', battle), ('events', events), ('utils', utils), ('constants', constants)):
-        names = _probe_names(obj)
-        _log('probe %s: %s' % (label, ', '.join(names) if names is not None else 'dir() unavailable'))
-    weapon_type = getattr(constants, 'WeaponType', None) if constants is not None else None
-    types = {}
-    for name in _probe_names(weapon_type) or PROBE_WEAPON_TYPES:
-        value = getattr(weapon_type, name, None)
-        if isinstance(value, int):
-            types[name] = value
-    _state['probe_types'] = types
-    _log('probe WeaponType: %s' % sorted(types.items(), key=lambda kv: kv[1]))
-    names = _probe_names(events)
-    candidates = [n for n in (names or PROBE_EVENTS)
-                  if n.startswith('on') and any(w in n for w in PROBE_EVENT_WORDS) and n != 'onArtilleryAmmoChanged']
-    registered = []
-    for name in candidates:
-        try:
-            getattr(events, name)(_probe_handler(name))
-            registered.append(name)
-        except Exception as e:
-            _log('probe event %s not registered: %r' % (name, e))
-    _log('probe events registered: %s' % ', '.join(registered))
 
 
 _log('Main.py loaded, game version %s, getModDir %s -> %s'
@@ -375,6 +350,6 @@ try:
 except Exception as e:
     _log('ammo events unavailable: %r' % (e,))
 try:
-    _probe_api()
+    events.onWeaponTypeChanged(on_weapon_changed)
 except Exception as e:
-    _log('probe failed: %r' % (e,))
+    _log('weapon events unavailable: %r' % (e,))

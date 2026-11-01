@@ -89,7 +89,10 @@ def detail_icons(detail):
 #   ja        nein   bow    (orange, Spitze gefuellt)
 #   nein      ja     deck   (orange, Band + Ring gefuellt)
 #   nein      nein   red    (Schraegstrich)
-PEN_AMMO = ('he', 'sap')
+PEN_AMMO = ('he', 'sap', 'as')
+# Luftschlag ('as', HE-Bomben): trifft von oben, bewertet wird nur das Deck. Ziel-Teil [-1, -1, deck],
+# Ampel green (Deck durch) / red. Durchschlag = alphaPiercingHE der Bombe ohne IFHE-Faktor.
+AIRSTRIKE = 'as'
 
 
 def floor_mm(value):
@@ -114,6 +117,14 @@ def pen_state(pen_mm, ship):
     if bow:
         return 'bow'
     return 'deck' if deck else RED
+
+
+def airstrike_state(pen_mm, ship):
+    return GREEN if penetrates(pen_mm, ship['deck']) else RED
+
+
+def airstrike_detail(pen_mm, ship):
+    return [-1, -1, -1 if ship.get('deck') is None else int(penetrates(pen_mm, ship['deck']))]
 
 
 def overmatch_limit(caliber_mm):
@@ -142,7 +153,7 @@ def numbers(me, enemy, he, pen_mm, ap_rated):
 def evaluate(me, enemy, ammo='ap', pen_mm=None):
     """me/enemy: dict mit 'class', 'caliber', 'bow', 'deck', optional 'mid' (mm).
 
-    ammo/pen_mm: geladene Munition ('ap', 'he', 'sap') und ihr Durchschlag (mm, nur HE/SAP).
+    ammo/pen_mm: geladene Munition ('ap', 'he', 'sap', Luftschlag 'as') und ihr Durchschlag (mm, nicht AP).
     Bei HE/SAP bewerten 'attack' und der Target-Teil von 'detail' den Durchschlag statt des
     Overmatch; Schild und Me-Teil bleiben AP-Overmatch des Gegners.
     HE/SAP wird auch fuer Zerstoerer und Traeger (nur als Ziel) bewertet, U-Boote nicht; Schild und Me-Teil gibt es
@@ -155,9 +166,11 @@ def evaluate(me, enemy, ammo='ap', pen_mm=None):
         return None
     return {
         'ammo': ammo if he else 'ap',
-        'attack': pen_state(pen_mm, enemy) if he else attack_color(me['caliber'], enemy),
+        'attack': (airstrike_state(pen_mm, enemy) if ammo == AIRSTRIKE else pen_state(pen_mm, enemy)) if he
+        else attack_color(me['caliber'], enemy),
         'defense': defense_color(enemy['caliber'], me) if ap_rated else GREY,
-        'detail': (pen_detail(pen_mm, enemy) if he else zone_detail(me['caliber'], enemy))
+        'detail': ((airstrike_detail(pen_mm, enemy) if ammo == AIRSTRIKE else pen_detail(pen_mm, enemy)) if he
+                   else zone_detail(me['caliber'], enemy))
         + (zone_detail(enemy['caliber'], me) if ap_rated else [-1, -1, -1]),
         'numbers': numbers(me, enemy, he, pen_mm, ap_rated),
     }

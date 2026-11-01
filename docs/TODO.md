@@ -11,8 +11,12 @@ Stand: 2026-10-24. Probe-Builds entstehen im Branch `Test`, übernommen wird ers
     Prins van Oranje 46,3 mm); die übrigen Luftschläge sind Wasserbomben gegen U-Boote.
   - Anzeige: bei gewähltem Luftschlag bewertet die obere Kapsel nur das Deck (eigenes Kürzel, z. B.
     „AS“), Alt-Ansicht mit Bomben-Durchschlag und Deckdicke.
-  - Zuerst Probe-Build: Waffentyp beim Wechsel auf den Luftschlag und Verhalten des aufgeschalteten
-    Ziels ins Log schreiben.
+  - [x] Probe (python.log 2026-11-01): `events.onWeaponTypeChanged(neuer_typ)`, `WeaponType.AIR_SUPPORT = 12`,
+    `battle.getSelectedAmmoId(12)` liefert die Bombe (Utrecht HE 36,9 mm).
+  - [ ] Probe 2 auf `Test`: Erkennung beim Waffenwechsel (Kürzel „AS“ bzw. „Airstrike“, Spiel-Symbol
+    `airsupport_he`, nur Deck-Punkt/-Balken), Anzeige auch außerhalb der Zielansicht solange der Luftschlag
+    gewählt ist; prüfen, ob in der Luftschlag-Ansicht ein Ziel aufgeschaltet bleibt (Diagnosezeile).
+  - [ ] Danach Diagnosezeile (`probeAirstrike`) entfernen.
   - Offen: Modifikatoren (Kapitänsfertigkeiten) auf den Bomben-Durchschlag.
 - [ ] **PenLight für Flugzeugträger**
   - Entscheidung offen: Teil von PenLight oder eigene Mod „PenLightCV“.
