@@ -21,7 +21,7 @@ Schiffe: Bug/Heck, Mitte und Deck.
 Die Anzeige erscheint nur in der **gezoomten Zielansicht** (Fernglas / Zielfernrohr) und solange
 der Luftschlag gewählt ist. In der normalen Außenperspektive ist sie ausgeblendet.
 
-> **Aktuelle Version: 0.4.0** (Vorabversion) – [Download unter Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases).
+> **Aktuelle Version: 0.5.0** (Vorabversion) – [Download unter Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases).
 >
 > Informationsanzeige über die offizielle ModsAPI des Spiels. Sie vergleicht nur statische
 > Panzerungs- und Kaliberwerte, wie die Panzerungsansicht im Hafen – siehe [Fair Play](#fair-play).
