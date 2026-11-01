@@ -5,6 +5,8 @@ workflow uses them as "What's new" and then moves them under the new version.
 
 ## Unreleased
 
+## 0.5.1 – 2026-11-01
+
 - Bars (Classic) and dots (Modern) are now arranged like a ship seen from the side: bow on the left, stern on the right, and a split middle section – upper half deck, lower half midship. Before, "bow/stern + deck" and "bow/stern + midship" were hard to tell apart.
 - Airstrike: shows a single deck section instead of three, green with glow when the bombs penetrate the deck.
 

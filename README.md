@@ -21,7 +21,7 @@ bow/stern, midship and deck.
 The display appears only in the **zoomed aiming view** (binoculars / scope), and while the
 airstrike is selected. In the normal third-person view it is hidden.
 
-> **Current version: 0.5.0** (pre-release) – [download from Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases).
+> **Current version: 0.5.1** (pre-release) – [download from Releases](https://github.com/DieDreiBeiden/wows-PenLight/releases).
 >
 > Information display built on the game's official ModsAPI. It only compares static armour and
 > calibre values, like the armour viewer in port – see [Fair play](#fair-play).
