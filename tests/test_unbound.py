@@ -48,6 +48,10 @@ class UnboundTest(unittest.TestCase):
                     names |= {'seg_%s%s_%s' % (pal, state, ''.join(bits)), 'cap_%s%s_%s' % (pal, state, ''.join(bits))}
             for state in ('green', 'red'):
                 names |= {'slot_ext_%s%s' % (pal, state), 'glow_slot_%s%s' % (pal, state), 'glow_cap_%s%s' % (pal, state)}
+        # Spiel-Symbole (Kopien aus den Spieldateien): Munition je Zustand und das Schild
+        for ammo in ('ap', 'he', 'cs', 'airsupport_he'):
+            names |= {'game/' + ammo, 'game/%s_inactive' % ammo}
+        names.add('game/planes_ap_damage')
         missing = sorted(n for n in names if not os.path.exists(os.path.join(folder, n + '.png')))
         self.assertEqual(missing, [])
 

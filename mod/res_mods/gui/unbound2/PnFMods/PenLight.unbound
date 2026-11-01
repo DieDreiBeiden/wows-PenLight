@@ -51,12 +51,13 @@
 	# Kameramodus, Zielansicht, Taktikkarte, aufgeschaltetem Ziel und Bewertung (false = aus)
 	probeAirstrike: true,
 	# Redesign "Munitionsleiste" (Probe, Branch Test; false = bisheriges Aussehen): Spiel-Symbol der geladenen
-	# Munition bzw. Schild der Kapitaensfertigkeit planes_ap_damage (zur Laufzeit per img:// aus dem Spiel,
-	# nicht mitgeliefert; Pfade sind zu pruefen), Ampelfarbe nur in Rahmen, Balken, Punkten und Streifen
-	# (ammobar/*.png aus tools/make_ammobar_icons.py). Gilt fuer Klassisch, Modern, Nur Text und Alt-Ansicht.
+	# Munition bzw. Schild der Kapitaensfertigkeit planes_ap_damage. Die Symbole stammen aus den Spieldateien
+	# (Wargaming) und liegen als Kopie in ammobar/game/ (per img:// aus dem Spiel nicht erreichbar).
+	# Ampelfarbe nur in Rahmen, Balken, Punkten und Streifen (ammobar/*.png aus tools/make_ammobar_icons.py).
+	# Gilt fuer Klassisch, Modern, Nur Text und Alt-Ansicht.
 	ammoBarDesign: true,
-	gameAmmoPath: 'img://gui/ammo/',
-	gameShieldIcon: 'img://gui/crew_commander/skills/planes_ap_damage.png',
+	gameAmmoPath: 'url:../../../PnFMods/PenLight/ammobar/game/',
+	gameShieldIcon: 'url:../../../PnFMods/PenLight/ammobar/game/planes_ap_damage.png',
 	ammoBarSlot: 46,
 	ammoBarIcon: 40,
 	ammoBarGap: 6,
@@ -470,10 +471,6 @@
 			(tf
 				(class $TextDefaultBold13NM)
 				(bind text "'cam ' + toString(probeCameraMode) + '  bino ' + (probeBinocular ? '1' : '0') + '  map ' + (probeTactical ? '1' : '0') + '  target ' + (targetKey != '' ? targetKey : '-') + '  verdict ' + (hasVerdict ? '1' : '0') + '  ammo ' + ammo")
-			)
-			(tf
-				(class $TextDefaultBold13NM)
-				(bind text "'icon ' + abAttackIcon")
 			)
 		)
 		# eigenes Zahnrad links neben der Anzeige, sichtbar bei aktivem Mauszeiger (Strg);

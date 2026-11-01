@@ -34,8 +34,10 @@ Stand: 2026-10-24. Probe-Builds entstehen im Branch `Test`, übernommen wird ers
 - [ ] Alle Darstellungen (Klassisch, Modern, Nur Text, Alt-Ansicht) im Stil der Munitionsleiste:
       Spiel-Symbol der geladenen Munition (AP / HE / SAP, Luftschlag: HE-Bombe) in Farbe im Slot,
       Ampelfarbe im Rahmen, drei Zonen-Balken bzw. -Punkte; ohne Ziel die `inactive`-Symbole.
-- [ ] Spiel-Symbole nur zur Laufzeit per `img://` (nicht mitliefern); Pfad per Probe prüfen
-      (vermutlich `gui/ammo/<name>.png`, `gui/crew_commander/skills/<name>.png`)
+- [x] Spiel-Symbole per `img://` nicht erreichbar (Probe a87b0b9). Entscheidung 2026-11-01: Kopien der
+      benötigten Symbole liegen in `PnFMods/PenLight/ammobar/game/` (aus dem WoWs Unpacker)
+- [ ] Vor Übernahme nach `main`: README, Fair-Play-Abschnitt und CLAUDE.md anpassen („keine
+      Spielgrafiken“ gilt nicht mehr), Quellenangabe Wargaming, in der Freigabe-Anfrage nennen
 - [ ] Unterer Teil „Ziel → ich“: Schild der Kapitänsfertigkeit `planes_ap_damage`
       (`crew_commander/skills/`), neutral hellgrau wie die Granaten, ohne Ziel abgedunkelt;
       Ampelfarbe nur in Rahmen, Balken und Punkten. Ausgewählt 2026-11-01. Rückfall bei fehlendem
